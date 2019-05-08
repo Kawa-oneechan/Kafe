@@ -1,0 +1,26 @@
+{
+	"keyboard" : {
+		"up" : "Up",
+		"down" : "Down",
+		"left" : "Left",
+		"right" : "Right",
+		"a" : "Z",
+		"b" : "X",
+		"c" : "C",
+		"d" : "A",
+		"e" : "S",
+		"f" : "D",
+	},
+	"gamepad" : {
+		"up" : "DPadUp",
+		"down" : "DPadDown",
+		"left" : "DPadLeft",
+		"right" : "DPadRight",
+		"a" : "A",
+		"b" : "B",
+		"c" : "LeftShoulder",
+		"d" : "X",
+		"e" : "Y",
+		"f" : "RightShoulder",
+	}
+}
