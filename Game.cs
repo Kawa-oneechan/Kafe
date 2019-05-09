@@ -37,7 +37,7 @@ namespace Kafe
 			graphics = new GraphicsDeviceManager(this);
 			graphics.PreferredBackBufferWidth = CrtWidth;
 			graphics.PreferredBackBufferHeight = CrtHeight;
-			IsMouseVisible = false;
+			IsMouseVisible = true;
 		}
 
 		protected override void Initialize()
@@ -58,7 +58,8 @@ namespace Kafe
 			var felicia = new Character("felicia.json", 0);
 			var sakura = new Character("felicia.json", 1);
 
-			var arena = new Arena("locales\\vegas.json", felicia, sakura);
+			//var arena = new Arena("locales\\vegas.json", felicia, sakura);
+			var arena = new Editor("locales\\vegas.json", "morrigan.json");
 			Components.Add(arena);
 		}
 

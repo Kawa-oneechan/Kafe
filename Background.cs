@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Kawa.Json;
 
 /*
@@ -97,9 +98,88 @@ namespace Kafe
 			base.Draw(gameTime);
 			var batch = Kafe.SpriteBatch;
 			batch.Begin();
-
 			foreach (var c in Characters)
 				c.Draw(batch);
+			batch.End();
+		}
+	}
+
+	class Editor : Background
+	{
+		public Character Subject { get; set; }
+		private System.IO.FileSystemWatcher watcher;
+		private string topMessage = string.Empty;
+
+		public Editor(string file, string charFile) : base(file)
+		{
+			try
+			{
+				var path = System.IO.Path.Combine("data", "fighters", charFile);
+				if (System.IO.File.Exists(path))
+				{
+					watcher = new System.IO.FileSystemWatcher(System.IO.Path.GetDirectoryName(path), charFile);
+					watcher.NotifyFilter = System.IO.NotifyFilters.LastWrite;
+					watcher.Changed += (sender, e) =>
+					{
+					tryAgain:
+						try
+						{
+							if (Subject == null)
+								Subject = new Character(charFile, 0);
+							else
+								Subject.Reload(charFile, 0, true);
+							SetupSubject();
+						}
+						catch (System.IO.IOException)
+						{
+							goto tryAgain;
+						}
+						catch (JsonException jEx)
+						{
+							topMessage = jEx.Message;
+							Subject = null;
+						}
+					};
+					watcher.EnableRaisingEvents = true;
+				}
+				Subject = new Character(charFile, 0);
+				SetupSubject();
+			}
+			catch (JsonException jEx)
+			{
+				topMessage = jEx.Message;
+				Subject = null;
+			}
+		}
+
+		private void SetupSubject()
+		{
+			if (Subject == null)
+				return;
+			Subject.Position = new Vector2(Kafe.ScreenWidth / 2, Kafe.Ground);
+			Subject.EditMode = true;
+			Subject.ShowBoxes = true;
+			topMessage = string.Empty;
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			if (Input.WasJustReleased(Keys.S))
+				Subject.Update();
+			base.Update(gameTime);
+		}
+
+		public override void Draw(GameTime gameTime)
+		{
+			base.Draw(gameTime);
+			var batch = Kafe.SpriteBatch;
+			batch.Begin();
+			if (Subject != null)
+			Subject.Draw(batch);
+			Text.Draw(batch, 1, "Edit mode", 4, Kafe.ScreenHeight - 4 - 24);
+			Text.Draw(batch, 0, "(S)tep anim", 4, Kafe.ScreenHeight - 4 - 8);
+			if (!string.IsNullOrWhiteSpace(topMessage))
+				Text.Draw(batch, 0, topMessage, 4, 4, Color.Red);
 			batch.End();
 		}
 	}

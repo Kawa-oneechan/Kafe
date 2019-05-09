@@ -183,8 +183,8 @@ namespace Kafe
 		{
 			if (!fileName.Contains("."))
 				fileName += ".json";
-			if (cache.ContainsKey(fileName))
-				return cache[fileName];
+			if (useCache && cache.ContainsKey(fileName + "-asObj"))
+				return cache[fileName + "-asObj"];
 			var ret = Json5.Parse(GetString(fileName));
 			if (ret is Dictionary<string, object>)
 			{
@@ -194,7 +194,7 @@ namespace Kafe
 					Kawa.Json.Patch.JsonPatch.Apply(ret, patch);
 				}
 			}
-			cache[fileName] = ret;
+			cache[fileName + "-asObj"] = ret;
 			return ret;
 		}
 
