@@ -109,6 +109,8 @@ namespace Kafe
 		public Character Subject { get; set; }
 		private System.IO.FileSystemWatcher watcher;
 		private string topMessage = string.Empty;
+		private string keyScrollerText = "(S)tep anim   (C)enter   (B)oxes   up/down cycle animations";
+		private int keyScroller = Kafe.ScreenWidth + 8;
 
 		public Editor(string file, string charFile) : base(file)
 		{
@@ -164,8 +166,22 @@ namespace Kafe
 
 		public override void Update(GameTime gameTime)
 		{
-			if (Input.WasJustReleased(Keys.S))
-				Subject.Update();
+			if (Subject != null)
+			{
+				if (Input.WasJustReleased(Keys.S))
+					Subject.Update();
+				if (Input.WasJustReleased(Keys.C))
+					Subject.Position = new Vector2(Kafe.ScreenWidth / 2, Kafe.Ground);
+				if (Input.WasJustReleased(Keys.B))
+					Subject.ShowBoxes = !Subject.ShowBoxes;
+				if (Input.WasJustReleased(Keys.Down))
+					Subject.CycleAnims(1);
+				if (Input.WasJustReleased(Keys.Up))
+					Subject.CycleAnims(-1);
+			}
+			keyScroller -= gameTime.ElapsedGameTime.Milliseconds / 10;
+			if (keyScroller < 0 - (keyScrollerText.Length * 8))
+				keyScroller = Kafe.ScreenWidth + 8;
 			base.Update(gameTime);
 		}
 
@@ -177,7 +193,7 @@ namespace Kafe
 			if (Subject != null)
 			Subject.Draw(batch);
 			Text.Draw(batch, 1, "Edit mode", 4, Kafe.ScreenHeight - 4 - 24);
-			Text.Draw(batch, 0, "(S)tep anim", 4, Kafe.ScreenHeight - 4 - 8);
+			Text.Draw(batch, 0, keyScrollerText, keyScroller, Kafe.ScreenHeight - 4 - 8);
 			if (!string.IsNullOrWhiteSpace(topMessage))
 				Text.Draw(batch, 0, topMessage, 4, 4, Color.Red);
 			batch.End();

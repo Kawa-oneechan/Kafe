@@ -143,6 +143,21 @@ namespace Kafe
 				currentFrame = 0;
 		}
 
+		public void CycleAnims(int direction)
+		{
+			var currentAnim = (int)animation["index"];
+			var nextAnim = currentAnim + direction;
+			if (nextAnim == animations.Count)
+				nextAnim = 0;
+			else if (nextAnim == -1)
+				nextAnim = animations.Count - 1;
+			SwitchTo((double)nextAnim);
+			var image = ((List<object>)frames[currentFrame]["image"]).Select(x => (int)(double)x).ToArray();
+			var offset = ((List<object>)frames[currentFrame]["offset"]).Select(x => (int)(double)x).ToArray();
+			Image = new Rectangle(image[0], image[1], image[2], image[3]);
+			CelOffset = new Vector2(offset[0], offset[1]);
+		}
+
 		public void Update()
 		{
 			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
