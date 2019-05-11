@@ -7,16 +7,14 @@ using Kawa.Json;
 
 namespace Kafe
 {
-	/// <summary>
-	/// This is the main type for your game
-	/// </summary>
 	public class Kafe : Game
 	{
-		private RenderTarget2D rawScreen; //, effectTargetA, effectTargetB;
+		private RenderTarget2D rawScreen;
 
 		GraphicsDeviceManager graphics;
 
 		public static SpriteBatch SpriteBatch;
+		public static Effect ClutEffect;
 
 		public static GraphicsDevice GfxDev { get; private set; }
 		public static Kafe Me { get; private set; }
@@ -40,6 +38,13 @@ namespace Kafe
 			IsMouseVisible = true;
 		}
 
+		public static Effect GetEffect(string assetName)
+		{
+			if (!assetName.Contains("."))
+				assetName += ".fxb";
+			return new Effect(GfxDev, Mix.GetBytes(assetName));
+		}
+
 		protected override void Initialize()
 		{
 			Kafe.GfxDev = graphics.GraphicsDevice;
@@ -52,14 +57,14 @@ namespace Kafe
 		{
 			SpriteBatch = new SpriteBatch(GraphicsDevice);
 			rawScreen = new RenderTarget2D(GraphicsDevice, ScreenWidth, ScreenHeight);
-			//effectTargetA = new RenderTarget2D(GraphicsDevice, ScreenWidth, ScreenHeight);
-			//effectTargetB = new RenderTarget2D(GraphicsDevice, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
 
-			var felicia = new Character("felicia.json", 0);
+			ClutEffect = GetEffect("clut");
+
+			var felicia = new Character("felicia.json", 3);
 			var sakura = new Character("felicia.json", 1);
 
-			//var arena = new Arena("locales\\vegas.json", felicia, sakura);
-			var arena = new Editor("locales\\vegas.json", "morrigan.json");
+			var arena = new Arena("locales\\vegas.json", felicia, sakura);
+			//var arena = new Editor("locales\\vegas.json", "felicia.json");
 			Components.Add(arena);
 		}
 
@@ -88,21 +93,15 @@ namespace Kafe
 			base.Draw(gameTime);
 			GraphicsDevice.SetRenderTarget(null);
 			GraphicsDevice.Clear(Color.Black);
-			SpriteBatch.Begin(SpriteSortMode.Immediate, null, /* BilinearBlurEnabled ? SamplerState.LinearClamp : */ SamplerState.PointClamp, null, null, /* ScanEffectEnabled ? scanlineEffect : */ null);
+			SpriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);
 			SpriteBatch.Draw(rawScreen, new Rectangle(0, 0, CrtWidth, CrtHeight), new Rectangle(0, 0, ScreenWidth, ScreenHeight), Color.White);
 			SpriteBatch.End();
 		}
 	}
 
 #if WINDOWS || LINUX
-	/// <summary>
-	/// The main class.
-	/// </summary>
 	public static class Program
 	{
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
 		[STAThread]
 		static void Main()
 		{

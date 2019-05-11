@@ -99,8 +99,10 @@ namespace Kafe
 			var batch = Kafe.SpriteBatch;
 			batch.Begin();
 			foreach (var c in Characters)
-				c.Draw(batch);
+				c.DrawShadow(batch);
 			batch.End();
+			foreach (var c in Characters)
+				c.Draw(batch);
 		}
 	}
 
@@ -178,6 +180,10 @@ namespace Kafe
 					Subject.CycleAnims(1);
 				if (Input.WasJustReleased(Keys.Up))
 					Subject.CycleAnims(-1);
+				if (Input.WasJustReleased(Keys.OemPlus))
+					Subject.ColorSwap++;
+				if (Input.WasJustReleased(Keys.OemMinus) && Subject.ColorSwap > 0)
+					Subject.ColorSwap--;
 			}
 			keyScroller -= gameTime.ElapsedGameTime.Milliseconds / 10;
 			if (keyScroller < 0 - (keyScrollerText.Length * 8))
@@ -189,9 +195,17 @@ namespace Kafe
 		{
 			base.Draw(gameTime);
 			var batch = Kafe.SpriteBatch;
-			batch.Begin();
 			if (Subject != null)
-			Subject.Draw(batch);
+			{
+				batch.Begin();
+				Subject.DrawShadow(batch);
+				batch.End();
+				Subject.Draw(batch);
+				batch.Begin();
+				Subject.DrawEditStuff(batch);
+				batch.End();
+			}
+			batch.Begin();
 			Text.Draw(batch, 1, "Edit mode", 4, Kafe.ScreenHeight - 4 - 24);
 			Text.Draw(batch, 0, keyScrollerText, keyScroller, Kafe.ScreenHeight - 4 - 8);
 			if (!string.IsNullOrWhiteSpace(topMessage))

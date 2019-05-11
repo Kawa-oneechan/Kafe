@@ -23,22 +23,26 @@ namespace Kafe
 {
 	class Character
 	{
-		private const int MaxPalettes = 4;
+		private const int PaletteSize = 4;
 
-		private Texture2D sheet;
-		private Texture2D[] sheets;
+		private static Dictionary<string, Texture2D> sheets = new Dictionary<string, Texture2D>();
+		private static Dictionary<string, Texture2D> palettes = new Dictionary<string, Texture2D>();
+
+		private Texture2D sheet, palette;
 
 		private JsonObj json;
 		private JsonObj animations;
 		private JsonObj animation;
 		private List<JsonObj> frames;
 		private int currentFrame, totalFrames;
+		private int posX, posY;
 
 		//private string currentAnimName;
 
 		private static Texture2D shadow, square;
 
 		public Rectangle Image { get; set; }
+		public int ColorSwap { get; set; }
 		public Vector2 Position { get; set; }
 		public Vector2 CelOffset { get; set; }
 		public Vector2 Velocity { get; set; }
@@ -60,44 +64,47 @@ namespace Kafe
 
 		public void Reload(string jsonFile, int palIndex, bool refresh)
 		{
-			if (palIndex >= MaxPalettes)
-				palIndex = MaxPalettes - 1;
-
 			json = Mix.GetJson("fighters\\" + jsonFile, false) as JsonObj;
 			var baseName = json["base"] as string;
-			//sheet = Mix.GetTexture("fighters\\" + baseName);
 
-			sheets = new Texture2D[MaxPalettes];
-			for (var i = 0; i < MaxPalettes; i++)
-				sheets[i] = Mix.GetTexture("fighters\\" + baseName);
-			sheet = sheets[palIndex];
-
-			if (Mix.FileExists("fighters\\" + baseName + "-pal.png"))
+			if (sheets.ContainsKey(baseName) && !refresh)
 			{
-				var palettes = Mix.GetTexture("fighters\\" + baseName + "-pal.png");
-				var numPals = palettes.Height;
-				var paletteData = new Color[palettes.Width * palettes.Height];
-				palettes.GetData(paletteData);
-				var spriteData = new Color[sheet.Width * sheet.Height];
-				for (var i = 1; i < numPals; i++)
+				sheet = sheets[baseName];
+				if (palettes.ContainsKey(baseName))
+					palette = palettes[baseName];
+			}
+			else
+			{
+				sheet = Mix.GetTexture("fighters\\" + baseName);
+				sheets[baseName] = sheet;
+
+				if (Mix.FileExists("fighters\\" + baseName + "-pal.png"))
 				{
-					sheets[i].GetData(spriteData);
+					palette = Mix.GetTexture("fighters\\" + baseName + "-pal.png");
+					palettes[baseName] = palette;
+					var numPals = palette.Height / PaletteSize;
+					var paletteData = new Color[palette.Width * palette.Height];
+					palette.GetData(paletteData);
+					var spriteData = new Color[sheet.Width * sheet.Height];
+					sheet.GetData(spriteData);
 					for (var j = 0; j < spriteData.Length; j++)
 					{
-						for (var p = 0; p < palettes.Width; p++)
+						for (var p = 0; p < palette.Width / PaletteSize; p++)
 						{
-							var cFrom = paletteData[p];
-							var cTo = paletteData[(i * palettes.Width) + p];
+							var cFrom = paletteData[p * PaletteSize];
+							var cTo = new Color(p, 0, 0, 16);
 							if (spriteData[j] == cFrom)
 								spriteData[j] = cTo;
 						}
 					}
-					sheets[i].SetData(spriteData);
-				}
+					sheet.SetData(spriteData);
 
-				if (palIndex >= numPals)
-					palIndex = numPals - 1;
+					if (palIndex >= numPals)
+						palIndex %= numPals;
+				}
 			}
+
+			ColorSwap = palIndex;
 
 			animations = (JsonObj)json["animations"];
 			var idx = 0;
@@ -124,11 +131,7 @@ namespace Kafe
 		private void SwitchTo(object anim)
 		{
 			if (anim == null)
-			{
-				//currentFrame = 0;
-				//return;
 				anim = 0.0;
-			}
 			if (anim is double)
 				anim = animations.ElementAt((int)(double)anim).Key;
 			var newAnimation = (JsonObj)animations[(string)anim];
@@ -275,13 +278,26 @@ namespace Kafe
 				Velocity += new Vector2(0.5f, 0);
 		}
 
-		public void Draw(SpriteBatch batch)
+		public void DrawShadow(SpriteBatch batch)
 		{
 			batch.Draw(shadow, new Vector2(Position.X - 32, Kafe.Ground - 4), null, Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
-			//batch.Draw(sheet, Position.ToInteger() - CelOffset, Image, Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
+		}
 
-			var posX = (int)Position.X;
-			var posY = (int)(Position.Y - CelOffset.Y);
+		public void Draw(SpriteBatch batch)
+		{
+			if (palette != null)
+			{
+				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, Kafe.ClutEffect);
+				Kafe.ClutEffect.Parameters["PALETTE"].SetValue(palette);
+				Kafe.ClutEffect.Parameters["PALETTES"].SetValue((float)palette.Height / PaletteSize);
+				Kafe.ClutEffect.Parameters["COLORS"].SetValue((float)palette.Width / PaletteSize);
+				Kafe.ClutEffect.Parameters["INDEX"].SetValue((float)ColorSwap);
+			}
+			else
+				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);
+
+			posX = (int)Position.X;
+			posY = (int)(Position.Y - CelOffset.Y);
 			var fx = SpriteEffects.None;
 			if (!FacingLeft)
 			{
@@ -295,7 +311,11 @@ namespace Kafe
 			}
 
 			batch.Draw(sheet, new Vector2(posX, posY), Image, Color.White, 0.0f, Vector2.Zero, 1.0f, fx, 0.0f);
+			batch.End();
+		}
 
+		public void DrawEditStuff(SpriteBatch batch)
+		{
 			if (ShowBoxes && frames[currentFrame].ContainsKey("boxes"))
 			{
 				var src = new Rectangle(0, 0, 32, 32);
@@ -318,8 +338,8 @@ namespace Kafe
 					fallToA = animations[fallTo0 as string] as JsonObj;
 				var fallTo = string.Format("{0} \"{1}\"", fallToA["index"], fallToA["name"]);
 				Text.Draw(batch, 0,
-					string.Format("anim {0} \"{1}\"\nframe {2} of {3}\nfall to {4}",
-					animation["index"], animation["name"], currentFrame, totalFrames, fallTo),
+					string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\nfall to {5}",
+					animation["index"], animation["name"], ColorSwap, currentFrame, totalFrames, fallTo),
 					2, 2);
 			}
 		}
