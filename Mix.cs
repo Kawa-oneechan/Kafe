@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Kawa.Json;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,7 +13,6 @@ namespace Kafe
 		{
 			public string MixFile, Filename;
 			public int Offset, Length;
-			//public bool NeedsPremultiply;
 			public bool IsCompressed;
 		}
 
@@ -31,7 +29,13 @@ namespace Kafe
 			fileList = new Dictionary<string, MixFileEntry>();
 			cache = new Dictionary<string, object>();
 			var mixfiles = new List<string>() { mainFile + ".zip" };
-			mixfiles.AddRange(Directory.EnumerateFiles(".", "*.zip").Select(x => x.Substring(2)).Where(x => !x.Equals(mainFile + ".zip", StringComparison.OrdinalIgnoreCase)));
+			foreach (var zipFile in Directory.EnumerateFiles(".", "*.zip"))
+			{
+				if (zipFile.Substring(2).Equals(mainFile + ".zip", StringComparison.OrdinalIgnoreCase))
+					continue;
+				mixfiles.Add(zipFile.Substring(2));
+			}
+
 			Console.WriteLine("Mixfiles enumerated. Indexing contents...");
 			foreach (var mixfile in mixfiles)
 			{
@@ -206,12 +210,19 @@ namespace Kafe
 		public static string[] GetFilesInPath(string path)
 		{
 			var ret = new List<string>();
-			foreach (var entry in fileList.Values.Where(x => x.Filename.StartsWith(path)))
-				ret.Add(entry.Filename);
+			foreach (var entry in fileList.Values)
+			{
+				if (entry.Filename.StartsWith(path))
+					ret.Add(entry.Filename);
+			}
 			if (Directory.Exists(Path.Combine("data", path)))
 			{
 				var getFiles = Directory.GetFiles(Path.Combine("data", path), "*", SearchOption.AllDirectories);
-				ret.AddRange(getFiles.Select(x => x.Substring("data\\".Length)).Where(x => !ret.Contains(x)));
+				foreach (var x in getFiles)
+				{
+					if (!ret.Contains(x.Substring(5)))
+						ret.Add(x.Substring(5));
+				}
 			}
 			return ret.ToArray();
 		}
@@ -233,17 +244,25 @@ namespace Kafe
 		{
 			var ret = new List<string>();
 			var regex = new System.Text.RegularExpressions.Regex(pattern.Replace("*", "(.*)").Replace("\\", "\\\\"));
-			foreach (var entry in fileList.Values.Where(x => regex.IsMatch(x.Filename)))
-				ret.Add(entry.Filename);
+			foreach (var entry in fileList.Values)
+			{
+				if (regex.IsMatch(entry.Filename))
+					ret.Add(entry.Filename);
+			}
 			if (Directory.Exists("data"))
 			{
-				if (pattern.Contains('\\'))
+				if (pattern.Contains("\\"))
 				{
 					if (!Directory.Exists(Path.Combine("data", Path.GetDirectoryName(pattern))))
 						return ret.ToArray();
 				}
 				var getFiles = Directory.GetFiles("data", pattern, SearchOption.AllDirectories);
-				ret.AddRange(getFiles.Select(f => { if (f.StartsWith("data\\")) return f.Substring(5); return f; }));
+				foreach (var f in getFiles)
+				{
+					if (f.StartsWith("data\\"))
+						ret.Add(f.Substring(5));
+					ret.Add(f);
+				}
 			}
 			return ret.ToArray();
 		}

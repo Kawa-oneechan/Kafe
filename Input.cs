@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Kawa.Json;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Kawa.Json;
 
 namespace Kafe
 {

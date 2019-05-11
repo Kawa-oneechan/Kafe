@@ -1,0 +1,31 @@
+{
+	"name": "Street",
+	"location": "",
+	"base": "ryu_street",
+	"extent": [ 144, 496 ],
+	"layers": [
+		{
+			"origin": [ 0, 0 ],
+			"rect": [ 0, 256, 768, 192 ],
+			"parallax": [ 0.5, 0.5 ]
+		},
+		{
+			"origin": [ 0, 0 ],
+			"rect": [ 0, 0, 1024, 216 ]
+		},
+		{
+			"origin": [ 688, 131 ],
+			"rect": [ 16, 456, 128, 72 ],
+			"frames": 6,
+			"rate": 240
+		},
+		{
+			"origin": [ 0, 208 ],
+			"rect": [0, 208, 1024, 32 ],
+			"floor": true
+		},
+		{
+			"fighters": true
+		}
+	]
+}

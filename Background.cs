@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Kawa.Json;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Kawa.Json;
 
 /*
 	private JsonObj background;
@@ -16,212 +14,138 @@ using Kawa.Json;
 
 namespace Kafe
 {
-	public enum BackgroundTypes { Still, Loop, Parallax, Parallax2, SimpleScroll };
-
 	class Background : DrawableGameComponent
 	{
 		private JsonObj json;
 		public Texture2D Sheet { get; private set; }
-		public BackgroundTypes Type { get; private set; }
-		public int ParallaxFloor { get; private set; }
+		public List<BackgroundLayer> Layers { get; private set; }
+		public int LeftExtent, RightExtent;
 
 		public Background(string file) : base(Kafe.Me)
 		{
 			json = Mix.GetJson(file) as JsonObj;
 			Sheet = Mix.GetTexture("locales\\" + (json["base"] as string));
-			Type = (BackgroundTypes)Enum.Parse(typeof(BackgroundTypes), json["type"] as string, true);
-
-			if (Type == BackgroundTypes.Parallax)
-				ParallaxFloor = (int)(double)json["floor"];
-			
-			var baseName = "locales\\" + (json["base"] as string);
-			foreach (var type in new[] { "ogg", "mp3", "it", "xm", "s3m", "mod", "mid" })
+			Layers = new List<BackgroundLayer>();
+			LeftExtent = 0;
+			RightExtent = 512;
+			if (json.ContainsKey("extent"))
 			{
-				var fullName = baseName + '.' + type;
-				if (Mix.FileExists(fullName))
-				{
-					SoundEngine.PlaySong(fullName);
-					break;
-				}
+				var data = ((List<object>)json["extent"]);
+				LeftExtent = (int)(double)data[0];
+				RightExtent = (int)(double)data[1];
 			}
-		}
-
-		public override void Draw(GameTime gameTime)
-		{
-			var batch = Kafe.SpriteBatch;
-			batch.Begin();
-			var dest = new Rectangle(0, 0, Kafe.ScreenWidth, Kafe.ScreenHeight);
-			switch (Type)
-			{
-				case BackgroundTypes.Still:
-					{
-						var src = new Rectangle((int)Kafe.Camera.X, 0, 384, 224);
-						batch.Draw(Sheet, dest, src, Color.White);
-					}
-					break;
-				case BackgroundTypes.Parallax:
-					{
-						var src = new Rectangle((int)(Kafe.Camera.X / 8), 224, 448, 224);
-						batch.Draw(Sheet, Vector2.Zero, src, Color.White);
-
-						src = new Rectangle((int)Kafe.Camera.X, 0, Kafe.ScreenWidth, Kafe.ScreenHeight);
-						batch.Draw(Sheet, dest, src, Color.White);
-					}
-					break;
-			}
-			batch.End();
-		}
-	}
-
-	class Arena : Background
-	{
-		private const int StartingDistance = 80;
-
-		private int timer = 0;
-		public Character[] Characters { get; set; }
-
-		public Arena(string file, Character left, Character right) : base(file)
-		{
-			left.Position = new Vector2(StartingDistance, Kafe.Ground);
-			right.Position = new Vector2(Kafe.ScreenWidth - StartingDistance, Kafe.Ground);
-			right.FacingLeft = true;
-			left.Opponent = right;
-			right.Opponent = left;
-			Characters = new[] { left, right };
+			foreach (var layer in ((List<object>)json["layers"]))
+				Layers.Add(new BackgroundLayer((JsonObj)layer, this));
 		}
 
 		public override void Update(GameTime gameTime)
 		{
-			timer += (int)gameTime.ElapsedGameTime.Milliseconds;
-			if (timer > Kafe.Speed)
-			{
-				timer = 0;
-				if (Input.Left)
-					Game.Window.Title = "!";
-				foreach (var c in Characters)
-					c.Update();
-			}
 			base.Update(gameTime);
+
+			if (Input.IsHeld(Keys.Q)) Kafe.Camera.X -= 8;
+			if (Input.IsHeld(Keys.W)) Kafe.Camera.X += 8;
+			if (Kafe.Camera.X < LeftExtent) Kafe.Camera.X = LeftExtent;
+			if (Kafe.Camera.X > RightExtent) Kafe.Camera.X = RightExtent;
+
+			foreach (var layer in Layers)
+				layer.Update(gameTime);
 		}
 
 		public override void Draw(GameTime gameTime)
 		{
-			base.Draw(gameTime);
-			var batch = Kafe.SpriteBatch;
-			batch.Begin();
-			foreach (var c in Characters)
-				c.DrawShadow(batch);
-			batch.End();
-			foreach (var c in Characters)
-				c.Draw(batch);
+			foreach (var layer in Layers)
+				layer.Draw(gameTime);
+		}
+
+		public virtual void DrawPlayers(GameTime gameTime)
+		{
+			throw new NotImplementedException("Don't call DrawPlayers on a raw Background!");
 		}
 	}
 
-	class Editor : Background
+	class BackgroundLayer
 	{
-		public Character Subject { get; set; }
-		private System.IO.FileSystemWatcher watcher;
-		private string topMessage = string.Empty;
-		private string keyScrollerText = "(S)tep anim   (C)enter   (B)oxes   up/down cycle animations";
-		private int keyScroller = Kafe.ScreenWidth + 8;
+		public Vector2 Origin { get; private set; }
+		public Rectangle Rect { get; private set; }
+		public Vector2 Parallax { get; private set; }
+		public int Frames { get; private set; }
+		public int FrameRate { get; private set; }
+		public bool Floor { get; private set; }
+		public bool IsPlayerLayer { get; private set; }
+		public Background Parent { get; private set; }
 
-		public Editor(string file, string charFile) : base(file)
-		{
-			try
-			{
-				var path = System.IO.Path.Combine("data", "fighters", charFile);
-				if (System.IO.File.Exists(path))
-				{
-					watcher = new System.IO.FileSystemWatcher(System.IO.Path.GetDirectoryName(path), charFile);
-					watcher.NotifyFilter = System.IO.NotifyFilters.LastWrite;
-					watcher.Changed += (sender, e) =>
-					{
-					tryAgain:
-						try
-						{
-							if (Subject == null)
-								Subject = new Character(charFile, 0);
-							else
-								Subject.Reload(charFile, 0, true);
-							SetupSubject();
-						}
-						catch (System.IO.IOException)
-						{
-							goto tryAgain;
-						}
-						catch (JsonException jEx)
-						{
-							topMessage = jEx.Message;
-							Subject = null;
-						}
-					};
-					watcher.EnableRaisingEvents = true;
-				}
-				Subject = new Character(charFile, 0);
-				SetupSubject();
-			}
-			catch (JsonException jEx)
-			{
-				topMessage = jEx.Message;
-				Subject = null;
-			}
-		}
+		//TODO: for animation purposes
+		private int frameTimeLeft, currentFrame;
 
-		private void SetupSubject()
+		public BackgroundLayer(JsonObj json, Background parent)
 		{
-			if (Subject == null)
+			Parent = parent;
+
+			if (json.ContainsKey("fighters"))
+			{
+				IsPlayerLayer = true;
 				return;
-			Subject.Position = new Vector2(Kafe.ScreenWidth / 2, Kafe.Ground);
-			Subject.EditMode = true;
-			Subject.ShowBoxes = true;
-			topMessage = string.Empty;
+			}
+
+			if (!json.ContainsKey("rect"))
+				throw new MissingFieldException("Background layer must have a rect.");
+
+			var data = ((List<object>)json["rect"]);
+			Rect = new Rectangle((int)(double)data[0], (int)(double)data[1], (int)(double)data[2], (int)(double)data[3]);
+
+			Origin = Vector2.Zero;
+			if (json.ContainsKey("origin"))
+			{
+				data = ((List<object>)json["origin"]);
+				Origin = new Vector2((int)(double)data[0], (int)(double)data[1]);
+			}
+
+			Parallax = Vector2.One;
+			if (json.ContainsKey("parallax"))
+			{
+				data = ((List<object>)json["parallax"]);
+				Parallax = new Vector2((float)(double)data[0], (float)(double)data[1]);
+			}
+
+			Frames = 0;
+			if (json.ContainsKey("frames"))
+				Frames = (int)(double)json["frames"];
+			FrameRate = 100;
+			if (json.ContainsKey("rate"))
+				FrameRate = (int)(double)json["rate"];
+			frameTimeLeft = FrameRate;
 		}
 
-		public override void Update(GameTime gameTime)
+		public void Update(GameTime gameTime)
 		{
-			if (Subject != null)
+			if (Frames > 0)
 			{
-				if (Input.WasJustReleased(Keys.S))
-					Subject.Update();
-				if (Input.WasJustReleased(Keys.C))
-					Subject.Position = new Vector2(Kafe.ScreenWidth / 2, Kafe.Ground);
-				if (Input.WasJustReleased(Keys.B))
-					Subject.ShowBoxes = !Subject.ShowBoxes;
-				if (Input.WasJustReleased(Keys.Down))
-					Subject.CycleAnims(1);
-				if (Input.WasJustReleased(Keys.Up))
-					Subject.CycleAnims(-1);
-				if (Input.WasJustReleased(Keys.OemPlus))
-					Subject.ColorSwap++;
-				if (Input.WasJustReleased(Keys.OemMinus) && Subject.ColorSwap > 0)
-					Subject.ColorSwap--;
+				frameTimeLeft -= gameTime.ElapsedGameTime.Milliseconds;
+				if (frameTimeLeft <= 0)
+				{
+					frameTimeLeft = FrameRate;
+					currentFrame++;
+					if (currentFrame >= Frames)
+						currentFrame = 0;
+				}
 			}
-			keyScroller -= gameTime.ElapsedGameTime.Milliseconds / 10;
-			if (keyScroller < 0 - (keyScrollerText.Length * 8))
-				keyScroller = Kafe.ScreenWidth + 8;
-			base.Update(gameTime);
 		}
 
-		public override void Draw(GameTime gameTime)
+		public void Draw(GameTime gameTime)
 		{
-			base.Draw(gameTime);
-			var batch = Kafe.SpriteBatch;
-			if (Subject != null)
+			if (IsPlayerLayer)
 			{
-				batch.Begin();
-				Subject.DrawShadow(batch);
-				batch.End();
-				Subject.Draw(batch);
-				batch.Begin();
-				Subject.DrawEditStuff(batch);
-				batch.End();
+				Parent.DrawPlayers(gameTime);
+				return;
 			}
-			batch.Begin();
-			Text.Draw(batch, 1, "Edit mode", 4, Kafe.ScreenHeight - 4 - 24);
-			Text.Draw(batch, 0, keyScrollerText, keyScroller, Kafe.ScreenHeight - 4 - 8);
-			if (!string.IsNullOrWhiteSpace(topMessage))
-				Text.Draw(batch, 0, topMessage, 4, 4, Color.Red);
-			batch.End();
+
+			Kafe.SpriteBatch.Begin();
+			var targetPos = (-Kafe.Camera + Origin) * Parallax;
+			var src = Rect;
+			if (Frames > 0)
+				src.Offset(Rect.Width * currentFrame, 0);
+			Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos, src, Color.White);
+			Kafe.SpriteBatch.End();
 		}
 	}
 }

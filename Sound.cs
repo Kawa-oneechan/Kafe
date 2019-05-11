@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using FMOD;
 
 namespace Kafe
@@ -25,15 +24,6 @@ namespace Kafe
         {
             if (player == null)
                 return;
-			if (!name.Contains('.'))
-			{
-				if (Mix.FileExists(name + ".ogg"))
-				{
-					PlaySong(name + ".ogg");
-					return;
-				}
-				name += ".mid";
-			}
 			if (Mix.FileExists(name))
 			{
 				var sound = new Sound();

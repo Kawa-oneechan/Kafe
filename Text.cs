@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using Kawa.Json;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -32,14 +32,18 @@ namespace Kafe
 			var data = Mix.GetJson("fonts") as List<object>;
 			fonts = new Font[data.Count];
 			var i = 0;
-			foreach (var f in data.Cast<JsonObj>())
+			foreach (var entry in data)
 			{
-				var sheet = Mix.GetTexture(f["sheet"] as string);
-				var width = (int)(double)f["width"];
-				var height = (int)(double)f["height"];
-				var lineHeight = (int)(double)f["line"];
-				var widths = (f["widths"] as List<object>).Select(w => (int)(double)w).ToArray();
-				fonts[i] = new Font(sheet, width, height, lineHeight, widths);
+				var font = (JsonObj)entry;
+				var sheet = Mix.GetTexture(font["sheet"] as string);
+				var width = (int)(double)font["width"];
+				var height = (int)(double)font["height"];
+				var lineHeight = (int)(double)font["line"];
+				var widths = (font["widths"] as List<object>);
+				var newWidths = new int[widths.Count];
+				for (var j = 0; j < newWidths.Length; j++)
+					newWidths[j] = (int)(double)widths[j];
+				fonts[i] = new Font(sheet, width, height, lineHeight, newWidths);
 				i++;
 			}
 		}

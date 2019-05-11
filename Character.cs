@@ -6,6 +6,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Kawa.Json;
 
+//TODO: optimize the shit out of this even though it's not needed *yet* by removing the Linq dependency.
+
 /* Cancels and Fallthroughs
  * ------------------------
  * XML

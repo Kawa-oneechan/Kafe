@@ -35,8 +35,10 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Arena.cs" />
     <Compile Include="Background.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="Editor.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="fmod.cs" />
     <Compile Include="Game.cs" />
