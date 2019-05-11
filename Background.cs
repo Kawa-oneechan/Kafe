@@ -33,6 +33,17 @@ namespace Kafe
 
 			if (Type == BackgroundTypes.Parallax)
 				ParallaxFloor = (int)(double)json["floor"];
+			
+			var baseName = "locales\\" + (json["base"] as string);
+			foreach (var type in new[] { "ogg", "mp3", "it", "xm", "s3m", "mod", "mid" })
+			{
+				var fullName = baseName + '.' + type;
+				if (Mix.FileExists(fullName))
+				{
+					SoundEngine.PlaySong(fullName);
+					break;
+				}
+			}
 		}
 
 		public override void Draw(GameTime gameTime)

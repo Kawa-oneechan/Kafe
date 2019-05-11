@@ -48,6 +48,7 @@ namespace Kafe
 		protected override void Initialize()
 		{
 			Kafe.GfxDev = graphics.GraphicsDevice;
+			SoundEngine.Initialize();
 			Input = new global::Kafe.Input(this); 
 			Components.Add(Input); 
 			base.Initialize();

@@ -38,6 +38,7 @@
     <Compile Include="Background.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="fmod.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="json\Kawa.Json.cs" />
@@ -46,6 +47,7 @@
     <Compile Include="json\Kawa.Json.Schema.cs" />
     <Compile Include="Mix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sound.cs" />
     <Compile Include="Text.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +66,9 @@
     <Content Include="data\font1.png" />
     <Content Include="data\font2.png" />
     <Content Include="data\font3.png" />
+    <Content Include="fmodex.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Icon.ico" />
     <Content Include="SDL.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
