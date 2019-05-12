@@ -68,14 +68,15 @@ namespace Kafe
 		public Vector2 Origin { get; private set; }
 		public Rectangle Rect { get; private set; }
 		public Vector2 Parallax { get; private set; }
+		public Vector2 Movement { get; private set; }
 		public int Frames { get; private set; }
 		public int FrameRate { get; private set; }
 		public bool Floor { get; private set; }
 		public bool IsPlayerLayer { get; private set; }
 		public Background Parent { get; private set; }
 
-		//TODO: for animation purposes
 		private int frameTimeLeft, currentFrame;
+		private Vector2 movementOrigin;
 
 		public BackgroundLayer(JsonObj json, Background parent)
 		{
@@ -107,6 +108,16 @@ namespace Kafe
 				Parallax = new Vector2((float)(double)data[0], (float)(double)data[1]);
 			}
 
+			Movement = Vector2.Zero;
+			if (json.ContainsKey("movement"))
+			{
+				data = ((List<object>)json["movement"]);
+				Movement = new Vector2((float)(double)data[0], (float)(double)data[1]);
+			}
+
+			if (json.ContainsKey("floor"))
+				Floor = (bool)json["floor"];
+
 			Frames = 0;
 			if (json.ContainsKey("frames"))
 				Frames = (int)(double)json["frames"];
@@ -129,6 +140,20 @@ namespace Kafe
 						currentFrame = 0;
 				}
 			}
+
+			if (Movement.Length() != 0)
+			{
+				movementOrigin += Movement;
+				//TODO: can we do better?
+				while (movementOrigin.X < -Rect.Width)
+					movementOrigin.X += Rect.Width;
+				while (movementOrigin.Y < -Rect.Height)
+					movementOrigin.Y -= Rect.Height;
+				while (movementOrigin.X > Rect.Width)
+					movementOrigin.X -= Rect.Width;
+				while (movementOrigin.Y > Rect.Height)
+					movementOrigin.Y -= Rect.Height;
+			}
 		}
 
 		public void Draw(GameTime gameTime)
@@ -141,10 +166,41 @@ namespace Kafe
 
 			Kafe.SpriteBatch.Begin();
 			var targetPos = (-Kafe.Camera + Origin) * Parallax;
-			var src = Rect;
-			if (Frames > 0)
-				src.Offset(Rect.Width * currentFrame, 0);
-			Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos, src, Color.White);
+
+			if (Floor)
+			{
+				var src = new Rectangle(Rect.Left, Rect.Top, Rect.Width, 1);
+				var displacement = (Kafe.Camera.X - Parent.LeftExtent - 128) / 128;
+				for (var row = 0; row < Rect.Height; row++)
+				{
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos, src, Color.White);
+					src.Offset(0, 1);
+					targetPos.X -= displacement;
+					targetPos.Y += 1;
+				}
+			}
+			else
+			{
+				var src = Rect;
+
+				if (Movement.Length() != 0)
+				{
+					targetPos += movementOrigin;
+					//TODO: can we do better?
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(-Rect.Width, -Rect.Height), src, Color.White);
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(-Rect.Width, 0), src, Color.White);
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(-Rect.Width, Rect.Height), src, Color.White);
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(0, Rect.Height), src, Color.White);
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(Rect.Width, Rect.Height), src, Color.White);
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(Rect.Width, 0), src, Color.White);
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(Rect.Width, -Rect.Height), src, Color.White);
+					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(0, -Rect.Height), src, Color.White);
+				}
+	
+				if (Frames > 0)
+					src.Offset(Rect.Width * currentFrame, 0);
+				Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos, src, Color.White);
+			}
 			Kafe.SpriteBatch.End();
 		}
 	}
