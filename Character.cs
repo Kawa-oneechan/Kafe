@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Kawa.Json;
-
-//TODO: optimize the shit out of this even though it's not needed *yet* by removing the Linq dependency.
 
 /* Cancels and Fallthroughs
  * ------------------------
@@ -23,6 +20,25 @@ using Kawa.Json;
 
 namespace Kafe
 {
+	public enum StandardAnims
+	{
+		stdIdle,
+		stdAdvance,
+		stdRetreat,
+		stdJumpUp,
+		stdJumpAdv,
+		stdJumpRet,
+		stdIntro,
+		stdDefeat,
+		stdTime,
+		stdVictory,
+		stdHitGrdMid,
+		stdHitGrdHigh,
+		stdHitGrdLow,
+		stdHitAir,
+		stdSelect,
+	};
+
 	class Character
 	{
 		private const int PaletteSize = 4;
@@ -33,13 +49,11 @@ namespace Kafe
 		private Texture2D sheet, palette;
 
 		private JsonObj json;
-		private JsonObj animations;
+		private List<JsonObj> animations;
 		private JsonObj animation;
 		private List<JsonObj> frames;
-		private int currentFrame, totalFrames;
+		private int currentAnim, currentFrame, totalFrames;
 		private int posX, posY;
-
-		//private string currentAnimName;
 
 		private static Texture2D shadow, square;
 
@@ -108,39 +122,64 @@ namespace Kafe
 
 			ColorSwap = palIndex;
 
-			animations = (JsonObj)json["animations"];
-			var idx = 0;
-			foreach (var a in animations)
+			animations = new List<JsonObj>();
+			foreach (var a in (List<object>)json["animations"])
 			{
-				((JsonObj)a.Value)["index"] = idx++;
-				((JsonObj)a.Value)["name"] = a.Key;
+				animations.Add((JsonObj)a);
 			}
 			if (!refresh)
-				animation = animations.ElementAt(0).Value as JsonObj;
+				animation = animations[0] as JsonObj;
 			else
-				animation = animations[animation["name"] as string] as JsonObj;
-			frames = ((List<object>)animation["frames"]).Cast<JsonObj>().ToList();
-			totalFrames = frames.Count;
+				animation = animations[currentAnim] as JsonObj;
+			Position = new Vector2(160, 160);
+			SetupFrames();
 			if (!refresh || currentFrame >= totalFrames)
 				currentFrame = 0;
-			Position = new Vector2(160, 160);
-			var image = ((List<object>)frames[currentFrame]["image"]).Select(x => (int)(double)x).ToArray();
-			var offset = ((List<object>)frames[currentFrame]["offset"]).Select(x => (int)(double)x).ToArray();
-			Image = new Rectangle(image[0], image[1], image[2], image[3]);
-			CelOffset = new Vector2(offset[0], offset[1]);
+			SetupImage();
+		}
+
+		public void SetupFrames()
+		{
+			frames = new List<JsonObj>();
+			foreach (var f in (List<object>)animation["frames"])
+				if (f is JsonObj)
+					frames.Add((JsonObj)f);
+			totalFrames = frames.Count;
+		}
+
+		public void SetupImage()
+		{
+			var image = ((List<object>)frames[currentFrame]["image"]);
+			var offset = ((List<object>)frames[currentFrame]["offset"]);
+			Image = new Rectangle((int)(double)image[0], (int)(double)image[1], (int)(double)image[2], (int)(double)image[3]);
+			CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
 		}
 
 		private void SwitchTo(object anim)
 		{
+			var newAnim = 0;
 			if (anim == null)
-				anim = 0.0;
-			if (anim is double)
-				anim = animations.ElementAt((int)(double)anim).Key;
-			var newAnimation = (JsonObj)animations[(string)anim];
-			if (newAnimation != animation)
+				newAnim = 0;
+			else if (anim is string)
+				for (var i = 0; i < animations.Count; i++)
+				{
+					if ((string)animations[i]["name"] == (string)anim)
+					{
+						newAnim = i;
+						break;
+					}
+				}
+			else if (anim is double)
+				newAnim = (int)(double)anim;
+			else if (anim is int)
+				newAnim = (int)anim;
+			if (newAnim == -1)
+				newAnim = currentAnim;
+			if (newAnim != currentAnim)
 			{
-				animation = newAnimation;
-				frames = ((List<object>)animation["frames"]).Cast<JsonObj>().ToList();
+				currentAnim = newAnim;
+				animation = animations[currentAnim];
+				SetupFrames();
 				currentFrame = 0;
 			}
 			totalFrames = frames.Count;
@@ -150,17 +189,13 @@ namespace Kafe
 
 		public void CycleAnims(int direction)
 		{
-			var currentAnim = (int)animation["index"];
 			var nextAnim = currentAnim + direction;
 			if (nextAnim == animations.Count)
 				nextAnim = 0;
 			else if (nextAnim == -1)
 				nextAnim = animations.Count - 1;
 			SwitchTo((double)nextAnim);
-			var image = ((List<object>)frames[currentFrame]["image"]).Select(x => (int)(double)x).ToArray();
-			var offset = ((List<object>)frames[currentFrame]["offset"]).Select(x => (int)(double)x).ToArray();
-			Image = new Rectangle(image[0], image[1], image[2], image[3]);
-			CelOffset = new Vector2(offset[0], offset[1]);
+			SetupImage();
 		}
 
 		public void Update()
@@ -171,80 +206,85 @@ namespace Kafe
 			currentFrame++;
 			if (currentFrame >= totalFrames)
 			{
-				var fallTos = ((List<object>)animation["fallTo"]);
-				if (EditMode)
+				if (animation["fallTo"] is List<object>)
 				{
-					if (fallTos[0] != null)
-						SwitchTo(fallTos[0]);
+					var fallTos = ((List<object>)animation["fallTo"]);
+					if (EditMode)
+					{
+						if (fallTos[0] != null)
+							SwitchTo(fallTos[0]);
+					}
+					else
+					{
+						if (Input.A && fallTos[1] != null)
+							SwitchTo(fallTos[1]);
+						else if (Input.B && fallTos[2] != null)
+							SwitchTo(fallTos[2]);
+						else if (Input.C && fallTos[3] != null)
+							SwitchTo(fallTos[3]);
+						else if (Input.D && fallTos[4] != null)
+							SwitchTo(fallTos[4]);
+						else if (Input.E && fallTos[5] != null)
+							SwitchTo(fallTos[5]);
+						else if (Input.F && fallTos[6] != null)
+							SwitchTo(fallTos[6]);
+						else if (advance && fallTos[7] != null)
+							SwitchTo(fallTos[7]);
+						else if (retreat && fallTos[8] != null)
+							SwitchTo(fallTos[8]);
+						else if (Input.Up && fallTos[9] != null)
+							SwitchTo(fallTos[10]);
+						else if (Input.Down && fallTos[9] != null)
+							SwitchTo(fallTos[10]);
+						else if (fallTos[0] != null)
+							SwitchTo(fallTos[0]);
+					}
 				}
 				else
-				{
-					if (Input.A && fallTos[1] != null)
-						SwitchTo(fallTos[1]);
-					else if (Input.B && fallTos[2] != null)
-						SwitchTo(fallTos[2]);
-					else if (Input.C && fallTos[3] != null)
-						SwitchTo(fallTos[3]);
-					else if (Input.D && fallTos[4] != null)
-						SwitchTo(fallTos[4]);
-					else if (Input.E && fallTos[5] != null)
-						SwitchTo(fallTos[5]);
-					else if (Input.F && fallTos[6] != null)
-						SwitchTo(fallTos[6]);
-					else if (advance && fallTos[7] != null)
-						SwitchTo(fallTos[7]);
-					else if (retreat && fallTos[8] != null)
-						SwitchTo(fallTos[8]);
-					else if (Input.Up && fallTos[9] != null)
-						SwitchTo(fallTos[10]);
-					else if (Input.Down && fallTos[9] != null)
-						SwitchTo(fallTos[10]);
-					else if (fallTos[0] != null)
-						SwitchTo(fallTos[0]);
-				}
+					SwitchTo(animation["fallTo"]);
 			}
 
 			if (!EditMode)
 			{
-				var cancelTos = ((List<object>)animation["cancelTo"]);
-				if (Input.A && cancelTos[1] != null)
-					SwitchTo(cancelTos[1]);
-				else if (Input.B && cancelTos[2] != null)
-					SwitchTo(cancelTos[2]);
-				else if (Input.C && cancelTos[3] != null)
-					SwitchTo(cancelTos[3]);
-				else if (Input.D && cancelTos[4] != null)
-					SwitchTo(cancelTos[4]);
-				else if (Input.E && cancelTos[5] != null)
-					SwitchTo(cancelTos[5]);
-				else if (Input.F && cancelTos[6] != null)
-					SwitchTo(cancelTos[6]);
-				else if (advance && cancelTos[7] != null)
-					SwitchTo(cancelTos[7]);
-				else if (retreat && cancelTos[8] != null)
-					SwitchTo(cancelTos[8]);
-				else if (Input.Up && cancelTos[9] != null)
-					SwitchTo(cancelTos[9]);
-				else if (Input.Down && cancelTos[10] != null)
-					SwitchTo(cancelTos[10]);
-				else if (!Input.Anything && cancelTos[0] != null)
-					SwitchTo(cancelTos[0]);
+				if (animation.ContainsKey("cancelTo"))
+				{
+					var cancelTos = ((List<object>)animation["cancelTo"]);
+					if (Input.A && cancelTos[1] != null)
+						SwitchTo(cancelTos[1]);
+					else if (Input.B && cancelTos[2] != null)
+						SwitchTo(cancelTos[2]);
+					else if (Input.C && cancelTos[3] != null)
+						SwitchTo(cancelTos[3]);
+					else if (Input.D && cancelTos[4] != null)
+						SwitchTo(cancelTos[4]);
+					else if (Input.E && cancelTos[5] != null)
+						SwitchTo(cancelTos[5]);
+					else if (Input.F && cancelTos[6] != null)
+						SwitchTo(cancelTos[6]);
+					else if (advance && cancelTos[7] != null)
+						SwitchTo(cancelTos[7]);
+					else if (retreat && cancelTos[8] != null)
+						SwitchTo(cancelTos[8]);
+					else if (Input.Up && cancelTos[9] != null)
+						SwitchTo(cancelTos[9]);
+					else if (Input.Down && cancelTos[10] != null)
+						SwitchTo(cancelTos[10]);
+					else if (!Input.Anything && cancelTos[0] != null)
+						SwitchTo(cancelTos[0]);
+				}
 			}
 
 			if (currentFrame >= frames.Count)
 				currentFrame = 0;
 
-			var image = ((List<object>)frames[currentFrame]["image"]).Select(x => (int)(double)x).ToArray();
-			var offset = ((List<object>)frames[currentFrame]["offset"]).Select(x => (int)(double)x).ToArray();
-			Image = new Rectangle(image[0], image[1], image[2], image[3]);
-			CelOffset = new Vector2(offset[0], offset[1]);
+			SetupImage();
 			if (frames[currentFrame].ContainsKey("impulse"))
 			{
-				var impulse = ((List<object>)frames[currentFrame]["impulse"]).Select(x => (float)(double)x).ToArray();
-				Velocity += new Vector2(impulse[0], impulse[1]);
+				var impulse = ((List<object>)frames[currentFrame]["impulse"]);
+				Velocity += new Vector2((float)(double)impulse[0], (float)(double)impulse[1]);
 			}
 
-			if ((int)animation["index"] == 0)
+			if (currentAnim == 0)
 			{
 				Velocity = new Vector2(0, Velocity.Y); //grind to a halt
 				if (Opponent != null && !EditMode)
@@ -321,27 +361,52 @@ namespace Kafe
 			if (ShowBoxes && frames[currentFrame].ContainsKey("boxes"))
 			{
 				var src = new Rectangle(0, 0, 32, 32);
-				foreach (var box in ((List<object>)frames[currentFrame]["boxes"]).Cast<JsonObj>())
+				foreach (var box in ((List<object>)frames[currentFrame]["boxes"]))
 				{
-					var rect = ((List<object>)box["rect"]).Select(x => (int)(double)x).ToArray();
-					batch.Draw(square, new Rectangle(rect[0] + posX, rect[1] + posY, rect[2], rect[3]), src, ((bool)box["hit"]) ? Color.Blue : Color.Red);
+					if (!(box is JsonObj))
+						continue;
+					var rect = ((List<object>)((JsonObj)box)["rect"]);
+					batch.Draw(square, new Rectangle((int)(double)rect[0] + posX, (int)(double)rect[1] + posY, (int)(double)rect[2], (int)(double)rect[3]),
+						src, ((bool)((JsonObj)box)["hit"]) ? Color.Blue : Color.Red);
 				}
 			}
 
 			if (EditMode)
 			{
-				var fallTo0 = ((List<object>)animation["fallTo"])[0];
-				var fallToA = default(JsonObj);
-				if (fallTo0 == null)
-					fallTo0 = 0.0;
-				if (fallTo0 is double)
-					fallToA = animations.ElementAt((int)(double)fallTo0).Value as JsonObj;
+				var fallTo0 = default(object);
+				if (animation["fallTo"] is double)
+					fallTo0 = (double)animation["fallTo"];
+				else if (animation["fallTo"] is string)
+					fallTo0 = (string)animation["fallTo"];
 				else
-					fallToA = animations[fallTo0 as string] as JsonObj;
-				var fallTo = string.Format("{0} \"{1}\"", fallToA["index"], fallToA["name"]);
+					fallTo0 = ((List<object>)animation["fallTo"])[0];
+				var fallToI = 0;
+				if (fallTo0 == null)
+					fallToI = 0;
+				else if (fallTo0 is double)
+					fallToI = (int)(double)fallTo0;
+				else if (fallTo0 is string)
+				{
+					for (var i = 0; i < animations.Count; i++)
+					{
+						if ((string)animations[i]["name"] == (string)fallTo0)
+						{
+							fallToI = i;
+							break;
+						}
+					}
+				}
+				var fallTo = "???";
+				if (fallToI == -1)
+					fallTo = "same";
+				else
+				{
+					var fallToA = animations[fallToI] as JsonObj;
+					fallTo = string.Format("{0} \"{1}\"", fallToI, fallToA["name"]);
+				}
 				Text.Draw(batch, 0,
 					string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\nfall to {5}",
-					animation["index"], animation["name"], ColorSwap, currentFrame, totalFrames, fallTo),
+					currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, fallTo),
 					2, 2);
 			}
 		}
