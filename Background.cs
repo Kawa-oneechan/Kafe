@@ -69,11 +69,12 @@ namespace Kafe
 		public Rectangle Rect { get; private set; }
 		public Vector2 Parallax { get; private set; }
 		public Vector2 Movement { get; private set; }
-		public int Frames { get; private set; }
+		public int[] Frames { get; private set; }
 		public int FrameRate { get; private set; }
 		public bool Floor { get; private set; }
 		public bool IsPlayerLayer { get; private set; }
 		public Background Parent { get; private set; }
+		public string BlendMode { get; private set; }
 
 		private int frameTimeLeft, currentFrame;
 		private Vector2 movementOrigin;
@@ -118,25 +119,47 @@ namespace Kafe
 			if (json.ContainsKey("floor"))
 				Floor = (bool)json["floor"];
 
-			Frames = 0;
+			Frames = new int[1] { 0 };
 			if (json.ContainsKey("frames"))
-				Frames = (int)(double)json["frames"];
+			{
+				if (json["frames"] is List<object>)
+				{
+					var framesList = (List<object>)json["frames"];
+					Frames = new int[framesList.Count];
+					for (var j = 0; j < framesList.Count; j++)
+						Frames[j] = (int)(double)framesList[j];
+				}
+				else
+				{
+					var i = (int)(double)json["frames"];
+					Frames = new int[i];
+					for (var j = 0; j < i; j++)
+						Frames[j] = j;
+				}
+			}
 			FrameRate = 100;
 			if (json.ContainsKey("rate"))
 				FrameRate = (int)(double)json["rate"];
 			frameTimeLeft = FrameRate;
+
+			BlendMode = "none";
+			if (json.ContainsKey("blend"))
+				BlendMode = json["blend"] as string;
 		}
 
 		public void Update(GameTime gameTime)
 		{
-			if (Frames > 0)
+			if (IsPlayerLayer)
+				return;
+
+			if (Frames.Length > 0)
 			{
 				frameTimeLeft -= gameTime.ElapsedGameTime.Milliseconds;
 				if (frameTimeLeft <= 0)
 				{
 					frameTimeLeft = FrameRate;
 					currentFrame++;
-					if (currentFrame >= Frames)
+					if (currentFrame >= Frames.Length)
 						currentFrame = 0;
 				}
 			}
@@ -164,7 +187,28 @@ namespace Kafe
 				return;
 			}
 
-			Kafe.SpriteBatch.Begin();
+			var blendState = new BlendState()
+			{
+				ColorBlendFunction = BlendFunction.Add,
+				ColorSourceBlend = Blend.SourceAlpha,
+				ColorDestinationBlend = Blend.InverseSourceAlpha
+			};
+			switch (BlendMode)
+			{
+				case "add":
+					blendState.ColorSourceBlend = Blend.One;
+					blendState.ColorDestinationBlend = Blend.One;
+					break;
+				case "sub":
+					//TODO: doesn't match what I expected from mockups.
+					//"Add" matches "Screen" in Paintshop Pro, but "Sub"
+					//does not match "Multiply".
+					blendState.ColorBlendFunction = BlendFunction.ReverseSubtract;
+					blendState.ColorSourceBlend = Blend.One;
+					blendState.ColorDestinationBlend = Blend.One;
+					break;
+			}
+			Kafe.SpriteBatch.Begin(SpriteSortMode.Immediate, blendState);
 			var targetPos = (-Kafe.Camera + Origin) * Parallax;
 
 			if (Floor)
@@ -197,8 +241,8 @@ namespace Kafe
 					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(0, -Rect.Height), src, Color.White);
 				}
 	
-				if (Frames > 0)
-					src.Offset(Rect.Width * currentFrame, 0);
+				if (Frames.Length > 0)
+					src.Offset(Rect.Width * Frames[currentFrame], 0);
 				Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos, src, Color.White);
 			}
 			Kafe.SpriteBatch.End();
