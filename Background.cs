@@ -42,8 +42,6 @@ namespace Kafe
 		{
 			base.Update(gameTime);
 
-			if (Input.IsHeld(Keys.Q)) Kafe.Camera.X -= 8;
-			if (Input.IsHeld(Keys.W)) Kafe.Camera.X += 8;
 			if (Kafe.Camera.X < LeftExtent) Kafe.Camera.X = LeftExtent;
 			if (Kafe.Camera.X > RightExtent) Kafe.Camera.X = RightExtent;
 

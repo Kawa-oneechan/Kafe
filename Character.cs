@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Kawa.Json;
 
 /* Cancels and Fallthroughs
@@ -22,21 +23,26 @@ namespace Kafe
 {
 	public enum StandardAnims
 	{
-		stdIdle,
-		stdAdvance,
-		stdRetreat,
-		stdJumpUp,
-		stdJumpAdv,
-		stdJumpRet,
-		stdIntro,
-		stdDefeat,
-		stdTime,
-		stdVictory,
-		stdHitGrdMid,
-		stdHitGrdHigh,
-		stdHitGrdLow,
-		stdHitAir,
-		stdSelect,
+		Idle,
+		Advance,
+		Retreat,
+		Turn,
+		JumpUp,
+		JumpAdv,
+		JumpRet,
+		CrouchIn,
+		Crouch,
+		CrouchOut,
+		CrouchTurn,
+		Intro,
+		Defeat,
+		Time,
+		Victory,
+		HitGrdMid,
+		HitGrdHigh,
+		HitGrdLow,
+		HitAir,
+		Select,
 	};
 
 	class Character
@@ -52,7 +58,8 @@ namespace Kafe
 		private List<JsonObj> animations;
 		private JsonObj animation;
 		private List<JsonObj> frames;
-		private int currentAnim, currentFrame, totalFrames;
+		private StandardAnims currentAnim;
+		private int currentFrame, totalFrames;
 		private int posX, posY;
 
 		private static Texture2D shadow, square;
@@ -130,7 +137,7 @@ namespace Kafe
 			if (!refresh)
 				animation = animations[0] as JsonObj;
 			else
-				animation = animations[currentAnim] as JsonObj;
+				animation = animations[(int)currentAnim] as JsonObj;
 			Position = new Vector2(160, 160);
 			SetupFrames();
 			if (!refresh || currentFrame >= totalFrames)
@@ -171,14 +178,16 @@ namespace Kafe
 				}
 			else if (anim is double)
 				newAnim = (int)(double)anim;
+			else if (anim is StandardAnims)
+				newAnim = (int)anim;
 			else if (anim is int)
 				newAnim = (int)anim;
 			if (newAnim == -1)
-				newAnim = currentAnim;
-			if (newAnim != currentAnim)
+				newAnim = (int)currentAnim;
+			if (newAnim != (int)currentAnim)
 			{
-				currentAnim = newAnim;
-				animation = animations[currentAnim];
+				currentAnim = (StandardAnims)newAnim;
+				animation = animations[(int)currentAnim];
 				SetupFrames();
 				currentFrame = 0;
 			}
@@ -189,13 +198,190 @@ namespace Kafe
 
 		public void CycleAnims(int direction)
 		{
-			var nextAnim = currentAnim + direction;
+			var nextAnim = (int)currentAnim + direction;
 			if (nextAnim == animations.Count)
 				nextAnim = 0;
 			else if (nextAnim == -1)
 				nextAnim = animations.Count - 1;
 			SwitchTo((double)nextAnim);
 			SetupImage();
+		}
+
+		public void DecideNextAnim()
+		{
+			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
+			var retreat = (Input.Left && !FacingLeft) || (Input.Right && FacingLeft);
+			var oldFacing = FacingLeft;
+			if (Opponent != null && !EditMode)
+				FacingLeft = (Position.X > Opponent.Position.X);
+
+			switch ((StandardAnims)currentAnim)
+			{
+				case StandardAnims.Idle:
+					if (FacingLeft != oldFacing) SwitchTo(StandardAnims.Turn);
+					else if (Input.Up)
+					{
+						if (advance) SwitchTo(StandardAnims.JumpAdv);
+						else if (retreat) SwitchTo(StandardAnims.JumpRet);
+						else SwitchTo(StandardAnims.JumpUp);
+					}
+					else if (advance) SwitchTo(StandardAnims.Advance);
+					else if (retreat) SwitchTo(StandardAnims.Retreat);
+					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					break;
+				case StandardAnims.Advance:
+					if (!advance) SwitchTo(StandardAnims.Idle);
+					else if (Input.Up) SwitchTo(StandardAnims.JumpAdv);
+					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					break;
+				case StandardAnims.Retreat:
+					if (!retreat) SwitchTo(StandardAnims.Idle);
+					else if (Input.Up) SwitchTo(StandardAnims.JumpRet);
+					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					break;
+				case StandardAnims.Turn:
+					SwitchTo(StandardAnims.Idle);
+					break;
+				case StandardAnims.JumpUp:
+				case StandardAnims.JumpAdv:
+				case StandardAnims.JumpRet:
+					if (Position.Y < Kafe.Ground)
+					{
+						//TODO: allow loop points
+						currentFrame--;
+					}
+					else
+						SwitchTo(StandardAnims.Idle);
+					break;
+				case StandardAnims.CrouchIn:
+					SwitchTo(StandardAnims.Crouch);
+					break;
+				case StandardAnims.Crouch:
+					if (!Input.Down) SwitchTo(StandardAnims.CrouchOut);
+					else if (FacingLeft != oldFacing) SwitchTo(StandardAnims.CrouchTurn);
+					break;
+				case StandardAnims.CrouchOut:
+					SwitchTo(StandardAnims.Idle);
+					break;
+				default:
+					{
+						if (animation.ContainsKey("fallTo"))
+						{
+							if (animation["fallTo"] is List<object>)
+							{
+								var fallTos = ((List<object>)animation["fallTo"]);
+								if (EditMode)
+								{
+									if (fallTos[0] != null)
+										SwitchTo(fallTos[0]);
+								}
+								else
+								{
+									if (Input.A && fallTos[1] != null)
+										SwitchTo(fallTos[1]);
+									else if (Input.B && fallTos[2] != null)
+										SwitchTo(fallTos[2]);
+									else if (Input.C && fallTos[3] != null)
+										SwitchTo(fallTos[3]);
+									else if (Input.D && fallTos[4] != null)
+										SwitchTo(fallTos[4]);
+									else if (Input.E && fallTos[5] != null)
+										SwitchTo(fallTos[5]);
+									else if (Input.F && fallTos[6] != null)
+										SwitchTo(fallTos[6]);
+									else if (advance && fallTos[7] != null)
+										SwitchTo(fallTos[7]);
+									else if (retreat && fallTos[8] != null)
+										SwitchTo(fallTos[8]);
+									else if (Input.Up && fallTos[9] != null)
+										SwitchTo(fallTos[10]);
+									else if (Input.Down && fallTos[9] != null)
+										SwitchTo(fallTos[10]);
+									else if (fallTos[0] != null)
+										SwitchTo(fallTos[0]);
+								}
+							}
+							else
+								SwitchTo(animation["fallTo"]);
+						}
+						else
+						{
+							//Do nothing, as if fallTo = -1.
+						}
+						break;
+					}
+			}
+		}
+
+		public void DecideCancelAnim()
+		{
+			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
+			var retreat = (Input.Left && !FacingLeft) || (Input.Right && FacingLeft);
+
+			switch ((StandardAnims)currentAnim)
+			{
+				case StandardAnims.Idle:
+					if (Input.Up)
+					{
+						if (advance) SwitchTo(StandardAnims.JumpAdv);
+						else if (retreat) SwitchTo(StandardAnims.JumpRet);
+						else SwitchTo(StandardAnims.JumpUp);
+					}
+					else if (advance) SwitchTo(StandardAnims.Advance);
+					else if (retreat) SwitchTo(StandardAnims.Retreat);
+					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					break;
+				case StandardAnims.Advance:
+					if (!advance) SwitchTo(StandardAnims.Idle);
+					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					break;
+				case StandardAnims.Retreat:
+					if (!retreat) SwitchTo(StandardAnims.Idle);
+					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					break;
+				case StandardAnims.Turn:
+					SwitchTo(StandardAnims.Idle);
+					break;
+				case StandardAnims.CrouchIn:
+					SwitchTo(StandardAnims.Crouch);
+					break;
+				case StandardAnims.Crouch:
+					if (!Input.Down) SwitchTo(StandardAnims.CrouchOut);
+					break;
+				case StandardAnims.CrouchOut:
+					SwitchTo(StandardAnims.Idle);
+					break;
+				default:
+					{
+						if (animation.ContainsKey("cancelTo"))
+						{
+							var cancelTos = ((List<object>)animation["cancelTo"]);
+							if (Input.A && cancelTos[1] != null)
+								SwitchTo(cancelTos[1]);
+							else if (Input.B && cancelTos[2] != null)
+								SwitchTo(cancelTos[2]);
+							else if (Input.C && cancelTos[3] != null)
+								SwitchTo(cancelTos[3]);
+							else if (Input.D && cancelTos[4] != null)
+								SwitchTo(cancelTos[4]);
+							else if (Input.E && cancelTos[5] != null)
+								SwitchTo(cancelTos[5]);
+							else if (Input.F && cancelTos[6] != null)
+								SwitchTo(cancelTos[6]);
+							else if (advance && cancelTos[7] != null)
+								SwitchTo(cancelTos[7]);
+							else if (retreat && cancelTos[8] != null)
+								SwitchTo(cancelTos[8]);
+							else if (Input.Up && cancelTos[9] != null)
+								SwitchTo(cancelTos[9]);
+							else if (Input.Down && cancelTos[10] != null)
+								SwitchTo(cancelTos[10]);
+							else if (!Input.Anything && cancelTos[0] != null)
+								SwitchTo(cancelTos[0]);
+						}
+						break;
+					}
+			}
 		}
 
 		public void Update()
@@ -205,74 +391,9 @@ namespace Kafe
 
 			currentFrame++;
 			if (currentFrame >= totalFrames)
-			{
-				if (animation["fallTo"] is List<object>)
-				{
-					var fallTos = ((List<object>)animation["fallTo"]);
-					if (EditMode)
-					{
-						if (fallTos[0] != null)
-							SwitchTo(fallTos[0]);
-					}
-					else
-					{
-						if (Input.A && fallTos[1] != null)
-							SwitchTo(fallTos[1]);
-						else if (Input.B && fallTos[2] != null)
-							SwitchTo(fallTos[2]);
-						else if (Input.C && fallTos[3] != null)
-							SwitchTo(fallTos[3]);
-						else if (Input.D && fallTos[4] != null)
-							SwitchTo(fallTos[4]);
-						else if (Input.E && fallTos[5] != null)
-							SwitchTo(fallTos[5]);
-						else if (Input.F && fallTos[6] != null)
-							SwitchTo(fallTos[6]);
-						else if (advance && fallTos[7] != null)
-							SwitchTo(fallTos[7]);
-						else if (retreat && fallTos[8] != null)
-							SwitchTo(fallTos[8]);
-						else if (Input.Up && fallTos[9] != null)
-							SwitchTo(fallTos[10]);
-						else if (Input.Down && fallTos[9] != null)
-							SwitchTo(fallTos[10]);
-						else if (fallTos[0] != null)
-							SwitchTo(fallTos[0]);
-					}
-				}
-				else
-					SwitchTo(animation["fallTo"]);
-			}
+				DecideNextAnim();
 
-			if (!EditMode)
-			{
-				if (animation.ContainsKey("cancelTo"))
-				{
-					var cancelTos = ((List<object>)animation["cancelTo"]);
-					if (Input.A && cancelTos[1] != null)
-						SwitchTo(cancelTos[1]);
-					else if (Input.B && cancelTos[2] != null)
-						SwitchTo(cancelTos[2]);
-					else if (Input.C && cancelTos[3] != null)
-						SwitchTo(cancelTos[3]);
-					else if (Input.D && cancelTos[4] != null)
-						SwitchTo(cancelTos[4]);
-					else if (Input.E && cancelTos[5] != null)
-						SwitchTo(cancelTos[5]);
-					else if (Input.F && cancelTos[6] != null)
-						SwitchTo(cancelTos[6]);
-					else if (advance && cancelTos[7] != null)
-						SwitchTo(cancelTos[7]);
-					else if (retreat && cancelTos[8] != null)
-						SwitchTo(cancelTos[8]);
-					else if (Input.Up && cancelTos[9] != null)
-						SwitchTo(cancelTos[9]);
-					else if (Input.Down && cancelTos[10] != null)
-						SwitchTo(cancelTos[10]);
-					else if (!Input.Anything && cancelTos[0] != null)
-						SwitchTo(cancelTos[0]);
-				}
-			}
+			DecideCancelAnim();
 
 			if (currentFrame >= frames.Count)
 				currentFrame = 0;
@@ -284,12 +405,8 @@ namespace Kafe
 				Velocity += new Vector2((float)(double)impulse[0], (float)(double)impulse[1]);
 			}
 
-			if (currentAnim == 0)
-			{
+			if (currentAnim == StandardAnims.Idle)
 				Velocity = new Vector2(0, Velocity.Y); //grind to a halt
-				if (Opponent != null && !EditMode)
-					FacingLeft = (Position.X > Opponent.Position.X);
-			}
 
 			Position = new Vector2(Position.X, Position.Y + Velocity.Y);
 			if (Position.Y < Kafe.Ground)
@@ -375,7 +492,9 @@ namespace Kafe
 			if (EditMode)
 			{
 				var fallTo0 = default(object);
-				if (animation["fallTo"] is double)
+				if (!animation.ContainsKey("fallTo"))
+					fallTo0 = -1.0;
+				else if (animation["fallTo"] is double)
 					fallTo0 = (double)animation["fallTo"];
 				else if (animation["fallTo"] is string)
 					fallTo0 = (string)animation["fallTo"];
@@ -406,10 +525,20 @@ namespace Kafe
 					fallTo = string.Format("{0} \"{1}\"", fallToI, fallToA["name"]);
 				}
 				Text.Draw(batch, 0,
-					string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\nfall to {5}",
-					currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, fallTo),
+					string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\nfall to {5}\noffset {6}",
+					currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, fallTo, CelOffset),
 					2, 2);
 			}
+		}
+
+		public void HandleOffsetEdit()
+		{
+			var offset = ((List<object>)frames[currentFrame]["offset"]);
+			if (Input.TrgUp) offset[1] = (double)offset[1] + 1;
+			else if (Input.TrgDown) offset[1] = (double)offset[1] - 1;
+			else if (Input.TrgLeft) offset[0] = (double)offset[0] - 1;
+			else if (Input.TrgRight) offset[0] = (double)offset[0] + 1;
+			CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
 		}
 	}
 }

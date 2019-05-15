@@ -12,8 +12,10 @@ namespace Kafe
 		public Character Subject { get; set; }
 		private FileSystemWatcher watcher;
 		private string topMessage = string.Empty;
-		private string keyScrollerText = "(S)tep anim   (C)enter   (B)oxes   up/down cycle animations";
+		private string keyScrollerText = "Q+up/down to cycle anims   W to step anim   E to center   R to toggle boxes   Tab to toggle auto-anim   `+left/right to move camera";
 		private int keyScroller = Kafe.ScreenWidth + 8;
+		private bool stepMode = true;
+		private int timer = 0;
 
 		public Editor(string file, string charFile) : base(file)
 		{
@@ -72,20 +74,60 @@ namespace Kafe
 		{
 			if (Subject != null)
 			{
-				if (Input.WasJustReleased(Keys.S))
+				if (!stepMode)
+				{
+					timer += (int)gameTime.ElapsedGameTime.Milliseconds;
+					if (timer > Kafe.Speed)
+					{
+						timer = 0;
+						Subject.Update();
+					}
+				}
+
+				if (Input.WasJustReleased(Keys.Tab))
+					stepMode = !stepMode;
+				if (Input.IsHeld(Keys.Q))
+				{
+					if (Input.WasJustReleased(Keys.Down))
+						Subject.CycleAnims(1);
+					else if (Input.WasJustReleased(Keys.Up))
+						Subject.CycleAnims(-1);
+				}
+				if (Input.WasJustReleased(Keys.W))
+				{
+					stepMode = true;
 					Subject.Update();
-				if (Input.WasJustReleased(Keys.C))
+				}
+
+				if (Input.WasJustReleased(Keys.E))
 					Subject.Position = new Vector2(Kafe.ScreenWidth / 2, Kafe.Ground);
-				if (Input.WasJustReleased(Keys.B))
+				if (Input.WasJustReleased(Keys.R))
 					Subject.ShowBoxes = !Subject.ShowBoxes;
-				if (Input.WasJustReleased(Keys.Down))
-					Subject.CycleAnims(1);
-				if (Input.WasJustReleased(Keys.Up))
-					Subject.CycleAnims(-1);
+				
 				if (Input.WasJustReleased(Keys.OemPlus))
-					Subject.ColorSwap++;
-				if (Input.WasJustReleased(Keys.OemMinus) && Subject.ColorSwap > 0)
+					Subject.ColorSwap++;				
+				else if (Input.WasJustReleased(Keys.OemMinus) && Subject.ColorSwap > 0)
 					Subject.ColorSwap--;
+				
+				if (Input.IsHeld(Keys.T))
+					Subject.HandleOffsetEdit();
+
+				if (Input.IsHeld(Keys.OemTilde))
+				{
+					var shift = Input.IsHeld(Keys.LeftControl) ? 16 : 8;
+					if (Input.IsHeld(Keys.LeftShift))
+					{
+						if (Input.WasJustReleased(Keys.Left)) Kafe.Camera.X -= shift;
+						if (Input.WasJustReleased(Keys.Right)) Kafe.Camera.X += shift;
+					}
+					else
+					{
+						if (Input.IsHeld(Keys.Left)) Kafe.Camera.X -= shift;
+						if (Input.IsHeld(Keys.Right)) Kafe.Camera.X += shift;
+					}
+					Kafe.Me.Window.Title = Kafe.Camera.X.ToString();
+				}
+
 			}
 			keyScroller -= gameTime.ElapsedGameTime.Milliseconds / 10;
 			if (keyScroller < 0 - (keyScrollerText.Length * 8))

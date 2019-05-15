@@ -60,10 +60,10 @@ namespace Kafe
 			ClutEffect = GetEffect("clut");
 
 			var felicia = new Character("felicia.json", 3);
-			var sakura = new Character("felicia.json", 1);
+			var sakura = new Character("sakura.json", 1);
 
 			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);
-			var arena = new Editor("locales\\ryu_street.json", "felicia.json");
+			var arena = new Editor("locales\\ryu_street.json", "sakura.json");
 			Components.Add(arena);
 		}
 
@@ -75,8 +75,6 @@ namespace Kafe
 		{
 			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
 				Exit();
-			Window.Title = Camera.X.ToString();
-
 			base.Update(gameTime);
 		}
 
