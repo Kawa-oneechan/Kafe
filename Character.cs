@@ -320,9 +320,24 @@ namespace Kafe
 				Velocity += new Vector2(0.5f, 0);
 		}
 
+		public void PreDraw()
+		{
+			posX = (int)Position.X;
+			posY = (int)(Position.Y - CelOffset.Y);
+			if (!FacingLeft)
+			{
+				posX -= (int)CelOffset.X;
+			}
+			else
+			{
+				posX += (int)CelOffset.X;
+				posX -= Image.Width;
+			}
+		}
+
 		public void DrawShadow(SpriteBatch batch)
 		{
-			batch.Draw(shadow, new Vector2(Position.X - 32, Kafe.Ground - 4), null, Color.White, 0.0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0.0f);
+			batch.Draw(shadow, new Rectangle(posX, Kafe.Ground - 4, Image.Width, 8), null, Color.White);
 		}
 
 		public void Draw(SpriteBatch batch)
@@ -338,21 +353,7 @@ namespace Kafe
 			else
 				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);
 
-			posX = (int)Position.X;
-			posY = (int)(Position.Y - CelOffset.Y);
-			var fx = SpriteEffects.None;
-			if (!FacingLeft)
-			{
-				posX -= (int)CelOffset.X;
-			}
-			else
-			{
-				posX += (int)CelOffset.X;
-				posX -= Image.Width;
-				fx = SpriteEffects.FlipHorizontally;
-			}
-
-			batch.Draw(sheet, new Vector2(posX, posY), Image, Color.White, 0.0f, Vector2.Zero, 1.0f, fx, 0.0f);
+			batch.Draw(sheet, new Vector2(posX, posY), Image, Color.White, 0.0f, Vector2.Zero, 1.0f, FacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0.0f);
 			batch.End();
 		}
 

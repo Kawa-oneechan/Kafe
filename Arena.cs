@@ -40,7 +40,10 @@ namespace Kafe
 			var batch = Kafe.SpriteBatch;
 			batch.Begin();
 			foreach (var c in Characters)
+			{
+				c.PreDraw();
 				c.DrawShadow(batch);
+			}
 			batch.End();
 			foreach (var c in Characters)
 				c.Draw(batch);

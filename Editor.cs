@@ -98,6 +98,7 @@ namespace Kafe
 			var batch = Kafe.SpriteBatch;
 			if (Subject != null)
 			{
+				Subject.PreDraw();
 				batch.Begin();
 				Subject.DrawShadow(batch);
 				batch.End();

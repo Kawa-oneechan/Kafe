@@ -63,7 +63,7 @@ namespace Kafe
 			var sakura = new Character("felicia.json", 1);
 
 			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);
-			var arena = new Editor("locales\\ayako_disco.json", "felicia.json");
+			var arena = new Editor("locales\\ryu_street.json", "felicia.json");
 			Components.Add(arena);
 		}
 
