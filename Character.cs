@@ -66,6 +66,8 @@ namespace Kafe
 		private List<bool> boxTypes;
 
 		private static Texture2D shadow, editGreebles;
+		private int editBox;
+		private string copiedBoxes;
 
 		public Rectangle Image { get; set; }
 		public int ColorSwap { get; set; }
@@ -535,7 +537,7 @@ namespace Kafe
 				{
 					var box = boxes[i];
 					batch.Draw(editGreebles, new Rectangle((int)(Position.X + box.X), (int)(Position.Y + box.Y), box.Width, box.Height),
-						src, boxTypes[i] ? Color.Blue : Color.Red);
+						src, i == editBox ? (boxTypes[i] ? Color.CornflowerBlue : Color.Salmon) : boxTypes[i] ? Color.Blue : Color.Red);
 				}
 			}
 
@@ -603,6 +605,117 @@ namespace Kafe
 				else if (Input.TrgLeft) offset[0] = (double)offset[0] - 1;
 				else if (Input.TrgRight) offset[0] = (double)offset[0] + 1;
 				CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
+			}
+		}
+
+		public void EnsureBoxesExist()
+		{
+			var cF = frames[currentFrame];
+			if (!cF.ContainsKey("boxes"))
+			{
+				cF["boxes"] = new List<object>();
+				if (this.boxes.Count > 0)
+				{
+					//Copy currently active set
+					for (var i = 0; i < this.boxes.Count; i++)
+					{
+						var b = this.boxes[i];
+						((List<object>)cF["boxes"]).Add(new List<object>() { boxTypes[i], (double)b.X, (double)b.Y, (double)b.Width, (double)b.Height });
+					}
+				}
+			}
+		}
+
+		public void HandleBoxEdit()
+		{
+			var cF = frames[currentFrame];
+
+			if (Input.WasJustReleased(Keys.V) && !string.IsNullOrWhiteSpace(copiedBoxes))
+			{
+				cF["boxes"] = Json5.Parse(copiedBoxes);
+				SetupImage();
+				return;
+			}
+			else if (Input.WasJustReleased(Keys.C) && cF.ContainsKey("boxes"))
+			{
+				copiedBoxes = cF["boxes"].Stringify();
+				System.IO.File.WriteAllText("boxes.json", copiedBoxes); //consider having a full frame save key
+				return;
+			}
+			else if (Input.WasJustReleased(Keys.X) && cF.ContainsKey("boxes"))
+			{
+				cF.Remove("boxes");
+				SetupImage();
+				return;
+			}
+
+			if (!cF.ContainsKey("boxes"))
+				return;
+
+			var boxes = cF["boxes"] as List<object>;
+			if (Input.WasJustReleased(Keys.Insert)) //add box
+			{
+				((List<object>)cF["boxes"]).Add(new List<object>() { true, 0.0, -8.0, 8.0, 8.0 });
+				SetupImage();
+			}
+			if (Input.WasJustReleased(Keys.Delete))
+			{
+				boxes.RemoveAt(editBox);
+				if (editBox >= boxes.Count)
+					editBox--;
+				if (boxes.Count == 0)
+					cF.Remove("boxes");
+				SetupImage();
+			}
+			else if (Input.WasJustReleased(Keys.PageUp))
+			{
+				editBox++;
+				if (editBox >= this.boxes.Count)
+					editBox = 0;
+			}
+			else if (Input.WasJustReleased(Keys.PageDown))
+			{
+				if (editBox == 0)
+					editBox = this.boxes.Count;
+				editBox--;
+			}
+
+			if (boxes == null)
+				return;
+
+			var rect = ((List<object>)boxes[editBox]);
+
+			if (Input.WasJustReleased(Keys.Up))
+			{
+				if (Input.IsHeld(Keys.RightShift))
+					rect[4] = (double)rect[4] - 1;
+				else
+					rect[2] = (double)rect[2] - 1;
+				SetupImage();
+			}
+			else if (Input.WasJustReleased(Keys.Down))
+			{
+				if (Input.IsHeld(Keys.RightShift))
+					rect[4] = (double)rect[4] + 1;
+				else
+					rect[2] = (double)rect[2] + 1;
+				SetupImage();
+			}
+			else if (Input.WasJustReleased(Keys.Left))
+			{
+				if (Input.IsHeld(Keys.RightShift))
+					rect[3] = (double)rect[3] - 1;
+				else
+					rect[1] = (double)rect[1] - 1;
+				SetupImage();
+			}
+			else if (Input.WasJustReleased(Keys.Right))
+			{
+				if (Input.IsHeld(Keys.RightShift))
+					rect[3] = (double)rect[3] + 1;
+				else
+					rect[1] = (double)rect[1] + 1;
+				SetupImage();
 			}
 		}
 	}

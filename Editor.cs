@@ -112,6 +112,8 @@ namespace Kafe
 				
 				if (Input.IsHeld(Keys.LeftAlt))
 					Subject.HandleOffsetEdit();
+				else if (Input.IsHeld(Keys.RightAlt))
+					Subject.HandleBoxEdit();
 
 				if (Input.IsHeld(Keys.OemTilde))
 				{
