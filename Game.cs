@@ -21,7 +21,7 @@ namespace Kafe
 		public const int ScreenWidth = 384, ScreenHeight = 224;
 		public const int Scale = 2;
 		public const int CrtWidth = ScreenWidth * Scale, CrtHeight = ScreenHeight * 2;
-		public const int Speed = 45;
+		public const int Speed = 10;
 
 		public const int Ground = 202, LeftStart = 300, RightStart = 470;
 		public static Vector2 Camera;
@@ -59,7 +59,7 @@ namespace Kafe
 
 			ClutEffect = GetEffect("clut");
 
-			var felicia = new Character("felicia.json", 3);
+			//var felicia = new Character("felicia.json", 3);
 			var sakura = new Character("sakura.json", 1);
 
 			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);

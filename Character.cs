@@ -61,8 +61,11 @@ namespace Kafe
 		private StandardAnims currentAnim;
 		private int currentFrame, totalFrames;
 		private int posX, posY;
+		//keep these in sync yo
+		private List<Rectangle> boxes;
+		private List<bool> boxTypes;
 
-		private static Texture2D shadow, square;
+		private static Texture2D shadow, editGreebles;
 
 		public Rectangle Image { get; set; }
 		public int ColorSwap { get; set; }
@@ -70,6 +73,7 @@ namespace Kafe
 		public Vector2 CelOffset { get; set; }
 		public Vector2 Velocity { get; set; }
 		public bool FacingLeft { get; set; }
+		public int FrameDelay { get; set; }
 		public Character Opponent { get; set; }
 
 		public bool EditMode { get; set; }
@@ -79,8 +83,11 @@ namespace Kafe
 		{
 			if (shadow == null)
 				shadow = Mix.GetTexture("shadow");
-			if (square == null)
-				square = Mix.GetTexture("square");
+			if (editGreebles == null)
+				editGreebles = Mix.GetTexture("editor");
+
+			boxes = new List<Rectangle>();
+			boxTypes = new List<bool>();
 
 			Reload(jsonFile, palIndex, false);
 		}
@@ -89,6 +96,14 @@ namespace Kafe
 		{
 			json = Mix.GetJson("fighters\\" + jsonFile, false) as JsonObj;
 			var baseName = json["base"] as string;
+
+			var keys = new string[json.Keys.Count];
+			json.Keys.CopyTo(keys, 0);
+			foreach (var key in keys)
+			{
+				if (json[key] is string && ((string)json[key]).StartsWith("import://"))
+					json[key] = Mix.GetJson("fighters\\" + ((string)json[key]).Substring(9));
+			}
 
 			if (sheets.ContainsKey(baseName) && !refresh)
 			{
@@ -152,14 +167,43 @@ namespace Kafe
 				if (f is JsonObj)
 					frames.Add((JsonObj)f);
 			totalFrames = frames.Count;
+			boxes.Clear();
+			boxTypes.Clear();
 		}
 
 		public void SetupImage()
 		{
-			var image = ((List<object>)frames[currentFrame]["image"]);
-			var offset = ((List<object>)frames[currentFrame]["offset"]);
-			Image = new Rectangle((int)(double)image[0], (int)(double)image[1], (int)(double)image[2], (int)(double)image[3]);
-			CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
+			var cF = frames[currentFrame];
+			if (cF.ContainsKey("img"))
+			{
+				var img = ((List<object>)cF["img"]);
+				var spriteIndex = (int)(double)img[0];
+				var image = (List<object>)((List<object>)json["sprites"])[spriteIndex];
+				Image = new Rectangle((int)(double)image[0], (int)(double)image[1], (int)(double)image[2], (int)(double)image[3]);
+				CelOffset = new Vector2((int)(double)img[1], (int)(double)img[2]);
+				FrameDelay = (int)(double)img[3];
+
+				if (cF.ContainsKey("boxes"))
+				{
+					boxes.Clear();
+					boxTypes.Clear();
+					foreach (var b in (List<object>)cF["boxes"])
+					{
+						var box = (List<object>)b;
+						boxTypes.Add((bool)box[0]);
+						boxes.Add(new Rectangle((int)(double)box[1], (int)(double)box[2], (int)(double)box[3], (int)(double)box[4]));
+					}
+				}
+			}
+			else
+			{
+				var image = ((List<object>)cF["image"]);
+				var offset = ((List<object>)cF["offset"]);
+				Image = new Rectangle((int)(double)image[0], (int)(double)image[1], (int)(double)image[2], (int)(double)image[3]);
+				CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
+				FrameDelay = 5;
+
+			}
 		}
 
 		private void SwitchTo(object anim)
@@ -389,20 +433,22 @@ namespace Kafe
 			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
 			var retreat = (Input.Left && !FacingLeft) || (Input.Right && FacingLeft);
 
-			currentFrame++;
-			if (currentFrame >= totalFrames)
-				DecideNextAnim();
-
-			DecideCancelAnim();
-
-			if (currentFrame >= frames.Count)
-				currentFrame = 0;
-
-			SetupImage();
-			if (frames[currentFrame].ContainsKey("impulse"))
+			if (FrameDelay-- <= 0)
 			{
-				var impulse = ((List<object>)frames[currentFrame]["impulse"]);
-				Velocity += new Vector2((float)(double)impulse[0], (float)(double)impulse[1]);
+				currentFrame++;
+				if (currentFrame >= totalFrames)
+					DecideNextAnim();
+				DecideCancelAnim();
+
+				if (currentFrame >= frames.Count)
+					currentFrame = 0;
+
+				SetupImage();
+				if (frames[currentFrame].ContainsKey("impulse"))
+				{
+					var impulse = ((List<object>)frames[currentFrame]["impulse"]);
+					Velocity += new Vector2((float)(double)impulse[0], (float)(double)impulse[1]);
+				}
 			}
 
 			if (currentAnim == StandardAnims.Idle)
@@ -439,16 +485,15 @@ namespace Kafe
 
 		public void PreDraw()
 		{
-			posX = (int)Position.X;
-			posY = (int)(Position.Y - CelOffset.Y);
+			posX = (int)Position.X - (Image.Width / 2);
+			posY = (int)(Position.Y - Image.Height - CelOffset.Y);
 			if (!FacingLeft)
 			{
-				posX -= (int)CelOffset.X;
+				posX += (int)CelOffset.X;
 			}
 			else
 			{
-				posX += (int)CelOffset.X;
-				posX -= Image.Width;
+				posX -= (int)CelOffset.X;
 			}
 		}
 
@@ -476,19 +521,19 @@ namespace Kafe
 
 		public void DrawEditStuff(SpriteBatch batch)
 		{
-			if (ShowBoxes && frames[currentFrame].ContainsKey("boxes"))
+			if (ShowBoxes)
 			{
 				var src = new Rectangle(0, 0, 32, 32);
-				foreach (var box in ((List<object>)frames[currentFrame]["boxes"]))
+				for (var i = 0; i < boxes.Count; i++)
 				{
-					if (!(box is JsonObj))
-						continue;
-					var rect = ((List<object>)((JsonObj)box)["rect"]);
-					batch.Draw(square, new Rectangle((int)(double)rect[0] + posX, (int)(double)rect[1] + posY, (int)(double)rect[2], (int)(double)rect[3]),
-						src, ((bool)((JsonObj)box)["hit"]) ? Color.Blue : Color.Red);
+					var box = boxes[i];
+					batch.Draw(editGreebles, new Rectangle((int)(Position.X + box.X), (int)(Position.Y + box.Y), box.Width, box.Height),
+						src, boxTypes[i] ? Color.Blue : Color.Red);
 				}
 			}
 
+			batch.Draw(editGreebles, Position - new Vector2(4), new Rectangle(132, 0, 9, 9), Color.Yellow);
+			
 			if (EditMode)
 			{
 				var fallTo0 = default(object);
@@ -526,19 +571,32 @@ namespace Kafe
 				}
 				Text.Draw(batch, 0,
 					string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\nfall to {5}\noffset {6}",
-					currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, fallTo, CelOffset),
+					(int)currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, fallTo, CelOffset),
 					2, 2);
 			}
 		}
 
 		public void HandleOffsetEdit()
 		{
-			var offset = ((List<object>)frames[currentFrame]["offset"]);
-			if (Input.TrgUp) offset[1] = (double)offset[1] + 1;
-			else if (Input.TrgDown) offset[1] = (double)offset[1] - 1;
-			else if (Input.TrgLeft) offset[0] = (double)offset[0] - 1;
-			else if (Input.TrgRight) offset[0] = (double)offset[0] + 1;
-			CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
+			var cF = frames[currentFrame];
+			if (cF.ContainsKey("img"))
+			{
+				var offset = ((List<object>)cF["img"]);
+				if (Input.TrgUp) offset[2] = (double)offset[2] + 1;
+				else if (Input.TrgDown) offset[2] = (double)offset[2] - 1;
+				else if (Input.TrgLeft) offset[1] = (double)offset[1] - 1;
+				else if (Input.TrgRight) offset[1] = (double)offset[1] + 1;
+				CelOffset = new Vector2((int)(double)offset[1], (int)(double)offset[2]);
+			}
+			else
+			{
+				var offset = ((List<object>)cF["offset"]);
+				if (Input.TrgUp) offset[1] = (double)offset[1] + 1;
+				else if (Input.TrgDown) offset[1] = (double)offset[1] - 1;
+				else if (Input.TrgLeft) offset[0] = (double)offset[0] - 1;
+				else if (Input.TrgRight) offset[0] = (double)offset[0] + 1;
+				CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
+			}
 		}
 	}
 }

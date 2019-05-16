@@ -12,7 +12,7 @@ namespace Kafe
 		public Character Subject { get; set; }
 		private FileSystemWatcher watcher;
 		private string topMessage = string.Empty;
-		private string keyScrollerText = "Q+up/down to cycle anims   W to step anim   E to center   R to toggle boxes   Tab to toggle auto-anim   `+left/right to move camera";
+		private string keyScrollerText = "Q+up/down to cycle anims   W to step anim   alt-arrows to move offset   E to center   R to toggle boxes   Tab to toggle auto-anim   `+left/right to move camera";
 		private int keyScroller = Kafe.ScreenWidth + 8;
 		private bool stepMode = true;
 		private int timer = 0;
@@ -96,6 +96,7 @@ namespace Kafe
 				if (Input.WasJustReleased(Keys.W))
 				{
 					stepMode = true;
+					Subject.FrameDelay = 0;
 					Subject.Update();
 				}
 
@@ -109,7 +110,7 @@ namespace Kafe
 				else if (Input.WasJustReleased(Keys.OemMinus) && Subject.ColorSwap > 0)
 					Subject.ColorSwap--;
 				
-				if (Input.IsHeld(Keys.T))
+				if (Input.IsHeld(Keys.LeftAlt))
 					Subject.HandleOffsetEdit();
 
 				if (Input.IsHeld(Keys.OemTilde))
