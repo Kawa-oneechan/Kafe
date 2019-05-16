@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -242,7 +242,7 @@ namespace Kafe
 
 		public void CycleAnims(int direction)
 		{
-			var nextAnim = (int)currentAnim + direction;
+			var nextAnim = (int)currentAnim - direction;
 			if (nextAnim == animations.Count)
 				nextAnim = 0;
 			else if (nextAnim == -1)
@@ -449,9 +449,14 @@ namespace Kafe
 					var impulse = ((List<object>)frames[currentFrame]["impulse"]);
 					Velocity += new Vector2((float)(double)impulse[0], (float)(double)impulse[1]);
 				}
+				else if (frames[currentFrame].ContainsKey("velocity"))
+				{
+					var velocity = ((List<object>)frames[currentFrame]["velocity"]);
+					Velocity = new Vector2((float)(double)velocity[0], (float)(double)velocity[1]);
+				}
 			}
 
-			if (currentAnim == StandardAnims.Idle)
+			if (animation.ContainsKey("halt") && (bool)animation["halt"])
 				Velocity = new Vector2(0, Velocity.Y); //grind to a halt
 
 			Position = new Vector2(Position.X, Position.Y + Velocity.Y);
@@ -469,6 +474,7 @@ namespace Kafe
 			}
 
 			Position = new Vector2(Position.X + (FacingLeft ? -Velocity.X : Velocity.X), Position.Y);
+			/*
 			if (Velocity.X > 5)
 				Velocity -= new Vector2(2.5f, 0);
 			else if (Velocity.X > 1)
@@ -481,6 +487,7 @@ namespace Kafe
 				Velocity += new Vector2(1, 0);
 			else if (Velocity.X < 0)
 				Velocity += new Vector2(0.5f, 0);
+			*/
 		}
 
 		public void PreDraw()
