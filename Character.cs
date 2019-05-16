@@ -542,47 +542,55 @@ namespace Kafe
 			}
 
 			batch.Draw(editGreebles, Position - new Vector2(4), new Rectangle(132, 0, 9, 9), Color.Yellow);
-			
-			if (EditMode)
+
+			var fallTo0 = default(object);
+			if (!animation.ContainsKey("fallTo"))
+				fallTo0 = -1.0;
+			else if (animation["fallTo"] is double)
+				fallTo0 = (double)animation["fallTo"];
+			else if (animation["fallTo"] is string)
+				fallTo0 = (string)animation["fallTo"];
+			else
+				fallTo0 = ((List<object>)animation["fallTo"])[0];
+			var fallToI = 0;
+			if (fallTo0 == null)
+				fallToI = 0;
+			else if (fallTo0 is double)
+				fallToI = (int)(double)fallTo0;
+			else if (fallTo0 is string)
 			{
-				var fallTo0 = default(object);
-				if (!animation.ContainsKey("fallTo"))
-					fallTo0 = -1.0;
-				else if (animation["fallTo"] is double)
-					fallTo0 = (double)animation["fallTo"];
-				else if (animation["fallTo"] is string)
-					fallTo0 = (string)animation["fallTo"];
-				else
-					fallTo0 = ((List<object>)animation["fallTo"])[0];
-				var fallToI = 0;
-				if (fallTo0 == null)
-					fallToI = 0;
-				else if (fallTo0 is double)
-					fallToI = (int)(double)fallTo0;
-				else if (fallTo0 is string)
+				for (var i = 0; i < animations.Count; i++)
 				{
-					for (var i = 0; i < animations.Count; i++)
+					if ((string)animations[i]["name"] == (string)fallTo0)
 					{
-						if ((string)animations[i]["name"] == (string)fallTo0)
-						{
-							fallToI = i;
-							break;
-						}
+						fallToI = i;
+						break;
 					}
 				}
-				var fallTo = "???";
-				if (fallToI == -1)
-					fallTo = "same";
-				else
-				{
-					var fallToA = animations[fallToI] as JsonObj;
-					fallTo = string.Format("{0} \"{1}\"", fallToI, fallToA["name"]);
-				}
-				Text.Draw(batch, 0,
-					string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\nfall to {5}\noffset {6}",
-					(int)currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, fallTo, CelOffset),
-					2, 2);
 			}
+			var fallTo = "???";
+			if (fallToI == -1)
+				fallTo = "same";
+			else
+			{
+				var fallToA = animations[fallToI] as JsonObj;
+				fallTo = string.Format("{0} \"{1}\"", fallToI, fallToA["name"]);
+			}
+			var info = string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\nfall to {5}\noffset {6}",
+				(int)currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, fallTo, CelOffset);
+			if (Input.IsHeld(Keys.RightAlt))
+			{
+				if (!frames[currentFrame].ContainsKey("boxes"))
+					info += "\n|c4|* Using previous boxset *|c0|";
+				else
+					info += "\n";
+				for (var i = 0; i < boxes.Count; i++)
+					info += string.Format("\n|c{0}|{1} {2}", (i == editBox ? 3 : 8), boxes[i], (boxTypes[i] ? 'H' : 'A'));
+				if (!string.IsNullOrWhiteSpace(copiedBoxes))
+					Text.Draw(batch, 2, copiedBoxes, Kafe.ScreenWidth / 2, 2);
+			}
+
+			Text.Draw(batch, 0, info, 2, 2);
 		}
 
 		public void HandleOffsetEdit()
@@ -605,24 +613,6 @@ namespace Kafe
 				else if (Input.TrgLeft) offset[0] = (double)offset[0] - 1;
 				else if (Input.TrgRight) offset[0] = (double)offset[0] + 1;
 				CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
-			}
-		}
-
-		public void EnsureBoxesExist()
-		{
-			var cF = frames[currentFrame];
-			if (!cF.ContainsKey("boxes"))
-			{
-				cF["boxes"] = new List<object>();
-				if (this.boxes.Count > 0)
-				{
-					//Copy currently active set
-					for (var i = 0; i < this.boxes.Count; i++)
-					{
-						var b = this.boxes[i];
-						((List<object>)cF["boxes"]).Add(new List<object>() { boxTypes[i], (double)b.X, (double)b.Y, (double)b.Width, (double)b.Height });
-					}
-				}
 			}
 		}
 

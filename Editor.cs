@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Kawa.Json;
 using Microsoft.Xna.Framework;
@@ -12,8 +12,6 @@ namespace Kafe
 		public Character Subject { get; set; }
 		private FileSystemWatcher watcher;
 		private string topMessage = string.Empty;
-		private string keyScrollerText = "Q+up/down to cycle anims   W to step anim   alt-arrows to move offset   E to center   R to toggle boxes   Tab to toggle auto-anim   `+left/right to move camera";
-		private int keyScroller = Kafe.ScreenWidth + 8;
 		private bool stepMode = true;
 		private int timer = 0;
 
@@ -132,9 +130,6 @@ namespace Kafe
 				}
 
 			}
-			keyScroller -= gameTime.ElapsedGameTime.Milliseconds / 10;
-			if (keyScroller < 0 - (keyScrollerText.Length * 8))
-				keyScroller = Kafe.ScreenWidth + 8;
 			base.Update(gameTime);
 		}
 
@@ -159,8 +154,33 @@ namespace Kafe
 			base.Draw(gameTime);
 			var batch = Kafe.SpriteBatch;
 			batch.Begin();
-			Text.Draw(batch, 1, "Edit mode", 4, Kafe.ScreenHeight - 4 - 24);
-			Text.Draw(batch, 0, keyScrollerText, keyScroller, Kafe.ScreenHeight - 4 - 8);
+
+			if (Input.IsHeld(Keys.LeftAlt))
+			{
+				Text.Draw(batch, 1, "Offset mode", 4, Kafe.ScreenHeight - 4 - 24);
+				Text.Draw(batch, 0, "Arrow keys to shift.", 4 , Kafe.ScreenHeight - 4 - 8);
+			}
+			else if (Input.IsHeld(Keys.RightAlt))
+			{
+				Text.Draw(batch, 1, "Box mode", 4, Kafe.ScreenHeight - 4 - 24 - 8);
+				Text.Draw(batch, 0, "PgUp/Dn to select, Ins/Del to add/remove\nArrows to move, RShift-arrows to size.", 4, Kafe.ScreenHeight - 4 - 8 - 8);
+			}
+			else if (Input.IsHeld(Keys.OemTilde))
+			{
+				Text.Draw(batch, 1, "Scroll mode", 4, Kafe.ScreenHeight - 4 - 24);
+				Text.Draw(batch, 0, "Arrow keys to scroll. Hold Ctrl for large increments, LShift to step.", 4, Kafe.ScreenHeight - 4 - 8);
+			}
+			else if (Input.IsHeld(Keys.Q))
+			{
+				Text.Draw(batch, 1, "Animation mode", 4, Kafe.ScreenHeight - 4 - 24);
+				Text.Draw(batch, 0, "Up/down to switch animations.", 4, Kafe.ScreenHeight - 4 - 8);
+			}
+			else
+			{
+				Text.Draw(batch, 1, "Edit mode", 4, Kafe.ScreenHeight - 4 - 24 - 8);
+				Text.Draw(batch, 0, "Q anim   LAlt offsets   RAlt boxes  ~ scroll\nTab play   W step   E reset   R boxes   +/- colors", 4, Kafe.ScreenHeight - 4 - 8 - 8);
+			}
+
 			if (!string.IsNullOrWhiteSpace(topMessage))
 				Text.Draw(batch, 0, topMessage, 4, 4, Color.Red);
 			batch.End();

@@ -26,6 +26,11 @@ namespace Kafe
 	public static class Text
 	{
 		private static Font[] fonts;
+		private static Color[] colors = new[]
+		{
+			Color.White, Color.Blue, Color.Lime, Color.Cyan, Color.Red, Color.Magenta, Color.Yellow, Color.Gray,
+			Color.DarkGray, Color.Navy, Color.Green, Color.Teal, Color.Maroon, Color.Purple, Color.Brown, Color.DarkGray
+		};
 
 		private static void LoadFonts()
 		{
@@ -57,12 +62,24 @@ namespace Kafe
 			var f = fonts[font];
 			var pos = new Vector2(left, top);
 			text = text.Replace("\r\n", "\n");
-			foreach (var c in text)
+			for (var i = 0; i < text.Length; i++)
 			{
+				var c = text[i];
 				if (c == '\n')
 				{
 					pos = new Vector2(left, pos.Y + f.LineHeight);
 					continue;
+				}
+				if (c == '|' && i < text.Length - 3 && text[i + 3] == '|')
+				{
+
+					switch (text[i + 1])
+					{
+						case 'c':
+							color = colors[int.Parse(text.Substring(i + 2, 1), System.Globalization.NumberStyles.HexNumber)];
+							i += 3;
+							continue;
+					}
 				}
 				var src = new Rectangle((c - 32) * f.Width, 0, f.Widths[c - 32], f.Height);
 				batch.Draw(f.Sheet, pos, src, color.HasValue ? color.Value : Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
