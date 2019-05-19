@@ -18,6 +18,8 @@ namespace Kafe
 		public static Kafe Me { get; private set; }
 		public static Input Input { get; private set; }
 
+		public static LoadingScreen LoadingScreen { get; private set; }
+
 		public const int ScreenWidth = 480, ScreenHeight = 270;
 		public const int Scale = 2;
 		public const int CrtWidth = ScreenWidth * Scale, CrtHeight = ScreenHeight * Scale;
@@ -65,11 +67,13 @@ namespace Kafe
 			ClutEffect = GetEffect("clut");
 
 			//var felicia = new Character("felicia.json", 3);
-			var sakura = new Character("sakura.json", 1);
+			//var sakura = new Character("sakura.json", 1);
 
 			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);
-			var arena = new Editor("locales\\mci_corridor.json", "sakura.json");
-			Components.Add(arena);
+			//var arena = new Editor("locales\\mci_corridor.json", "sakura.json");
+			//Components.Add(arena);
+			Kafe.LoadingScreen = new LoadingScreen(Me);
+			Kafe.LoadingScreen.Start(() => { Components.Add(new Editor("locales\\mci_corridor.json", "sakura.json")); });
 		}
 
 		protected override void UnloadContent()
@@ -93,6 +97,46 @@ namespace Kafe
 			SpriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);
 			SpriteBatch.Draw(rawScreen, new Rectangle(0, 0, CrtWidth, CrtHeight), new Rectangle(0, 0, ScreenWidth, ScreenHeight), Color.White);
 			SpriteBatch.End();
+		}
+	}
+
+	public class LoadingScreen : DrawableGameComponent
+	{
+		private Action task;
+		private int state = 0;
+
+		public LoadingScreen(Game game) : base(game) { }
+
+		public void Start(Action task)
+		{
+			this.task = task;
+			state = 0;
+			Kafe.Me.Components.Add(this);
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			base.Update(gameTime);
+			if (state == 1 && task != null)
+			{
+				task();
+				task = null;
+				state++;
+			}
+			else if (state == 2)
+			{
+				Kafe.Me.Components.Remove(this);
+			}
+		}
+
+		public override void Draw(GameTime gameTime)
+		{
+			Kafe.GfxDev.Clear(Color.Black);
+			Kafe.SpriteBatch.Begin();
+			Text.Draw(Kafe.SpriteBatch, 1, "Loading...", 8, Kafe.ScreenHeight - 24);
+			Kafe.SpriteBatch.End();
+			if (state == 0)
+				state++;
 		}
 	}
 
