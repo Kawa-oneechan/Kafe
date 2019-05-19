@@ -17,7 +17,7 @@ namespace Kafe
 
 		public Editor(string file, string charFile) : base(file)
 		{
-			Kafe.Camera.Y = 16;
+			Kafe.Camera.Y = 0;
 			try
 			{
 				var path = Path.Combine("data", "fighters", charFile);

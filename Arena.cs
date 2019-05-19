@@ -5,20 +5,18 @@ namespace Kafe
 {
 	class Arena : Background
 	{
-		private const int StartingDistance = 80;
-
 		private int timer = 0;
 		public Character[] Characters { get; set; }
 
 		public Arena(string file, Character left, Character right) : base(file)
 		{
-			left.Position = new Vector2(StartingDistance, Kafe.Ground);
-			right.Position = new Vector2(Kafe.ScreenWidth - StartingDistance, Kafe.Ground);
+			left.Position = new Vector2(Kafe.LeftStart, Kafe.Ground);
+			right.Position = new Vector2(Kafe.ScreenWidth - Kafe.RightStart, Kafe.Ground);
 			right.FacingLeft = true;
 			left.Opponent = right;
 			right.Opponent = left;
 			Characters = new[] { left, right };
-			Kafe.Camera.Y = 16;
+			Kafe.Camera.Y = 0;
 		}
 
 		public override void Update(GameTime gameTime)

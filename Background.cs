@@ -26,6 +26,9 @@ namespace Kafe
 			json = Mix.GetJson(file) as JsonObj;
 			Sheet = Mix.GetTexture("locales\\" + (json["base"] as string));
 			Layers = new List<BackgroundLayer>();
+			Kafe.Ground = json.ContainsKey("ground") ? (int)(double)json["ground"] : 240;
+			Kafe.LeftStart = json.ContainsKey("start") ? (int)(double)((List<object>)json["start"])[0] : 300;
+			Kafe.RightStart = json.ContainsKey("start") ? (int)(double)((List<object>)json["start"])[1] : 470;
 			LeftExtent = 0;
 			RightExtent = 512;
 			if (json.ContainsKey("extent"))
@@ -70,6 +73,7 @@ namespace Kafe
 		public int[] Frames { get; private set; }
 		public int FrameRate { get; private set; }
 		public bool Floor { get; private set; }
+		public int[] FloorVals { get; private set; }
 		public bool IsPlayerLayer { get; private set; }
 		public Background Parent { get; private set; }
 		public string BlendMode { get; private set; }
@@ -115,7 +119,16 @@ namespace Kafe
 			}
 
 			if (json.ContainsKey("floor"))
+			{
 				Floor = (bool)json["floor"];
+				if (json.ContainsKey("floorVals"))
+				{
+					data = ((List<object>)json["floorVals"]);
+					FloorVals = new[] { (int)(double)data[0], (int)(double)data[1] };
+				}
+				else
+					FloorVals = new[] { 128, 128 };
+			}
 
 			Frames = new int[1] { 0 };
 			if (json.ContainsKey("frames"))
@@ -212,7 +225,7 @@ namespace Kafe
 			if (Floor)
 			{
 				var src = new Rectangle(Rect.Left, Rect.Top, Rect.Width, 1);
-				var displacement = (Kafe.Camera.X - Parent.LeftExtent - 128) / 128;
+				var displacement = (Kafe.Camera.X - Parent.LeftExtent - FloorVals[0]) / FloorVals[1];
 				for (var row = 0; row < Rect.Height; row++)
 				{
 					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos, src, Color.White);

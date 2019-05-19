@@ -1,0 +1,16 @@
+{
+	"name": "MCI Corridor",
+	"location": "",
+	"base": "mci_corridor",
+	"extent": [ 0, 320 ],
+	"ground": 240,
+	"layers": [
+		{
+			"origin": [ 0, 0 ],
+			"rect": [ 0, 0, 800, 270 ]
+		},
+		{
+			"fighters": true
+		}
+	]
+}

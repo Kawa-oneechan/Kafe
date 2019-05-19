@@ -4,9 +4,10 @@ float PALETTES : register(c0); //num rows
 float COLORS : register(c1); //num of colors per row
 float INDEX : register(c2); //target row
 
-float4 main(float2 tex : TEXCOORD0) : COLOR
+//float4 main(float2 uv : TEXCOORD0) : COLOR
+float4 main(float4 position : SV_Position, float4 col : COLOR0, float2 uv : TEXCOORD0) : COLOR0
 {
-	float4 pixel = tex2D(s0, tex);
+	float4 pixel = tex2D(s0, uv);
 	float colorIndex, palIndex;
 	
 	if (pixel.a == 0.0) return pixel;
@@ -28,6 +29,6 @@ technique Plain
 {
     pass Pass1
     {
-        PixelShader = compile ps_2_0 main();
+        PixelShader = compile ps_4_0 main();
     }
 }

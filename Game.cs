@@ -18,21 +18,26 @@ namespace Kafe
 		public static Kafe Me { get; private set; }
 		public static Input Input { get; private set; }
 
-		public const int ScreenWidth = 384, ScreenHeight = 224;
+		public const int ScreenWidth = 480, ScreenHeight = 270;
 		public const int Scale = 2;
-		public const int CrtWidth = ScreenWidth * Scale, CrtHeight = ScreenHeight * 2;
+		public const int CrtWidth = ScreenWidth * Scale, CrtHeight = ScreenHeight * Scale;
 		public const int Speed = 10;
 
-		public const int Ground = 202, LeftStart = 300, RightStart = 470;
+		public static int Ground = 240, LeftStart = 300, RightStart = 470;
 		public static Vector2 Camera;
 
 		public Kafe() : base()
 		{
 			Kafe.Me = this;
-			Mix.Initialize();
 			graphics = new GraphicsDeviceManager(this);
 			graphics.PreferredBackBufferWidth = CrtWidth;
 			graphics.PreferredBackBufferHeight = CrtHeight;
+			if (CrtWidth == GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width && CrtHeight == GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height)
+			{
+				Window.IsBorderless = true;
+				Window.Position = new Point(0, 0);
+			}
+			Mix.Initialize();
 			IsMouseVisible = true;
 		}
 
@@ -63,7 +68,7 @@ namespace Kafe
 			var sakura = new Character("sakura.json", 1);
 
 			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);
-			var arena = new Editor("locales\\ryu_street.json", "sakura.json");
+			var arena = new Editor("locales\\mci_corridor.json", "sakura.json");
 			Components.Add(arena);
 		}
 

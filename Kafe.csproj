@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -11,13 +12,14 @@
     <RootNamespace>Kafe</RootNamespace>
     <AssemblyName>Kafe</AssemblyName>
     <FileAlignment>512</FileAlignment>
+    <MonoGamePlatform>Windows</MonoGamePlatform>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\WindowsGL\Debug\</OutputPath>
+    <OutputPath>bin\$(MonoGamePlatform)\$(Platform)\$(Configuration)\</OutputPath>
     <DefineConstants>DEBUG;TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,7 +28,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\WindowsGL\Release\</OutputPath>
+    <OutputPath>bin\$(MonoGamePlatform)\$(Platform)\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -34,6 +36,7 @@
   <PropertyGroup>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <Compile Include="Arena.cs" />
     <Compile Include="Background.cs" />
@@ -53,33 +56,45 @@
     <Compile Include="Text.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="OpenTK">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\MSBuild\..\MonoGame\v3.0\Assemblies\WindowsGL\OpenTK.dll</HintPath>
-    </Reference>
     <Reference Include="MonoGame.Framework">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\MSBuild\..\MonoGame\v3.0\Assemblies\WindowsGL\MonoGame.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Tao.Sdl">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\MSBuild\..\MonoGame\v3.0\Assemblies\WindowsGL\Tao.Sdl.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="data\clut.fx" />
+    <Content Include="data\editor.png" />
+    <Content Include="data\fighters\felicia-pal.png" />
+    <Content Include="data\fighters\felicia.png" />
+    <Content Include="data\fighters\sakura-pal.png" />
+    <Content Include="data\fighters\sakura.png" />
     <Content Include="data\font1.png" />
     <Content Include="data\font2.png" />
     <Content Include="data\font3.png" />
+    <Content Include="data\locales\ayako_disco.png" />
+    <Content Include="data\locales\mci_corridor.png" />
+    <Content Include="data\locales\ryu_street.png" />
+    <Content Include="data\locales\tower_of_arrogance.png" />
+    <Content Include="data\locales\vegas.png" />
+    <Content Include="data\shadow.png" />
     <Content Include="fmodex.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />
-    <Content Include="SDL.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
+    <None Include="data\clut.fxb" />
+    <None Include="data\fighters\felicia.json" />
+    <None Include="data\fighters\sakura.json" />
+    <None Include="data\fighters\sakura_sprites.json" />
     <None Include="data\fonts.json" />
     <None Include="data\keys.json" />
+    <None Include="data\locales\ayako_disco.json" />
+    <None Include="data\locales\mci_corridor.json" />
+    <None Include="data\locales\ryu_street.json" />
+    <None Include="data\locales\tower_of_arrogance.json" />
+    <None Include="data\locales\vegas.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
