@@ -103,28 +103,29 @@ namespace Kafe
 	public class LoadingScreen : DrawableGameComponent
 	{
 		private Action task;
-		private int state = 0;
+		private bool beenDrawn;
 
 		public LoadingScreen(Game game) : base(game) { }
 
 		public void Start(Action task)
 		{
 			this.task = task;
-			state = 0;
+			beenDrawn = false;
 			Kafe.Me.Components.Add(this);
 		}
 
 		public override void Update(GameTime gameTime)
 		{
 			base.Update(gameTime);
-			if (state == 1 && task != null)
+			if (task == null)
+			{
+				Kafe.Me.Components.Remove(this);
+				return;
+			}
+			if (beenDrawn)
 			{
 				task();
 				task = null;
-				state++;
-			}
-			else if (state == 2)
-			{
 				Kafe.Me.Components.Remove(this);
 			}
 		}
@@ -135,8 +136,7 @@ namespace Kafe
 			Kafe.SpriteBatch.Begin();
 			Text.Draw(Kafe.SpriteBatch, 1, "Loading...", 8, Kafe.ScreenHeight - 24);
 			Kafe.SpriteBatch.End();
-			if (state == 0)
-				state++;
+			beenDrawn = true;
 		}
 	}
 
