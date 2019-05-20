@@ -21,6 +21,8 @@ namespace Kafe
 
 		public override void Update(GameTime gameTime)
 		{
+			if (Kafe.Paused)
+				return;
 			timer += (int)gameTime.ElapsedGameTime.Milliseconds;
 			if (timer > Kafe.Speed)
 			{

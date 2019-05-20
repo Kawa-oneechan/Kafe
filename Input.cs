@@ -85,7 +85,6 @@ namespace Kafe
 		{
 			base.Update(gameTime);
 
-			//InputExtensions.Update();
 			Array.Copy(keys, oldKeys, 256);
 
 			keyState = Keyboard.GetState();
@@ -123,6 +122,14 @@ namespace Kafe
 		public static bool IsHeld(Keys key)
 		{
 			return keys[(int)key];
+		}
+
+		public static void Flush()
+		{
+			for (var i = 0; i < 256; i++)
+			{
+				keys[i] = oldKeys[i] = false;
+			}
 		}
 
 		public static void Save()

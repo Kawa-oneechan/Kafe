@@ -70,6 +70,9 @@ namespace Kafe
 
 		public override void Update(GameTime gameTime)
 		{
+			if (Kafe.Paused)
+				return;
+
 			if (Subject != null)
 			{
 				if (!stepMode)
