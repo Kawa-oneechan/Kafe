@@ -45,7 +45,7 @@ namespace Kafe
 		Select,
 	};
 
-	class Character
+	public class Character
 	{
 		private const int PaletteSize = 4;
 

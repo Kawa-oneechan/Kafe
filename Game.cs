@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -7,6 +8,7 @@ namespace Kafe
 {
 	public class Kafe : Game
 	{
+		public string[] Args { get; set; }
 		private RenderTarget2D rawScreen;
 
 		GraphicsDeviceManager graphics;
@@ -17,6 +19,8 @@ namespace Kafe
 		public static GraphicsDevice GfxDev { get; private set; }
 		public static Kafe Me { get; private set; }
 		public static Input Input { get; private set; }
+
+		public static Character[] Characters { get; private set; }
 
 		public const int ScreenWidth = 480, ScreenHeight = 270;
 		public const int Scale = 2;
@@ -71,11 +75,33 @@ namespace Kafe
 			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);
 			//var arena = new Editor("locales\\mci_corridor.json", "sakura.json");
 			//Components.Add(arena);
-			//LoadingScreen.Start(() => { Components.Add(new Editor("locales\\mci_corridor.json", "sakura.json")); });
-			LoadingScreen.Start(() => {
-				Components.Add(new TitleBackground());
-				Components.Add(new TitleScreen());
-			});
+			if (Args.Length >= 3 && Args[0] == "/edit")
+			{
+				LoadingScreen.Start(() =>
+				{
+					Components.Add(new Editor("locales\\" + Args[1] + ".json", Args[2] + ".json"));
+				});
+			}
+			else
+			{
+				LoadingScreen.Start(() =>
+				{
+					var fighters = Mix.GetFilesWithPattern("fighters\\*.json");
+					var fighterList = new List<Character>();
+					foreach (var f in fighters)
+					{
+						var data = Mix.GetStream(f);
+						var first = (char)data.ReadByte();
+						data.Close();
+						if (first != '{')
+							continue;
+						fighterList.Add(new Character(f.Substring(f.IndexOf('\\') + 1), 0));
+					}
+					Kafe.Characters = fighterList.ToArray();
+					Components.Add(new TitleBackground());
+					Components.Add(new TitleScreen());
+				});
+			}
 		}
 
 		protected override void UnloadContent()
@@ -259,10 +285,13 @@ namespace Kafe
 	public static class Program
 	{
 		[STAThread]
-		static void Main()
+		static void Main(string[] args)
 		{
 			using (var game = new Kafe())
+			{
+				game.Args = args;
 				game.Run();
+			}
 		}
 	}
 #endif

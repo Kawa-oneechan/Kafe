@@ -63,38 +63,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="data\clut.fx" />
-    <Content Include="data\editor.png" />
-    <Content Include="data\fighters\felicia-pal.png" />
-    <Content Include="data\fighters\felicia.png" />
-    <Content Include="data\fighters\sakura-pal.png" />
-    <Content Include="data\fighters\sakura.png" />
-    <Content Include="data\font1.png" />
-    <Content Include="data\font2.png" />
-    <Content Include="data\font3.png" />
-    <Content Include="data\locales\ayako_disco.png" />
-    <Content Include="data\locales\mci_corridor.png" />
-    <Content Include="data\locales\ryu_street.png" />
-    <Content Include="data\locales\tower_of_arrogance.png" />
-    <Content Include="data\locales\vegas.png" />
-    <Content Include="data\shadow.png" />
     <Content Include="fmodex.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="data\clut.fxb" />
-    <None Include="data\fighters\felicia.json" />
-    <None Include="data\fighters\sakura.json" />
-    <None Include="data\fighters\sakura_sprites.json" />
-    <None Include="data\fonts.json" />
-    <None Include="data\keys.json" />
-    <None Include="data\locales\ayako_disco.json" />
-    <None Include="data\locales\mci_corridor.json" />
-    <None Include="data\locales\ryu_street.json" />
-    <None Include="data\locales\tower_of_arrogance.json" />
-    <None Include="data\locales\vegas.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

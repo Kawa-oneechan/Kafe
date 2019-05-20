@@ -305,7 +305,7 @@ namespace Kafe
 	class TitleScreen : DrawableGameComponent
 	{
 		private Texture2D titleE, titleF;
-		private int anim;
+		private int anim, selection;
 
 		public TitleScreen() : base(Kafe.Me)
 		{
@@ -322,8 +322,21 @@ namespace Kafe
 			if (Input.WasJustReleased(Keys.Enter))
 			{
 				Kafe.Me.Components.Remove(this);
+				Input.Flush();
+				switch (selection)
+				{
+					case 0: //Story Mode
+						LoadingScreen.Start(() => { Kafe.Me.Components.Add(new CharacterSelect(false)); });
+						break;
+					case 1: //Versus Mode
+						LoadingScreen.Start(() => { Kafe.Me.Components.Add(new CharacterSelect(true)); });
+						break;
+					case 2: //Quit
+						Kafe.ExitConfirm = true;
+						ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Kafe.ExitConfirm = Kafe.Paused = false; Input.Flush(); });
+						break;
+				}
 				//LoadingScreen.Start(() => { Kafe.Me.Components.Add(new CharacterSelectScreen()); });
-				LoadingScreen.Start(() => { Kafe.Me.Components.Add(new Editor("locales\\mci_corridor.json", "sakura.json")); });
 			}
 		}
 
@@ -338,6 +351,56 @@ namespace Kafe
 			batch.Draw(titleF, dst, null, Color.White, 0.0f, center, (anim < 32) ? anim / 32f : 1f, SpriteEffects.None, 0);
 			if (anim > 64)
 				batch.Draw(titleE, dst, null, Color.White, 0.0f, center, (anim < 96) ? 2f - ((anim - 64) / 32f) : 1f, SpriteEffects.None, 0);
+
+			batch.End();
+		}
+	}
+
+	class CharacterSelect : DrawableGameComponent
+	{
+		private Texture2D stuff;
+		private int anim, numPlayers;
+		private int[] cursorX, cursorY;
+		private Character[] selection;
+
+		public CharacterSelect(bool versus) : base(Kafe.Me)
+		{
+			stuff = Mix.GetTexture("menu.png");
+			cursorX = new[] { 0, 1 };
+			cursorY = new[] { 0, 0 };
+			selection = new[] { Kafe.Characters[0], Kafe.Characters[1] };
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			base.Update(gameTime);
+			if (anim < 128)
+				anim++;
+
+			if (Input.WasJustReleased(Keys.Enter))
+			{
+				Kafe.Me.Components.Remove(this);
+				Input.Flush();
+			}
+		}
+
+		public override void Draw(GameTime gameTime)
+		{
+			base.Draw(gameTime);
+			var batch = Kafe.SpriteBatch;
+			batch.Begin();
+
+			var x = 200;
+			var y = 56;
+			var dst = new Rectangle(x, y, 25, 25);
+			var src = new Rectangle(16, 50, 25, 25);
+			for (var i = 0; i < Kafe.Characters.Length; i++)
+			{
+				batch.Draw(stuff, dst, src, Color.White);
+				dst.Offset(24, 0);
+				if (i % 5 == 5)
+					dst.Offset(-(5 * 24), 24);
+			}
 
 			batch.End();
 		}
