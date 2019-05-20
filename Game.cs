@@ -29,7 +29,7 @@ namespace Kafe
 
 		public static int Ground = 240, LeftStart = 300, RightStart = 470;
 		public static Vector2 Camera;
-		public static bool Paused, ExitConfirm;
+		public static bool Paused, CanExit, ExitConfirm;
 
 		public Kafe() : base()
 		{
@@ -110,7 +110,7 @@ namespace Kafe
 
 		protected override void Update(GameTime gameTime)
 		{
-			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Input.WasJustReleased(Keys.Escape) && !ExitConfirm)
+			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Input.WasJustReleased(Keys.Escape) && CanExit && !ExitConfirm)
 			{
 				//Exit();
 				ExitConfirm = true;

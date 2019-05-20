@@ -79,6 +79,7 @@ namespace Kafe
 		public Character Opponent { get; set; }
 
 		public bool EditMode { get; set; }
+		public bool SelectMode { get; set; }
 		public bool ShowBoxes { get; set; }
 
 		public Character(string jsonFile, int palIndex)
@@ -262,6 +263,8 @@ namespace Kafe
 
 		public void DecideNextAnim()
 		{
+			if (SelectMode)
+				return;
 			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
 			var retreat = (Input.Left && !FacingLeft) || (Input.Right && FacingLeft);
 			var oldFacing = FacingLeft;
@@ -368,6 +371,8 @@ namespace Kafe
 
 		public void DecideCancelAnim()
 		{
+			if (SelectMode)
+				return;
 			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
 			var retreat = (Input.Left && !FacingLeft) || (Input.Right && FacingLeft);
 
