@@ -122,6 +122,14 @@ namespace Kafe
 				{
 					palette = Mix.GetTexture("fighters\\" + baseName + "-pal.png");
 					palettes[baseName] = palette;
+
+					//var timer1 = DateTime.Now;
+					//Console.WriteLine("Palette start at {0}", timer1.ToLongTimeString());
+
+					var tints = new Color[32];
+					for (var i = 0; i < 32; i++)
+						tints[i] = new Color(i, 0, 0, 16);
+
 					var numPals = palette.Height / PaletteSize;
 					var paletteData = new Color[palette.Width * palette.Height];
 					palette.GetData(paletteData);
@@ -131,16 +139,19 @@ namespace Kafe
 					{
 						for (var p = 0; p < palette.Width / PaletteSize; p++)
 						{
-							var cFrom = paletteData[p * PaletteSize];
-							var cTo = new Color(p, 0, 0, 16);
-							if (spriteData[j] == cFrom)
-								spriteData[j] = cTo;
+							if (spriteData[j] == paletteData[p * PaletteSize])
+								spriteData[j] = tints[p];
 						}
 					}
 					sheet.SetData(spriteData);
 
 					if (palIndex >= numPals)
 						palIndex %= numPals;
+
+					//var timer2 = DateTime.Now;
+					//Console.WriteLine("Palette end at {0}", timer2.ToLongTimeString());
+					//var timer3 = timer2 - timer1;
+					//Console.WriteLine("Delta {0}", timer3);
 				}
 			}
 
