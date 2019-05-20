@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Kafe
 {
-
 	class Editor : Background
 	{
 		public Character Subject { get; set; }

@@ -71,7 +71,8 @@ namespace Kafe
 			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);
 			//var arena = new Editor("locales\\mci_corridor.json", "sakura.json");
 			//Components.Add(arena);
-			LoadingScreen.Start(() => { Components.Add(new Editor("locales\\mci_corridor.json", "sakura.json")); });
+			//LoadingScreen.Start(() => { Components.Add(new Editor("locales\\mci_corridor.json", "sakura.json")); });
+			LoadingScreen.Start(() => { Components.Add(new TitleBackground()); });
 		}
 
 		protected override void UnloadContent()

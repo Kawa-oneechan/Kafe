@@ -5,13 +5,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-/*
-	private JsonObj background;
-	private Texture2D backgroundTexture;
-	private BackgroundTypes backgroundType;
-	private int backgroundFloor;
- */
-
 namespace Kafe
 {
 	class Background : DrawableGameComponent
@@ -259,6 +252,55 @@ namespace Kafe
 				Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos, src, Color.White);
 			}
 			Kafe.SpriteBatch.End();
+		}
+	}
+
+	class TitleBackground : DrawableGameComponent
+	{
+		private Texture2D sheet, backdrop; //, titleE, titleF;
+		private int lineAnim, backdropAnim;
+
+		private static int gridStart = 96;
+
+		public TitleBackground() : base(Kafe.Me)
+		{
+			sheet = Mix.GetTexture("menu.png");
+			backdrop = Mix.GetTexture("menu_back.png");
+			//titleE = Mix.GetTexture("title_e.png");
+			//titleF = Mix.GetTexture("title_f.png");
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			base.Update(gameTime);
+			//backdropAnim++;
+			if (backdropAnim >= backdrop.Width)
+				backdropAnim = 0;
+			lineAnim++;
+			if (lineAnim == 64)
+				lineAnim = 0;
+		}
+
+		public override void Draw(GameTime gameTime)
+		{
+			base.Draw(gameTime);
+			var batch = Kafe.SpriteBatch;
+			batch.Begin();
+			var dst = new Rectangle(-(backdropAnim / 16), 0, backdrop.Width, Kafe.ScreenHeight);
+			batch.Draw(backdrop, dst, Color.White);
+			dst.Offset(backdrop.Width, 0);
+			batch.Draw(backdrop, dst, Color.White);
+			var src = new Rectangle(0, 0, 384, 49);
+			dst = new Rectangle(0, Kafe.ScreenHeight - gridStart, Kafe.ScreenWidth, gridStart);
+			batch.Draw(sheet, dst, src, Color.White);
+			src = new Rectangle(1, 50, 14, 14);
+			dst = new Rectangle(0, Kafe.ScreenHeight + 6 - gridStart + (lineAnim / 4), Kafe.ScreenWidth, 14);
+			for (var i = 0; i < 6; i++)
+			{
+				batch.Draw(sheet, dst, src, Color.White);
+				dst.Offset(0, 16);
+			}
+			batch.End();
 		}
 	}
 }
