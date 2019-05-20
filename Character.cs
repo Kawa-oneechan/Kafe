@@ -126,21 +126,17 @@ namespace Kafe
 					//var timer1 = DateTime.Now;
 					//Console.WriteLine("Palette start at {0}", timer1.ToLongTimeString());
 
-					var tints = new Color[32];
-					for (var i = 0; i < 32; i++)
-						tints[i] = new Color(i, 0, 0, 16);
-
 					var numPals = palette.Height / PaletteSize;
-					var paletteData = new Color[palette.Width * palette.Height];
+					var paletteData = new int[palette.Width * palette.Height];
 					palette.GetData(paletteData);
-					var spriteData = new Color[sheet.Width * sheet.Height];
+					var spriteData = new int[sheet.Width * sheet.Height];
 					sheet.GetData(spriteData);
 					for (var j = 0; j < spriteData.Length; j++)
 					{
 						for (var p = 0; p < palette.Width / PaletteSize; p++)
 						{
 							if (spriteData[j] == paletteData[p * PaletteSize])
-								spriteData[j] = tints[p];
+								spriteData[j] = 0x10000000 + p;
 						}
 					}
 					sheet.SetData(spriteData);
