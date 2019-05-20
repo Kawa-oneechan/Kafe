@@ -72,7 +72,10 @@ namespace Kafe
 			//var arena = new Editor("locales\\mci_corridor.json", "sakura.json");
 			//Components.Add(arena);
 			//LoadingScreen.Start(() => { Components.Add(new Editor("locales\\mci_corridor.json", "sakura.json")); });
-			LoadingScreen.Start(() => { Components.Add(new TitleBackground()); });
+			LoadingScreen.Start(() => {
+				Components.Add(new TitleBackground());
+				Components.Add(new TitleScreen());
+			});
 		}
 
 		protected override void UnloadContent()

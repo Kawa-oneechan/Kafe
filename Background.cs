@@ -257,17 +257,15 @@ namespace Kafe
 
 	class TitleBackground : DrawableGameComponent
 	{
-		private Texture2D sheet, backdrop; //, titleE, titleF;
+		private Texture2D sheet, backdrop;
 		private int lineAnim, backdropAnim;
 
-		private static int gridStart = 96;
+		private static int gridStart = 49;
 
 		public TitleBackground() : base(Kafe.Me)
 		{
 			sheet = Mix.GetTexture("menu.png");
 			backdrop = Mix.GetTexture("menu_back.png");
-			//titleE = Mix.GetTexture("title_e.png");
-			//titleF = Mix.GetTexture("title_f.png");
 		}
 
 		public override void Update(GameTime gameTime)
@@ -294,12 +292,53 @@ namespace Kafe
 			dst = new Rectangle(0, Kafe.ScreenHeight - gridStart, Kafe.ScreenWidth, gridStart);
 			batch.Draw(sheet, dst, src, Color.White);
 			src = new Rectangle(1, 50, 14, 14);
-			dst = new Rectangle(0, Kafe.ScreenHeight + 6 - gridStart + (lineAnim / 4), Kafe.ScreenWidth, 14);
-			for (var i = 0; i < 6; i++)
+			dst = new Rectangle(0, Kafe.ScreenHeight - gridStart + (lineAnim / 4), Kafe.ScreenWidth, 14);
+			for (var i = 0; i < 4; i++)
 			{
 				batch.Draw(sheet, dst, src, Color.White);
 				dst.Offset(0, 16);
 			}
+			batch.End();
+		}
+	}
+
+	class TitleScreen : DrawableGameComponent
+	{
+		private Texture2D titleE, titleF;
+		private int anim;
+
+		public TitleScreen() : base(Kafe.Me)
+		{
+			titleE = Mix.GetTexture("title_e.png");
+			titleF = Mix.GetTexture("title_f.png");
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			base.Update(gameTime);
+			if (anim < 128)
+				anim++;
+
+			if (Input.WasJustReleased(Keys.Enter))
+			{
+				Kafe.Me.Components.Remove(this);
+				//LoadingScreen.Start(() => { Kafe.Me.Components.Add(new CharacterSelectScreen()); });
+				LoadingScreen.Start(() => { Kafe.Me.Components.Add(new Editor("locales\\mci_corridor.json", "sakura.json")); });
+			}
+		}
+
+		public override void Draw(GameTime gameTime)
+		{
+			base.Draw(gameTime);
+			var batch = Kafe.SpriteBatch;
+			batch.Begin();
+			var dst = new Vector2(Kafe.ScreenWidth / 2, Kafe.ScreenHeight / 2);
+			var center = new Vector2(titleE.Width / 2, titleE.Height / 2);
+
+			batch.Draw(titleF, dst, null, Color.White, 0.0f, center, (anim < 32) ? anim / 32f : 1f, SpriteEffects.None, 0);
+			if (anim > 64)
+				batch.Draw(titleE, dst, null, Color.White, 0.0f, center, (anim < 96) ? 2f - ((anim - 64) / 32f) : 1f, SpriteEffects.None, 0);
+
 			batch.End();
 		}
 	}
