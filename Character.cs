@@ -69,6 +69,8 @@ namespace Kafe
 		private int editBox;
 		private string copiedBoxes;
 
+		public string Name { get; set; }
+
 		public Rectangle Image { get; set; }
 		public int ColorSwap { get; set; }
 		public Vector2 Position { get; set; }
@@ -98,6 +100,7 @@ namespace Kafe
 		public void Reload(string jsonFile, int palIndex, bool refresh)
 		{
 			json = Mix.GetJson("fighters\\" + jsonFile, false) as JsonObj;
+			Name = json["name"] as string;
 			var baseName = json["base"] as string;
 
 			var keys = new string[json.Keys.Count];

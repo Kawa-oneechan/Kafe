@@ -271,8 +271,8 @@ namespace Kafe
 		public override void Update(GameTime gameTime)
 		{
 			base.Update(gameTime);
-			//backdropAnim++;
-			if (backdropAnim >= backdrop.Width)
+			backdropAnim++;
+			if (backdropAnim >= backdrop.Width * 16)
 				backdropAnim = 0;
 			lineAnim++;
 			if (lineAnim == 64)
@@ -362,16 +362,16 @@ namespace Kafe
 	{
 		private Texture2D stuff;
 		private int anim, numPlayers;
-		private int[] cursorX, cursorY;
+		private int[] cursor;
 		private Character[] selection;
 
 		private Vector2[] positions = new[] { new Vector2(104, Kafe.Ground), new Vector2(484, Kafe.Ground) };
+		private int[] namePositions = new[] { 40, 340 };
 
 		public CharacterSelect(bool versus) : base(Kafe.Me)
 		{
 			stuff = Mix.GetTexture("menu.png");
-			cursorX = new[] { 1, 0 };
-			cursorY = new[] { 0, 0 };
+			cursor = new[] { 1, 0 };
 			selection = new[] { Kafe.Characters[1], Kafe.Characters[0] };
 			numPlayers = versus ? 2 : 1;
 			Kafe.CanExit = false;
@@ -383,29 +383,33 @@ namespace Kafe
 			if (anim < 128)
 				anim++;
 
-			for (var i = 0; i < numPlayers; i++)
-			{
-				selection[i].Position = positions[i];
-				selection[i].FacingLeft = (i == 1);
-				selection[i].SelectMode = true;
-				selection[i].Update();
-			}
-
 			if (Input.TrgLeft)
 			{
-				cursorX[0]--;
-				if (cursorX[0] < 0)
-					cursorX[0] = 0;
-				selection[0] = Kafe.Characters[(cursorY[0] * 5) + cursorX[0]];
+				cursor[0]--;
+				if (cursor[0] < 0)
+					cursor[0]++;
+				selection[0] = Kafe.Characters[cursor[0]];
 			}
 			else if (Input.TrgRight)
 			{
-				cursorX[0]++;
-				if (cursorX[0] > 5)
-					cursorX[0] = 5;
-				if ((cursorY[0] * 5) + cursorX[0] >= Kafe.Characters.Length)
-					cursorX[0]--;
-				selection[0] = Kafe.Characters[(cursorY[0] * 5) + cursorX[0]];
+				cursor[0]++;
+				if (cursor[0] >= Kafe.Characters.Length)
+					cursor[0]--;
+				selection[0] = Kafe.Characters[cursor[0]];
+			}
+			else if (Input.TrgUp)
+			{
+				cursor[0] -= 5;
+				if (cursor[0] < 0)
+					cursor[0] += 5;
+				selection[0] = Kafe.Characters[cursor[0]];
+			}
+			else if (Input.TrgDown)
+			{
+				cursor[0] += 5;
+				if (cursor[0] >= Kafe.Characters.Length)
+					cursor[0] -= 5;
+				selection[0] = Kafe.Characters[cursor[0]];
 			}
 
 		}
@@ -424,30 +428,34 @@ namespace Kafe
 			{
 				batch.Draw(stuff, dst, src, Color.White);
 				dst.Offset(24, 0);
-				if (i % 5 == 5)
+				if (i % 5 == 4)
 					dst.Offset(-(5 * 24), 24);
 			}
 			dst = new Rectangle(x - 6, y - 6, 36, 36);
 			src = new Rectangle(42, 50, 36, 36);
 			for (var i = 0; i < Kafe.Characters.Length; i++)
 			{
-				if (i == (cursorY[0] * 5) + cursorX[0])
+				if (i == cursor[0])
 					batch.Draw(stuff, dst, src, Color.Lime);
-				if (numPlayers > 1 && i == (cursorY[1] * 5) + cursorX[1])
+				if (numPlayers > 1 && i == cursor[1])
 					batch.Draw(stuff, dst, src, Color.Red);
 				dst.Offset(24, 0);
-				if (i % 5 == 5)
+				if (i % 5 == 4)
 					dst.Offset(-(5 * 24), 24);
 			}
+			batch.End();
 
 			for (var i = 0; i < numPlayers; i++)
 			{
+				selection[i].Position = positions[i];
+				selection[i].FacingLeft = (i == 1);
+				selection[i].SelectMode = true;
+				selection[i].Update();
+				batch.Begin();
 				selection[i].PreDraw();
 				selection[i].DrawShadow(batch);
-			}
-			batch.End();
-			for (var i = 0; i < numPlayers; i++)
-			{
+				Text.Draw(batch, 1, selection[i].Name, namePositions[i], 80);
+				batch.End();
 				selection[i].Draw(batch);
 			}
 

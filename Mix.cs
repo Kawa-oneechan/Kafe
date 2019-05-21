@@ -261,7 +261,8 @@ namespace Kafe
 				{
 					if (f.StartsWith("data\\"))
 						ret.Add(f.Substring(5));
-					ret.Add(f);
+					else
+						ret.Add(f);
 				}
 			}
 			return ret.ToArray();
