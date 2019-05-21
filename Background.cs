@@ -427,6 +427,9 @@ namespace Kafe
 			for (var i = 0; i < Kafe.Characters.Length; i++)
 			{
 				batch.Draw(stuff, dst, src, Color.White);
+				dst.Inflate(-1, -1);
+				Kafe.Characters[i].DrawIcon(batch, dst, false);
+				dst.Inflate(1, 1);
 				dst.Offset(24, 0);
 				if (i % 5 == 4)
 					dst.Offset(-(5 * 24), 24);

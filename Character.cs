@@ -51,8 +51,9 @@ namespace Kafe
 
 		private static Dictionary<string, Texture2D> sheets = new Dictionary<string, Texture2D>();
 		private static Dictionary<string, Texture2D> palettes = new Dictionary<string, Texture2D>();
+		private static Dictionary<string, Texture2D> icons = new Dictionary<string, Texture2D>();
 
-		private Texture2D sheet, palette;
+		private Texture2D sheet, palette, icon;
 
 		private JsonObj json;
 		private List<JsonObj> animations;
@@ -116,6 +117,8 @@ namespace Kafe
 				sheet = sheets[baseName];
 				if (palettes.ContainsKey(baseName))
 					palette = palettes[baseName];
+				if (icons.ContainsKey(baseName))
+					icon = icons[baseName];
 			}
 			else
 			{
@@ -152,6 +155,12 @@ namespace Kafe
 					//Console.WriteLine("Palette end at {0}", timer2.ToLongTimeString());
 					//var timer3 = timer2 - timer1;
 					//Console.WriteLine("Delta {0}", timer3);
+				}
+
+				if (Mix.FileExists("fighters\\" + baseName + "-icon.png"))
+				{
+					icon = Mix.GetTexture("fighters\\" + baseName + "-icon.png");
+					icons[baseName] = icon;
 				}
 			}
 
@@ -526,7 +535,7 @@ namespace Kafe
 			batch.Draw(shadow, new Rectangle(posX, Kafe.Ground - 4, Image.Width, 8), null, Color.White);
 		}
 
-		public void Draw(SpriteBatch batch)
+		public void StartBatch(SpriteBatch batch)
 		{
 			if (palette != null)
 			{
@@ -538,7 +547,11 @@ namespace Kafe
 			}
 			else
 				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);
+		}
 
+		public void Draw(SpriteBatch batch)
+		{
+			StartBatch(batch);
 			batch.Draw(sheet, new Vector2(posX, posY), Image, Color.White, 0.0f, Vector2.Zero, 1.0f, FacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0.0f);
 			batch.End();
 		}
@@ -606,6 +619,15 @@ namespace Kafe
 			}
 
 			Text.Draw(batch, 0, info, 2, 2);
+		}
+
+		public void DrawIcon(SpriteBatch batch, Rectangle position, bool recolor = true, bool flip = false)
+		{
+			if (recolor)
+				StartBatch(batch);
+			batch.Draw(icon, position, null, Color.White, 0.0f, Vector2.Zero, flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0.0f);
+			if (recolor)
+				batch.End();
 		}
 
 		public void HandleOffsetEdit()
