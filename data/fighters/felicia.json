@@ -1,153 +1,119 @@
 {
-	"name" : "Felicia",
-	"base" : "felicia",
-	"specials": [
-		{	"name": "Screw you guys",
-			"input": "rdaD", //retreat, down, advance, fierce kick
-			"super": false,
-			"animation": 9, //stdVictory
-			"limits": [ "groundOnly" ],
-			"levels": 0
+	"name": "Felicia",
+	"base": "felicia",
+	"female": true,
+
+	"inputs": [
+		{
+			"name": "Weak punch",
+			"sequence": "a",
+			"stand": "WP-Stand",
+			"standfar": "WP-Stand",
+			"crouch": null,
+			"air": null
+		},
+		{
+			"name": "Medium punch",
+			"sequence": "b",
+			"stand": "MP-Stand",
+			"standfar": "MP-Stand",
+			"crouch": null,
+			"air": null
+		},
+		{
+			"name": "Heavy punch",
+			"sequence": "a",
+			"stand": "HP-Stand",
+			"standfar": "HP-Stand",
+			"crouch": null,
+			"air": null
 		}
 	],
+
 	"animations" : [
 		/* Standard animations have to be in a particular order.
 		 * This *does* guarantee that numerical references will be correct.
 		 * 0	stdIdle
 		 * 1	stdAdvance
 		 * 2	stdRetreat
-		 * 3	stdJumpUp
-		 * 4	stdJumpAdv
-		 * 5	stdJumpRet
-		 * 6	stdIntro
-		 * 7	stdDefeat
-		 * 8	stdTime
-		 * 9	stdVictory
-		 * 10	stdHitGroundMid
-		 * 11	stdHitGroundHigh
-		 * 12	stdHitGroundLow
-		 * 13	stdHitAir
-		 * 14	stdSelect
+		 * 3	stdTurn
+		 * 4	stdJumpUp
+		 * 5	stdJumpAdv
+		 * 6	stdJumpRet
+		 * 7	stdCrouchIn
+		 * 8	stdCrouch
+		 * 9	stdCrouchOut
+		 * 10	stdCrouchTurn
+		 * 11	stdIntro
+		 * 12	stdDefeat
+		 * 13	stdTime
+		 * 14	stdVictory
+		 * 15	stdHitGroundMid
+		 * 16	stdHitGroundHigh
+		 * 17	stdHitGroundLow
+		 * 18	stdHitAir
+		 * 19	stdSelect
 		 */
 		{	"name": "stdIdle", //0
-			"fallTo" : [ 0, 0, 0, 0, 0, 0, 0, 1, 2, null, null ],
-			"cancelTo" : [ null, "Jab", 0, 0, 0, 0, 0, 1, 2, 0, 0 ],
+			"halt": true,
 			"frames" : [
-				{
-					"image" : [ 1, 4, 88, 97 ], "offset" : [ 53, 95 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
+				/*{	"img": [ 0, 0, 0, 3 ],
+					"boxes": [ [ true, -3, -81, 25, 17 ], [ true, -23, -70, 57, 69 ] ]
+					{ "img": [ 1, 0, 0, 3 ] },
+				{ "img": [ 2, 0, 0, 3 ] },
+				},*/
+				{	"img": [ 2, 0, 0, 3 ],
+					"boxes": [ [ true, -3, -81, 25, 17 ], [ true, -23, -70, 57, 69 ] ]
 				},
-				{
-					"image" : [ 90, 4, 87, 97 ], "offset" : [ 52, 95 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 22, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 178, 1, 88, 100 ], "offset" : [ 53, 98 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 356, 1, 90, 99 ], "offset" : [ 55, 97 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 25, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 447, 2, 88, 98 ], "offset" : [ 53, 96 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 536, 2, 86, 97 ], "offset" : [ 51, 95 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 21, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 623, 2, 90, 97 ], "offset" : [ 55, 95 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 25, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 1, 103, 93, 99 ], "offset" : [ 58, 97 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 28, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 95, 102, 88, 100 ], "offset" : [ 53, 98 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 184, 102, 88, 100 ], "offset" : [ 53, 98 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
-				},
-				{
-					"image" : [ 273, 103, 88, 99 ], "offset" : [ 53, 97 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
-				}
+				{ "img": [ 3, 1, 0, 3 ] },
+				{ "img": [ 4, -1, 0, 3 ] },
+				{ "img": [ 5, -3, 0, 3 ] },
+				{ "img": [ 6, 0, 0, 3 ] },
+				{ "img": [ 7, 0, 0, 3 ] },
+				{ "img": [ 8, 0, 0, 3 ] },
+				{ "img": [ 9, 0, 0, 3 ] },
+				{ "img": [ 10, 0, 0, 3 ] },
+				{ "img": [ 11, 0, 0, 3 ] },
+				{ "img": [ 12, 0, 0, 3 ] },
+				{ "img": [ 13, -1, 0, 3 ] }
 			]
 		},
 		{	"name": "stdAdvance", //1
-			"fallTo" : [ 0, 0, 0, 0, 0, 0, 0, 1, 2, null, null ],
-			"cancelTo" : [ null, "Jab", 0, 0, 0, 0, 0, 1, 0, 0, 0 ],
 			"frames" : [
-				{
-					"image" : [ 1, 204, 113, 92 ], "offset" : [ 74, 91 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 53, 9, 47, 82 ] } ]
+				{	"img": [ 114, 0, 0, 3 ],
+					"velocity": [ 3.33, 0 ],
+					"boxes": [ [ true, 23, -75, 25, 17 ], [ true, -12, -69, 57, 69 ] ]
 				},
-				{
-					"image" : [ 115, 204, 117, 92 ], "offset" : [ 77, 91 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 56, 9, 44, 82 ] } ]
-				},
-				{
-					"image" : [ 233, 204, 102, 92 ], "offset" : [ 61, 91 ], "impulse" : [ 12, 0 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 40, 9, 44, 82 ] } ]
-				},
-				{
-					"image" : [ 336, 206, 101, 90 ], "offset" : [ 57, 89 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 37, 9, 44, 80 ] } ]
-				},
-				{
-					"image" : [ 438, 206, 101, 90 ], "offset" : [ 57, 89 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 36, 9, 45, 80 ] } ]
-				},
-				{
-					"image" : [ 540, 206, 99, 90 ], "offset" : [ 61, 89 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 40, 9, 44, 80 ] } ]
-				},
-				{
-					"image" : [ 640, 204, 105, 92 ], "offset" : [ 66, 91 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 46, 9, 45, 82 ] } ]
-				},
-				{
-					"image" : [ 1, 297, 107, 93 ], "offset" : [ 69, 92 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 48, 9, 42, 83 ] } ]
-				},
-				{
-					"image" : [ 109, 298, 112, 91 ], "offset" : [ 72, 90 ], "impulse" : [ 12, 0 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 51, 9, 44, 81 ] } ]
-				},
-				{
-					"image" : [ 222, 300, 117, 90 ], "offset" : [ 75, 89 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 54, 9, 46, 80 ] } ]
-				},
-				{
-					"image" : [ 340, 302, 120, 88 ], "offset" : [ 77, 87 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 56, 9, 44, 78 ] } ]
-				},
-				{
-					"image" : [ 461, 300, 114, 90 ], "offset" : [ 76, 89 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 56, 9, 43, 80 ] } ]
-				}
+				{ "img": [ 115, 0, 0, 2 ] },
+				{ "img": [ 118, 0, 0, 3 ] },
+				{ "img": [ 119, 0, 0, 2 ] },
+				{ "img": [ 120, 0, 0, 3 ] },
+				{ "img": [ 121, 0, 0, 3 ] },
+				{ "img": [ 122, 0, 0, 2 ] },
+				{ "img": [ 123, 10, 0, 3 ] },
+				{ "img": [ 124, 11, 0, 2 ] },
+				{ "img": [ 125, 10, 0, 3 ] },
+				{ "img": [ 116, 5, 0, 3 ] },
+				{ "img": [ 117, 0, 0, 3 ] }
 			]
 		},
 		{	"name": "stdRetreat", //2
-			"fallTo" : [ 0, 0, 0, 0, 0, 0, 0, 1, 2, null, null ],
-			"cancelTo" : [ null, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0 ],
 			"frames" : [
-				{ "image" : [ 1, 395, 71, 100 ], "offset" : [ 46, 99 ], "impulse" : [ -7, 0 ] },
-				{ "image" : [ 73, 393, 82, 102 ], "offset" : [ 51, 101 ] },
-				{ "image" : [ 156, 391, 106, 104 ], "offset" : [ 70, 103 ] },
-				{ "image" : [ 263, 391, 95, 104 ], "offset" : [ 64, 103 ] },
-				{ "image" : [ 359, 392, 83, 103 ], "offset" : [ 54, 102 ] },
-				{ "image" : [ 443, 395, 76, 100 ], "offset" : [ 45, 99 ] },
-				{ "image" : [ 520, 393, 81, 102 ], "offset" : [ 48, 101 ], "impulse" : [ -7, 0 ] },
-				{ "image" : [ 602, 391, 86, 104 ], "offset" : [ 44, 103 ] },
-				{ "image" : [ 689, 391, 83, 104 ], "offset" : [ 45, 103 ] },
-				{ "image" : [ 1, 496, 72, 103 ], "offset" : [ 44, 102 ] },
-				{ "image" : [ 74, 498, 73, 101 ], "offset" : [ 45, 100 ] }
+				{	"img": [ 129, 0, 0, 3 ],
+					"velocity": [ -2.78, 0 ],
+					"boxes": [ [ true, -4, -86, 25, 17 ], [ true, -19, -75, 47, 74 ] ]
+				},
+				{ "img": [ 130, 0, 0, 3 ] },
+				{ "img": [ 133, 0, 0, 3 ] },
+				{ "img": [ 134, 0, 0, 3 ] },
+				{ "img": [ 135, 0, 0, 3 ] },
+				{ "img": [ 136, 0, 0, 3 ] },
+				{ "img": [ 137, -5, 0, 3 ] },
+				{ "img": [ 138, -6, 0, 3 ] },
+				{ "img": [ 139, -10, 0, 3 ] },
+				{ "img": [ 140, 0, 0, 3 ] },
+				{ "img": [ 131, 0, 0, 3 ] },
+				{ "img": [ 132, 0, 0, 3 ] }
 			]
 		},
 		{	"name": "stdJumpUp", //3 PLACEHOLDER
@@ -342,5 +308,7 @@
 				{ "image" : [ 598, 1210, 86, 50 ], "offset" : [ 45, 40 ] }
 			]
 		}
-	]
+	],
+
+	"sprites": "import://felicia_sprites.json"
 }

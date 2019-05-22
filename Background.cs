@@ -473,7 +473,7 @@ namespace Kafe
 				selection[i].Update();
 				batch.Begin();
 				selection[i].PreDraw();
-				selection[i].DrawShadow(batch);
+				//selection[i].DrawShadow(batch);
 				Text.Draw(batch, 1, selection[i].Name, namePositions[i], 80);
 				batch.End();
 				selection[i].Draw(batch);
