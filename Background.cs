@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Kawa.Json;
 using Microsoft.Xna.Framework;
@@ -323,15 +323,32 @@ namespace Kafe
 
 			if (Input.WasJustReleased(Keys.Enter))
 			{
-				Kafe.Me.Components.Remove(this);
 				Input.Flush();
 				switch (selection)
 				{
 					case 0: //Story Mode
-						LoadingScreen.Start(() => { Kafe.Me.Components.Add(new CharacterSelect(false)); });
+						Kafe.DoTransition(false, () =>
+						{
+							Kafe.Me.Components.Remove(this);
+							LoadingScreen.Start(() =>
+							{
+								var charSelect = new CharacterSelect(false) { Enabled = false };
+								Kafe.Me.Components.Add(charSelect);
+								Kafe.DoTransition(true, () => { charSelect.Enabled = true; });
+							});
+						});
 						break;
 					case 1: //Versus Mode
-						LoadingScreen.Start(() => { Kafe.Me.Components.Add(new CharacterSelect(true)); });
+						Kafe.DoTransition(false, () =>
+						{
+							Kafe.Me.Components.Remove(this);
+							LoadingScreen.Start(() =>
+							{
+								var charSelect = new CharacterSelect(true) { Enabled = false };
+								Kafe.Me.Components.Add(charSelect);
+								Kafe.DoTransition(true, () => { charSelect.Enabled = true; });
+							});
+						});
 						break;
 					case 2: //Quit
 						Kafe.ExitConfirm = true;

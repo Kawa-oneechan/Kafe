@@ -15,6 +15,9 @@ namespace Kafe
 
 		public static SpriteBatch SpriteBatch;
 		public static Effect ClutEffect;
+		public static Effect TransitionEffect;
+
+		private static Texture2D transitionImage;
 
 		public static GraphicsDevice GfxDev { get; private set; }
 		public static Kafe Me { get; private set; }
@@ -68,6 +71,8 @@ namespace Kafe
 			rawScreen = new RenderTarget2D(GraphicsDevice, ScreenWidth, ScreenHeight);
 
 			ClutEffect = GetEffect("clut");
+			TransitionEffect = GetEffect("transition");
+			transitionImage = Mix.GetTexture("transition");
 
 			//var felicia = new Character("felicia.json", 3);
 			//var sakura = new Character("sakura.json", 1);
@@ -110,6 +115,19 @@ namespace Kafe
 
 		protected override void Update(GameTime gameTime)
 		{
+			if (TransitionDelta > -1)
+			{
+				TransitionDelta += 0.05f;
+				if (TransitionDelta >= 1.0f)
+				{
+					TransitionDelta = -1;
+					if (OnTransitionFinish != null)
+						OnTransitionFinish();
+				}
+				base.Update(gameTime);
+				return;
+			}
+
 			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Input.WasJustReleased(Keys.Escape) && CanExit && !ExitConfirm)
 			{
 				//Exit();
@@ -124,11 +142,29 @@ namespace Kafe
 			GraphicsDevice.SetRenderTarget(rawScreen);
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 			base.Draw(gameTime);
+			if (TransitionDelta > -1)
+			{
+				TransitionEffect.Parameters["TransitionDelta"].SetValue(transitionIn ? TransitionDelta : 1 - TransitionDelta);
+				SpriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, TransitionEffect);
+				SpriteBatch.Draw(transitionImage, new Rectangle(0, 0, ScreenWidth, ScreenHeight), Color.White);
+				SpriteBatch.End();
+			}
 			GraphicsDevice.SetRenderTarget(null);
 			GraphicsDevice.Clear(Color.Black);
 			SpriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);
 			SpriteBatch.Draw(rawScreen, new Rectangle(0, 0, CrtWidth, CrtHeight), new Rectangle(0, 0, ScreenWidth, ScreenHeight), Color.White);
 			SpriteBatch.End();
+		}
+
+		public static float TransitionDelta = -1;
+		private static bool transitionIn;
+		public static Action OnTransitionFinish;
+
+		public static void DoTransition(bool goIn, Action onFinish)
+		{
+			TransitionDelta = 0;
+			transitionIn = goIn;
+			OnTransitionFinish = onFinish;
 		}
 	}
 
