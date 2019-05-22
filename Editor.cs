@@ -64,6 +64,7 @@ namespace Kafe
 			Subject.Position = new Vector2(Kafe.ScreenWidth / 2, Kafe.Ground);
 			Subject.EditMode = true;
 			Subject.ShowBoxes = true;
+			Subject.Controls = Input.Controls[0];
 			topMessage = string.Empty;
 		}
 

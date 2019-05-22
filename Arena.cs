@@ -15,6 +15,8 @@ namespace Kafe
 			right.FacingLeft = true;
 			left.Opponent = right;
 			right.Opponent = left;
+			left.Controls = Input.Controls[0];
+			right.Controls = Input.Controls[1];
 			Characters = new[] { left, right };
 			Kafe.Camera.Y = 0;
 		}
@@ -27,8 +29,6 @@ namespace Kafe
 			if (timer > Kafe.Speed)
 			{
 				timer = 0;
-				if (Input.Left)
-					Game.Window.Title = "!";
 				foreach (var c in Characters)
 					c.Update();
 			}

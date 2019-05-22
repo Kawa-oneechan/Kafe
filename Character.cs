@@ -85,6 +85,8 @@ namespace Kafe
 		public bool SelectMode { get; set; }
 		public bool ShowBoxes { get; set; }
 
+		public ControlSet Controls { get; set; }
+
 		public Character(string jsonFile, int palIndex)
 		{
 			if (shadow == null)
@@ -96,6 +98,7 @@ namespace Kafe
 			boxTypes = new List<bool>();
 
 			Reload(jsonFile, palIndex, false);
+			Controls = Input.Controls[0];
 		}
 
 		public void Reload(string jsonFile, int palIndex, bool refresh)
@@ -277,8 +280,8 @@ namespace Kafe
 		{
 			if (SelectMode)
 				return;
-			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
-			var retreat = (Input.Left && !FacingLeft) || (Input.Right && FacingLeft);
+			var advance = (Controls.Right && !FacingLeft) || (Controls.Left && FacingLeft);
+			var retreat = (Controls.Left && !FacingLeft) || (Controls.Right && FacingLeft);
 			var oldFacing = FacingLeft;
 			if (Opponent != null && !EditMode)
 				FacingLeft = (Position.X > Opponent.Position.X);
@@ -287,7 +290,7 @@ namespace Kafe
 			{
 				case StandardAnims.Idle:
 					if (FacingLeft != oldFacing) SwitchTo(StandardAnims.Turn);
-					else if (Input.Up)
+					else if (Controls.Up)
 					{
 						if (advance) SwitchTo(StandardAnims.JumpAdv);
 						else if (retreat) SwitchTo(StandardAnims.JumpRet);
@@ -295,17 +298,17 @@ namespace Kafe
 					}
 					else if (advance) SwitchTo(StandardAnims.Advance);
 					else if (retreat) SwitchTo(StandardAnims.Retreat);
-					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					else if (Controls.Down) SwitchTo(StandardAnims.CrouchIn);
 					break;
 				case StandardAnims.Advance:
 					if (!advance) SwitchTo(StandardAnims.Idle);
-					else if (Input.Up) SwitchTo(StandardAnims.JumpAdv);
-					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					else if (Controls.Up) SwitchTo(StandardAnims.JumpAdv);
+					else if (Controls.Down) SwitchTo(StandardAnims.CrouchIn);
 					break;
 				case StandardAnims.Retreat:
 					if (!retreat) SwitchTo(StandardAnims.Idle);
-					else if (Input.Up) SwitchTo(StandardAnims.JumpRet);
-					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					else if (Controls.Up) SwitchTo(StandardAnims.JumpRet);
+					else if (Controls.Down) SwitchTo(StandardAnims.CrouchIn);
 					break;
 				case StandardAnims.Turn:
 					SwitchTo(StandardAnims.Idle);
@@ -325,7 +328,7 @@ namespace Kafe
 					SwitchTo(StandardAnims.Crouch);
 					break;
 				case StandardAnims.Crouch:
-					if (!Input.Down) SwitchTo(StandardAnims.CrouchOut);
+					if (!Controls.Down) SwitchTo(StandardAnims.CrouchOut);
 					else if (FacingLeft != oldFacing) SwitchTo(StandardAnims.CrouchTurn);
 					break;
 				case StandardAnims.CrouchOut:
@@ -345,25 +348,25 @@ namespace Kafe
 								}
 								else
 								{
-									if (Input.A && fallTos[1] != null)
+									if (Controls.A && fallTos[1] != null)
 										SwitchTo(fallTos[1]);
-									else if (Input.B && fallTos[2] != null)
+									else if (Controls.B && fallTos[2] != null)
 										SwitchTo(fallTos[2]);
-									else if (Input.C && fallTos[3] != null)
+									else if (Controls.C && fallTos[3] != null)
 										SwitchTo(fallTos[3]);
-									else if (Input.D && fallTos[4] != null)
+									else if (Controls.D && fallTos[4] != null)
 										SwitchTo(fallTos[4]);
-									else if (Input.E && fallTos[5] != null)
+									else if (Controls.E && fallTos[5] != null)
 										SwitchTo(fallTos[5]);
-									else if (Input.F && fallTos[6] != null)
+									else if (Controls.F && fallTos[6] != null)
 										SwitchTo(fallTos[6]);
 									else if (advance && fallTos[7] != null)
 										SwitchTo(fallTos[7]);
 									else if (retreat && fallTos[8] != null)
 										SwitchTo(fallTos[8]);
-									else if (Input.Up && fallTos[9] != null)
+									else if (Controls.Up && fallTos[9] != null)
 										SwitchTo(fallTos[10]);
-									else if (Input.Down && fallTos[9] != null)
+									else if (Controls.Down && fallTos[9] != null)
 										SwitchTo(fallTos[10]);
 									else if (fallTos[0] != null)
 										SwitchTo(fallTos[0]);
@@ -385,13 +388,13 @@ namespace Kafe
 		{
 			if (SelectMode)
 				return;
-			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
-			var retreat = (Input.Left && !FacingLeft) || (Input.Right && FacingLeft);
+			var advance = (Controls.Right && !FacingLeft) || (Controls.Left && FacingLeft);
+			var retreat = (Controls.Left && !FacingLeft) || (Controls.Right && FacingLeft);
 
 			switch ((StandardAnims)currentAnim)
 			{
 				case StandardAnims.Idle:
-					if (Input.Up)
+					if (Controls.Up)
 					{
 						if (advance) SwitchTo(StandardAnims.JumpAdv);
 						else if (retreat) SwitchTo(StandardAnims.JumpRet);
@@ -399,15 +402,15 @@ namespace Kafe
 					}
 					else if (advance) SwitchTo(StandardAnims.Advance);
 					else if (retreat) SwitchTo(StandardAnims.Retreat);
-					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					else if (Controls.Down) SwitchTo(StandardAnims.CrouchIn);
 					break;
 				case StandardAnims.Advance:
 					if (!advance) SwitchTo(StandardAnims.Idle);
-					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					else if (Controls.Down) SwitchTo(StandardAnims.CrouchIn);
 					break;
 				case StandardAnims.Retreat:
 					if (!retreat) SwitchTo(StandardAnims.Idle);
-					else if (Input.Down) SwitchTo(StandardAnims.CrouchIn);
+					else if (Controls.Down) SwitchTo(StandardAnims.CrouchIn);
 					break;
 				case StandardAnims.Turn:
 					SwitchTo(StandardAnims.Idle);
@@ -416,7 +419,7 @@ namespace Kafe
 					SwitchTo(StandardAnims.Crouch);
 					break;
 				case StandardAnims.Crouch:
-					if (!Input.Down) SwitchTo(StandardAnims.CrouchOut);
+					if (!Controls.Down) SwitchTo(StandardAnims.CrouchOut);
 					break;
 				case StandardAnims.CrouchOut:
 					SwitchTo(StandardAnims.Idle);
@@ -426,27 +429,27 @@ namespace Kafe
 						if (animation.ContainsKey("cancelTo"))
 						{
 							var cancelTos = ((List<object>)animation["cancelTo"]);
-							if (Input.A && cancelTos[1] != null)
+							if (Controls.A && cancelTos[1] != null)
 								SwitchTo(cancelTos[1]);
-							else if (Input.B && cancelTos[2] != null)
+							else if (Controls.B && cancelTos[2] != null)
 								SwitchTo(cancelTos[2]);
-							else if (Input.C && cancelTos[3] != null)
+							else if (Controls.C && cancelTos[3] != null)
 								SwitchTo(cancelTos[3]);
-							else if (Input.D && cancelTos[4] != null)
+							else if (Controls.D && cancelTos[4] != null)
 								SwitchTo(cancelTos[4]);
-							else if (Input.E && cancelTos[5] != null)
+							else if (Controls.E && cancelTos[5] != null)
 								SwitchTo(cancelTos[5]);
-							else if (Input.F && cancelTos[6] != null)
+							else if (Controls.F && cancelTos[6] != null)
 								SwitchTo(cancelTos[6]);
 							else if (advance && cancelTos[7] != null)
 								SwitchTo(cancelTos[7]);
 							else if (retreat && cancelTos[8] != null)
 								SwitchTo(cancelTos[8]);
-							else if (Input.Up && cancelTos[9] != null)
+							else if (Controls.Up && cancelTos[9] != null)
 								SwitchTo(cancelTos[9]);
-							else if (Input.Down && cancelTos[10] != null)
+							else if (Controls.Down && cancelTos[10] != null)
 								SwitchTo(cancelTos[10]);
-							else if (!Input.Anything && cancelTos[0] != null)
+							else if (!Controls.Anything && cancelTos[0] != null)
 								SwitchTo(cancelTos[0]);
 						}
 						break;
@@ -456,8 +459,8 @@ namespace Kafe
 
 		public void Update()
 		{
-			var advance = (Input.Right && !FacingLeft) || (Input.Left && FacingLeft);
-			var retreat = (Input.Left && !FacingLeft) || (Input.Right && FacingLeft);
+			var advance = (Controls.Right && !FacingLeft) || (Controls.Left && FacingLeft);
+			var retreat = (Controls.Left && !FacingLeft) || (Controls.Right && FacingLeft);
 
 			if (FrameDelay-- <= 0)
 			{
@@ -633,22 +636,23 @@ namespace Kafe
 		public void HandleOffsetEdit()
 		{
 			var cF = frames[currentFrame];
+			var control = Input.Controls[0];
 			if (cF.ContainsKey("img"))
 			{
 				var offset = ((List<object>)cF["img"]);
-				if (Input.TrgUp) offset[2] = (double)offset[2] + 1;
-				else if (Input.TrgDown) offset[2] = (double)offset[2] - 1;
-				else if (Input.TrgLeft) offset[1] = (double)offset[1] - 1;
-				else if (Input.TrgRight) offset[1] = (double)offset[1] + 1;
+				if (control.TrgUp) offset[2] = (double)offset[2] + 1;
+				else if (control.TrgDown) offset[2] = (double)offset[2] - 1;
+				else if (control.TrgLeft) offset[1] = (double)offset[1] - 1;
+				else if (control.TrgRight) offset[1] = (double)offset[1] + 1;
 				CelOffset = new Vector2((int)(double)offset[1], (int)(double)offset[2]);
 			}
 			else
 			{
 				var offset = ((List<object>)cF["offset"]);
-				if (Input.TrgUp) offset[1] = (double)offset[1] + 1;
-				else if (Input.TrgDown) offset[1] = (double)offset[1] - 1;
-				else if (Input.TrgLeft) offset[0] = (double)offset[0] - 1;
-				else if (Input.TrgRight) offset[0] = (double)offset[0] + 1;
+				if (control.TrgUp) offset[1] = (double)offset[1] + 1;
+				else if (control.TrgDown) offset[1] = (double)offset[1] - 1;
+				else if (control.TrgLeft) offset[0] = (double)offset[0] - 1;
+				else if (control.TrgRight) offset[0] = (double)offset[0] + 1;
 				CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
 			}
 		}

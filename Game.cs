@@ -30,7 +30,7 @@ namespace Kafe
 		public const int CrtWidth = ScreenWidth * Scale, CrtHeight = ScreenHeight * Scale;
 		public const int Speed = 10;
 
-		public static int Ground = 240, LeftStart = 300, RightStart = 470;
+		public static int Ground = 240, LeftStart = 100, RightStart = 100;
 		public static Vector2 Camera;
 		public static bool Paused, CanExit, ExitConfirm;
 
@@ -80,6 +80,19 @@ namespace Kafe
 			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);
 			//var arena = new Editor("locales\\mci_corridor.json", "sakura.json");
 			//Components.Add(arena);
+
+			var fighterFiles = Mix.GetFilesWithPattern("fighters\\*.json");
+			var fighters = new List<string>();
+			foreach (var f in fighterFiles)
+			{
+				var data = Mix.GetStream(f);
+				var first = (char)data.ReadByte();
+				data.Close();
+				if (first != '{')
+					continue;
+				fighters.Add(f.Substring(f.IndexOf('\\') + 1).Replace(".json", string.Empty));
+			}
+
 			if (Args.Length >= 3 && Args[0] == "/edit")
 			{
 				LoadingScreen.Start(() =>
@@ -87,21 +100,40 @@ namespace Kafe
 					Components.Add(new Editor("locales\\" + Args[1] + ".json", Args[2] + ".json"));
 				});
 			}
+			else if (Args.Length > 0 && Args[0] == "/quick")
+			{
+				var names = new string[2];
+				var colors = new int[2];
+				var rand = new Random();
+				for (var i = 0; i < 2; i++)
+					names[i] = fighters[rand.Next(fighters.Count)];
+				for (var i = 0; i < Args.Length - 1; i++)
+				{
+					names[i] = Args[i + 1].ToLowerInvariant();
+					colors[i] = 0;
+					if (names[i].Contains(","))
+					{
+						colors[i] = int.Parse(names[i].Substring(names[i].IndexOf(',') + 1));
+						names[i] = names[i].Remove(names[i].IndexOf(','));
+					}
+				}
+				//Ensure mirror matches have distinct colors
+				if (names[0] == names[1] && colors[0] == colors[1])
+					colors[1]++;
+				LoadingScreen.Start(() =>
+				{
+					var left = new Character(names[0], colors[0]);
+					var right = new Character(names[1], colors[1]);
+					Components.Add(new Arena("locales\\mci_corridor.json", left, right));
+				});
+			}
 			else
 			{
 				LoadingScreen.Start(() =>
 				{
-					var fighters = Mix.GetFilesWithPattern("fighters\\*.json");
 					var fighterList = new List<Character>();
 					foreach (var f in fighters)
-					{
-						var data = Mix.GetStream(f);
-						var first = (char)data.ReadByte();
-						data.Close();
-						if (first != '{')
-							continue;
-						fighterList.Add(new Character(f.Substring(f.IndexOf('\\') + 1), 0));
-					}
+						fighterList.Add(new Character(f, 0));
 					Kafe.Characters = fighterList.ToArray();
 					Components.Add(new TitleBackground());
 					Components.Add(new TitleScreen());
@@ -259,6 +291,7 @@ namespace Kafe
 				return;
 			}
 
+			var control = Input.Controls[0];
 			if (Input.WasJustReleased(Keys.Y))
 			{
 				Kafe.Me.Components.Remove(this);
@@ -277,7 +310,7 @@ namespace Kafe
 				else
 					onNo();
 			}
-			else if (Input.TrgLeft || Input.TrgRight)
+			else if (control.TrgLeft || control.TrgRight)
 				onRight = !onRight;
 		}
 

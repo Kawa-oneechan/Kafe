@@ -1,26 +1,54 @@
-{
-	"keyboard" : {
-		"up" : "Up",
-		"down" : "Down",
-		"left" : "Left",
-		"right" : "Right",
-		"a" : "Z",
-		"b" : "X",
-		"c" : "C",
-		"d" : "A",
-		"e" : "S",
-		"f" : "D",
+[
+	{	//Player 1
+		"keyboard" : {
+			"up" : "Up",
+			"down" : "Down",
+			"left" : "Left",
+			"right" : "Right",
+			"a" : "Z",
+			"b" : "X",
+			"c" : "C",
+			"d" : "A",
+			"e" : "S",
+			"f" : "D",
+		},
+		"gamepad" : {
+			"up" : "DPadUp",
+			"down" : "DPadDown",
+			"left" : "DPadLeft",
+			"right" : "DPadRight",
+			"a" : "A",
+			"b" : "B",
+			"c" : "LeftShoulder",
+			"d" : "X",
+			"e" : "Y",
+			"f" : "RightShoulder",
+		}
 	},
-	"gamepad" : {
-		"up" : "DPadUp",
-		"down" : "DPadDown",
-		"left" : "DPadLeft",
-		"right" : "DPadRight",
-		"a" : "A",
-		"b" : "B",
-		"c" : "LeftShoulder",
-		"d" : "X",
-		"e" : "Y",
-		"f" : "RightShoulder",
+	{	//Player 2
+		"keyboard" : {
+			"up" : "I",
+			"down" : "K",
+			"left" : "J",
+			"right" : "L",
+			"a" : "F",
+			"b" : "G",
+			"c" : "H",
+			"d" : "R",
+			"e" : "T",
+			"f" : "Y",
+		},
+		"gamepad" : {
+			"up" : "DPadUp",
+			"down" : "DPadDown",
+			"left" : "DPadLeft",
+			"right" : "DPadRight",
+			"a" : "A",
+			"b" : "B",
+			"c" : "LeftShoulder",
+			"d" : "X",
+			"e" : "Y",
+			"f" : "RightShoulder",
+		}
 	}
-}
+]

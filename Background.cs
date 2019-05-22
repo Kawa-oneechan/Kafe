@@ -20,8 +20,8 @@ namespace Kafe
 			Sheet = Mix.GetTexture("locales\\" + (json["base"] as string));
 			Layers = new List<BackgroundLayer>();
 			Kafe.Ground = json.ContainsKey("ground") ? (int)(double)json["ground"] : 240;
-			Kafe.LeftStart = json.ContainsKey("start") ? (int)(double)((List<object>)json["start"])[0] : 300;
-			Kafe.RightStart = json.ContainsKey("start") ? (int)(double)((List<object>)json["start"])[1] : 470;
+			Kafe.LeftStart = json.ContainsKey("start") ? (int)(double)((List<object>)json["start"])[0] : 100;
+			Kafe.RightStart = json.ContainsKey("start") ? (int)(double)((List<object>)json["start"])[1] : 100;
 			LeftExtent = 0;
 			RightExtent = 512;
 			if (json.ContainsKey("extent"))
@@ -400,35 +400,38 @@ namespace Kafe
 			if (anim < 128)
 				anim++;
 
-			if (Input.TrgLeft)
+			for (var i = 0; i < numPlayers; i++)
 			{
-				cursor[0]--;
-				if (cursor[0] < 0)
-					cursor[0]++;
-				selection[0] = Kafe.Characters[cursor[0]];
+				var control = Input.Controls[i];
+				if (control.TrgLeft)
+				{
+					cursor[i]--;
+					if (cursor[i] < 0)
+						cursor[i] = Kafe.Characters.Length - 1;
+					selection[i] = Kafe.Characters[cursor[i]];
+				}
+				else if (control.TrgRight)
+				{
+					cursor[i]++;
+					if (cursor[i] >= Kafe.Characters.Length)
+						cursor[i] = 0;
+					selection[i] = Kafe.Characters[cursor[i]];
+				}
+				else if (control.TrgUp)
+				{
+					cursor[i] -= 5;
+					if (cursor[i] < 0)
+						cursor[i] = Kafe.Characters.Length - 1;
+					selection[i] = Kafe.Characters[cursor[i]];
+				}
+				else if (control.TrgDown)
+				{
+					cursor[i] += 5;
+					if (cursor[i] >= Kafe.Characters.Length)
+						cursor[i] = 0;
+					selection[i] = Kafe.Characters[cursor[i]];
+				}
 			}
-			else if (Input.TrgRight)
-			{
-				cursor[0]++;
-				if (cursor[0] >= Kafe.Characters.Length)
-					cursor[0]--;
-				selection[0] = Kafe.Characters[cursor[0]];
-			}
-			else if (Input.TrgUp)
-			{
-				cursor[0] -= 5;
-				if (cursor[0] < 0)
-					cursor[0] += 5;
-				selection[0] = Kafe.Characters[cursor[0]];
-			}
-			else if (Input.TrgDown)
-			{
-				cursor[0] += 5;
-				if (cursor[0] >= Kafe.Characters.Length)
-					cursor[0] -= 5;
-				selection[0] = Kafe.Characters[cursor[0]];
-			}
-
 		}
 
 		public override void Draw(GameTime gameTime)
