@@ -56,13 +56,13 @@ namespace Kafe
 
 	class TitleScreen : DrawableGameComponent
 	{
-		private Texture2D titleE, titleF;
+		private Texture2D title, logo;
 		private int anim, selection;
 
 		public TitleScreen() : base(Kafe.Me)
 		{
-			titleE = Mix.GetTexture("title_e.png");
-			titleF = Mix.GetTexture("title_f.png");
+			title = Mix.GetTexture("title_logo.png");
+			logo = Mix.GetTexture("firrhna_logo.png");
 			Kafe.CanExit = true;
 			selection = 0;
 		}
@@ -70,8 +70,9 @@ namespace Kafe
 		public override void Update(GameTime gameTime)
 		{
 			base.Update(gameTime);
-			if (anim < 128)
-				anim++;
+			if (gameTime.TotalGameTime.Seconds > 2)
+				if (anim < 128)
+					anim++;
 
 			if (Input.WasJustReleased(Keys.Enter))
 			{
@@ -112,15 +113,21 @@ namespace Kafe
 
 		public override void Draw(GameTime gameTime)
 		{
-			base.Draw(gameTime);
 			var batch = Kafe.SpriteBatch;
+			if (gameTime.TotalGameTime.Seconds < 2)
+			{
+				batch.Begin();
+				batch.Draw(logo, Vector2.Zero, Color.White);
+				batch.End();
+				return;
+			}
+
+			base.Draw(gameTime);
 			batch.Begin();
 			var dst = new Vector2(Kafe.ScreenWidth / 2, Kafe.ScreenHeight / 2);
-			var center = new Vector2(titleE.Width / 2, titleE.Height / 2);
+			var center = new Vector2(title.Width / 2, title.Height / 2);
 
-			batch.Draw(titleF, dst, null, Color.White, 0.0f, center, (anim < 32) ? anim / 32f : 1f, SpriteEffects.None, 0);
-			if (anim > 64)
-				batch.Draw(titleE, dst, null, Color.White, 0.0f, center, (anim < 96) ? 2f - ((anim - 64) / 32f) : 1f, SpriteEffects.None, 0);
+			batch.Draw(title, dst, null, Color.White, 0.0f, center, (anim < 32) ? anim / 32f : 1f, SpriteEffects.None, 0);
 
 			batch.End();
 		}
