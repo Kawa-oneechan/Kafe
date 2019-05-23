@@ -65,8 +65,13 @@ namespace Kafe
 				}
 				else if (control.TrgA || control.TrgB || control.TrgC || control.TrgD || control.TrgE || control.TrgF)
 				{
-					//Yeah, allow any of them.
 					locked[i] = true;
+					if (control.TrgA) selection[i].ColorSwap = 0;
+					else if (control.TrgB) selection[i].ColorSwap = 1;
+					else if (control.TrgC) selection[i].ColorSwap = 2;
+					else if (control.TrgD) selection[i].ColorSwap = 3;
+					else if (control.TrgE) selection[i].ColorSwap = 4;
+					else if (control.TrgF) selection[i].ColorSwap = 5;
 					selection[i].SwitchTo(StandardAnims.Select);
 				}
 				if (cursor[i] == cursor[i ^ 1])
