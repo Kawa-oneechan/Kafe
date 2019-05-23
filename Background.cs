@@ -173,15 +173,6 @@ namespace Kafe
 			if (Movement.Length() != 0)
 			{
 				movementOrigin += Movement;
-				//TODO: can we do better?
-				while (movementOrigin.X < -Rect.Width)
-					movementOrigin.X += Rect.Width;
-				while (movementOrigin.Y < -Rect.Height)
-					movementOrigin.Y -= Rect.Height;
-				while (movementOrigin.X > Rect.Width)
-					movementOrigin.X -= Rect.Width;
-				while (movementOrigin.Y > Rect.Height)
-					movementOrigin.Y -= Rect.Height;
 			}
 		}
 
@@ -214,11 +205,13 @@ namespace Kafe
 					blendState.ColorDestinationBlend = Blend.One;
 					break;
 			}
-			Kafe.SpriteBatch.Begin(SpriteSortMode.Immediate, blendState);
 			var targetPos = (-Kafe.Camera + Origin) * Parallax;
+
+			var batch = Kafe.SpriteBatch;
 
 			if (Floor)
 			{
+				batch.Begin(SpriteSortMode.Immediate, blendState);
 				var src = new Rectangle(Rect.Left, Rect.Top, Rect.Width, 1);
 				var displacement = (Kafe.Camera.X - Parent.LeftExtent - FloorVals[0]) / FloorVals[1];
 				for (var row = 0; row < Rect.Height; row++)
@@ -228,6 +221,7 @@ namespace Kafe
 					targetPos.X -= displacement;
 					targetPos.Y += 1;
 				}
+				batch.End();
 			}
 			else
 			{
@@ -236,22 +230,19 @@ namespace Kafe
 				if (Movement.Length() != 0)
 				{
 					targetPos += movementOrigin;
-					//TODO: can we do better?
-					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(-Rect.Width, -Rect.Height), src, Color.White);
-					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(-Rect.Width, 0), src, Color.White);
-					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(-Rect.Width, Rect.Height), src, Color.White);
-					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(0, Rect.Height), src, Color.White);
-					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(Rect.Width, Rect.Height), src, Color.White);
-					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(Rect.Width, 0), src, Color.White);
-					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(Rect.Width, -Rect.Height), src, Color.White);
-					Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos + new Vector2(0, -Rect.Height), src, Color.White);
+					batch.Begin(SpriteSortMode.Immediate, blendState, SamplerState.LinearWrap);
+					batch.Draw(Parent.Sheet, Vector2.Zero, new Rectangle((int)targetPos.X, (int)targetPos.Y, src.Width * 3, src.Height * 3), Color.White);
+					batch.End();
 				}
-	
-				if (Frames.Length > 0)
-					src.Offset(Rect.Width * Frames[currentFrame], 0);
-				Kafe.SpriteBatch.Draw(Parent.Sheet, targetPos, src, Color.White);
+				else
+				{
+					if (Frames.Length > 0)
+						src.Offset(Rect.Width * Frames[currentFrame], 0);
+					batch.Begin(SpriteSortMode.Immediate, blendState);
+					batch.Draw(Parent.Sheet, targetPos, src, Color.White);
+					batch.End();
+				}
 			}
-			Kafe.SpriteBatch.End();
 		}
 	}
 }

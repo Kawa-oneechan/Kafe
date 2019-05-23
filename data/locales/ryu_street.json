@@ -2,7 +2,7 @@
 	"name": "Street",
 	"location": "",
 	"base": "ryu_street",
-	"extent": [ 144, 496 ],
+	"extent": [ 144, 400 ],
 	"layers": [
 		{
 			"origin": [ 0, 0 ],
