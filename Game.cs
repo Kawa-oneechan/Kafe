@@ -160,12 +160,12 @@ namespace Kafe
 				return;
 			}
 
-			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Input.WasJustReleased(Keys.Escape) && CanExit && !ExitConfirm)
+			/* if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Input.WasJustReleased(Keys.Escape) && CanExit && !ExitConfirm)
 			{
 				//Exit();
 				ExitConfirm = true;
 				ConfirmScreen.Ask("Are you sure you want to exit?", () => { Exit(); }, () => { ExitConfirm = Paused = false; Input.Flush(); });
-			}
+			} */
 			base.Update(gameTime);
 		}
 

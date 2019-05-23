@@ -14,8 +14,7 @@ namespace Kafe
 
 		private static int gridStart = 49;
 
-		public TitleBackground()
-			: base(Kafe.Me)
+		public TitleBackground() : base(Kafe.Me)
 		{
 			sheet = Mix.GetTexture("menu.png");
 			backdrop = Mix.GetTexture("menu_back.png");
@@ -60,8 +59,7 @@ namespace Kafe
 		private Texture2D titleE, titleF;
 		private int anim, selection;
 
-		public TitleScreen()
-			: base(Kafe.Me)
+		public TitleScreen() : base(Kafe.Me)
 		{
 			titleE = Mix.GetTexture("title_e.png");
 			titleF = Mix.GetTexture("title_f.png");
@@ -86,7 +84,7 @@ namespace Kafe
 							Kafe.Me.Components.Remove(this);
 							LoadingScreen.Start(() =>
 							{
-								var charSelect = new CharacterSelect(false) { Enabled = false };
+								var charSelect = new CharacterSelect(true) { Enabled = false }; //don't forget to set that back to false!
 								Kafe.Me.Components.Add(charSelect);
 								Kafe.DoTransition(true, () => { charSelect.Enabled = true; });
 							});
@@ -109,7 +107,6 @@ namespace Kafe
 						ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Kafe.ExitConfirm = Kafe.Paused = false; Input.Flush(); });
 						break;
 				}
-				//LoadingScreen.Start(() => { Kafe.Me.Components.Add(new CharacterSelectScreen()); });
 			}
 		}
 

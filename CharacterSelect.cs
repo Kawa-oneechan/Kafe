@@ -10,18 +10,20 @@ namespace Kafe
 	class CharacterSelect : DrawableGameComponent
 	{
 		private Texture2D stuff;
-		private int anim, numPlayers;
+		private int numPlayers;
 		private int[] cursor;
 		private Character[] selection;
+		private bool[] locked;
+		private long lockTimer = -1;
 
-		private Vector2[] positions = new[] { new Vector2(104, Kafe.Ground), new Vector2(484, Kafe.Ground) };
+		private Vector2[] positions = new[] { new Vector2(100, Kafe.Ground), new Vector2(Kafe.ScreenWidth - 100, Kafe.Ground) };
 		private int[] namePositions = new[] { 40, 340 };
 
-		public CharacterSelect(bool versus)
-			: base(Kafe.Me)
+		public CharacterSelect(bool versus) : base(Kafe.Me)
 		{
 			stuff = Mix.GetTexture("menu.png");
 			cursor = new[] { 1, 0 };
+			locked = new[] { false, false };
 			selection = new[] { Kafe.Characters[1], Kafe.Characters[0] };
 			numPlayers = versus ? 2 : 1;
 			Kafe.CanExit = false;
@@ -30,39 +32,77 @@ namespace Kafe
 		public override void Update(GameTime gameTime)
 		{
 			base.Update(gameTime);
-			if (anim < 128)
-				anim++;
 
 			for (var i = 0; i < numPlayers; i++)
 			{
+				if (locked[i])
+					continue;
 				var control = Input.Controls[i];
+				var oldCursor = cursor[i];
 				if (control.TrgLeft)
 				{
 					cursor[i]--;
 					if (cursor[i] < 0)
 						cursor[i] = Kafe.Characters.Length - 1;
-					selection[i] = Kafe.Characters[cursor[i]];
 				}
 				else if (control.TrgRight)
 				{
 					cursor[i]++;
 					if (cursor[i] >= Kafe.Characters.Length)
 						cursor[i] = 0;
-					selection[i] = Kafe.Characters[cursor[i]];
 				}
 				else if (control.TrgUp)
 				{
 					cursor[i] -= 5;
 					if (cursor[i] < 0)
 						cursor[i] = Kafe.Characters.Length - 1;
-					selection[i] = Kafe.Characters[cursor[i]];
 				}
 				else if (control.TrgDown)
 				{
 					cursor[i] += 5;
 					if (cursor[i] >= Kafe.Characters.Length)
 						cursor[i] = 0;
+				}
+				else if (control.TrgA || control.TrgB || control.TrgC || control.TrgD || control.TrgE || control.TrgF)
+				{
+					//Yeah, allow any of them.
+					locked[i] = true;
+					selection[i].SwitchTo(StandardAnims.Select);
+				}
+				if (cursor[i] == cursor[i ^ 1])
+					cursor[i] = oldCursor;
+				else
 					selection[i] = Kafe.Characters[cursor[i]];
+			}
+			if (lockTimer == -1)
+			{
+				if (locked[0] && locked[1])
+					lockTimer = 1000;
+			}
+			else
+			{
+				lockTimer -= gameTime.ElapsedGameTime.Milliseconds;
+				if (lockTimer <= 0)
+				{
+					this.Enabled = false;
+					Kafe.DoTransition(false, () =>
+					{
+						Kafe.Me.Components.Remove(this);
+						for (var i = 0; i < Kafe.Me.Components.Count; i++)
+						{
+							if (Kafe.Me.Components[i] is TitleBackground)
+							{
+								Kafe.Me.Components.RemoveAt(i);
+								break;
+							}
+						}
+						LoadingScreen.Start(() =>
+						{
+							var arena = new Arena("locales\\mci_corridor.json", selection[0], selection[1]) { Enabled = false };
+							Kafe.Me.Components.Add(arena);
+							Kafe.DoTransition(true, () => { arena.Enabled = true; });							
+						});
+					});
 				}
 			}
 		}

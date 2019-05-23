@@ -231,7 +231,7 @@ namespace Kafe
 			}
 		}
 
-		private void SwitchTo(object anim)
+		public void SwitchTo(object anim)
 		{
 			var newAnim = 0;
 			if (anim == null)
