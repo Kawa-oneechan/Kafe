@@ -26,7 +26,6 @@ namespace Kafe
 			locked = new[] { false, false };
 			selection = new[] { Kafe.Characters[1], Kafe.Characters[0] };
 			numPlayers = versus ? 2 : 1;
-			Kafe.CanExit = false;
 		}
 
 		public override void Update(GameTime gameTime)

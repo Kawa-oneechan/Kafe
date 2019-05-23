@@ -63,7 +63,6 @@ namespace Kafe
 		{
 			title = Mix.GetTexture("title_logo.png");
 			logo = Mix.GetTexture("firrhna_logo.png");
-			Kafe.CanExit = true;
 			selection = 0;
 		}
 
@@ -104,8 +103,8 @@ namespace Kafe
 						});
 						break;
 					case 2: //Quit
-						Kafe.ExitConfirm = true;
-						ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Kafe.ExitConfirm = Kafe.Paused = false; Input.Flush(); });
+						//TODO: make this a method we can call from wherever
+						ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Kafe.Paused = false; Input.Flush(); });
 						break;
 				}
 			}
