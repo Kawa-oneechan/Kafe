@@ -529,6 +529,7 @@ namespace Kafe
 			}
 			else
 			{
+				//TODO: something's fucky here
 				posX -= (int)CelOffset.X;
 			}
 		}

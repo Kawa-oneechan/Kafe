@@ -55,8 +55,6 @@ namespace Kafe
 					Anything = true;
 			}
 
-			//Remap gamepad to keyboard
-			//TODO: use a configurable LUT
 			foreach (var control in Controls)
 				control.Update();
 		}

@@ -105,7 +105,7 @@ namespace Kafe
 				var rand = new Random();
 				for (var i = 0; i < 2; i++)
 					names[i] = fighters[rand.Next(fighters.Count)];
-				var numNames = (Args.Length > 3) ? 1 : 2;
+				var numNames = (Args.Length > 2) ? 2 : 1;
 				for (var i = 0; i < numNames; i++)
 				{
 					names[i] = Args[i + 1].ToLowerInvariant();
@@ -119,7 +119,7 @@ namespace Kafe
 				//Ensure mirror matches have distinct colors
 				if (names[0] == names[1] && colors[0] == colors[1])
 					colors[1]++;
-				var arena = "locales\\" + ((Args.Length > 4) ? Args[3] : arenas[rand.Next(arenas.Count)]);
+				var arena = "locales\\" + ((Args.Length > 3) ? Args[3] : arenas[rand.Next(arenas.Count)]);
 				LoadingScreen.Start(() =>
 				{
 					var left = new Character(names[0], colors[0]);
