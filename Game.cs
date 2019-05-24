@@ -73,29 +73,24 @@ namespace Kafe
 			TransitionEffect = GetEffect("transition");
 			transitionImage = Mix.GetTexture("transition");
 
-			var fighterFiles = Mix.GetFilesWithPattern("fighters\\*.json");
+			var fighterFiles = Mix.GetFilesWithPattern("fighters\\*.char.json");
 			var fighters = new List<string>();
 			foreach (var f in fighterFiles)
 			{
-				var data = Mix.GetStream(f);
-				var first = (char)data.ReadByte();
-				data.Close();
-				if (first != '{')
-					continue;
-				fighters.Add(f.Substring(f.IndexOf('\\') + 1).Replace(".json", string.Empty));
+				fighters.Add(f.Substring(f.IndexOf('\\') + 1));
 			}
-			var arenaFiles = Mix.GetFilesWithPattern("locales\\*.json");
+			var arenaFiles = Mix.GetFilesWithPattern("locales\\*.bg.json");
 			var arenas = new List<string>();
 			foreach (var a in arenaFiles)
 			{
-				arenas.Add(a.Substring(a.IndexOf('\\') + 1).Replace(".json", string.Empty));
+				arenas.Add(a.Substring(a.IndexOf('\\') + 1));
 			}
 
 			if (Args.Length >= 3 && Args[0] == "/edit")
 			{
 				LoadingScreen.Start(() =>
 				{
-					Components.Add(new Editor("locales\\" + Args[1] + ".json", Args[2] + ".json"));
+					Components.Add(new Editor("locales\\" + Args[1] + ".bg.json", Args[2] + ".char.json"));
 				});
 			}
 			else if (Args.Length > 0 && Args[0] == "/quick")
@@ -115,11 +110,13 @@ namespace Kafe
 						colors[i] = int.Parse(names[i].Substring(names[i].IndexOf(',') + 1));
 						names[i] = names[i].Remove(names[i].IndexOf(','));
 					}
+					if (!names[i].EndsWith(".char.json"))
+						names[i] += ".char.json";
 				}
 				//Ensure mirror matches have distinct colors
 				if (names[0] == names[1] && colors[0] == colors[1])
 					colors[1]++;
-				var arena = "locales\\" + ((Args.Length > 3) ? Args[3] : arenas[rand.Next(arenas.Count)]);
+				var arena = "locales\\" + ((Args.Length > 3) ? Args[3] + ".bg.json" : arenas[rand.Next(arenas.Count)]);
 				LoadingScreen.Start(() =>
 				{
 					var left = new Character(names[0], colors[0]);

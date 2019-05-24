@@ -259,10 +259,9 @@ namespace Kafe
 				var getFiles = Directory.GetFiles("data", pattern, SearchOption.AllDirectories);
 				foreach (var f in getFiles)
 				{
-					if (f.StartsWith("data\\"))
-						ret.Add(f.Substring(5));
-					else
-						ret.Add(f);
+					var f2 = f.Substring(5);
+					if (!ret.Contains(f2))
+						ret.Add(f2);
 				}
 			}
 			return ret.ToArray();
