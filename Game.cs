@@ -73,13 +73,6 @@ namespace Kafe
 			TransitionEffect = GetEffect("transition");
 			transitionImage = Mix.GetTexture("transition");
 
-			//var felicia = new Character("felicia.json", 3);
-			//var sakura = new Character("sakura.json", 1);
-
-			//var arena = new Arena("locales\\ryu_street.json", felicia, sakura);
-			//var arena = new Editor("locales\\mci_corridor.json", "sakura.json");
-			//Components.Add(arena);
-
 			var fighterFiles = Mix.GetFilesWithPattern("fighters\\*.json");
 			var fighters = new List<string>();
 			foreach (var f in fighterFiles)
@@ -90,6 +83,12 @@ namespace Kafe
 				if (first != '{')
 					continue;
 				fighters.Add(f.Substring(f.IndexOf('\\') + 1).Replace(".json", string.Empty));
+			}
+			var arenaFiles = Mix.GetFilesWithPattern("locales\\*.json");
+			var arenas = new List<string>();
+			foreach (var a in arenaFiles)
+			{
+				arenas.Add(a.Substring(a.IndexOf('\\') + 1).Replace(".json", string.Empty));
 			}
 
 			if (Args.Length >= 3 && Args[0] == "/edit")
@@ -106,7 +105,8 @@ namespace Kafe
 				var rand = new Random();
 				for (var i = 0; i < 2; i++)
 					names[i] = fighters[rand.Next(fighters.Count)];
-				for (var i = 0; i < Args.Length - 1; i++)
+				var numNames = (Args.Length > 3) ? 1 : 2;
+				for (var i = 0; i < numNames; i++)
 				{
 					names[i] = Args[i + 1].ToLowerInvariant();
 					colors[i] = 0;
@@ -119,11 +119,12 @@ namespace Kafe
 				//Ensure mirror matches have distinct colors
 				if (names[0] == names[1] && colors[0] == colors[1])
 					colors[1]++;
+				var arena = "locales\\" + ((Args.Length > 4) ? Args[3] : arenas[rand.Next(arenas.Count)]);
 				LoadingScreen.Start(() =>
 				{
 					var left = new Character(names[0], colors[0]);
 					var right = new Character(names[1], colors[1]);
-					Components.Add(new Arena("locales\\mci_corridor.json", left, right));
+					Components.Add(new Arena(arena, left, right));
 				});
 			}
 			else
