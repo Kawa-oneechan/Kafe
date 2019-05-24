@@ -1,7 +1,0 @@
-//TODO: convert to new system
-{
-	"name": "Las Vegas",
-	"base": "vegas",
-	"type": "parallax",
-	"floor": 160
-}

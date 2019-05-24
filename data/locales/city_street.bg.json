@@ -1,0 +1,22 @@
+{
+	"name": "City Street",
+	"location": "",
+	"base": "city_street",
+	"extent": [ 0, 320 ],
+	"ground": 240,
+	"layers": [
+		{
+			"origin": [ 0, 0 ],
+			"rect": [ 64, 0, 800, 270 ]
+		},
+		{
+			"origin": [ 216, 24 ],
+			"rect": [ 8, 280, 24, 16 ],
+			"frames": [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0 ],
+			"rate": 120
+		},
+		{
+			"fighters": true
+		}
+	]
+}
