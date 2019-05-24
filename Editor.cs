@@ -70,9 +70,6 @@ namespace Kafe
 
 		public override void Update(GameTime gameTime)
 		{
-			if (Kafe.Paused)
-				return;
-
 			if (Subject != null)
 			{
 				if (!stepMode)
@@ -132,6 +129,8 @@ namespace Kafe
 					Kafe.Me.Window.Title = Kafe.Camera.X.ToString();
 				}
 
+				if (Input.WasJustReleased(Keys.Escape))
+					Kafe.AskToQuit();
 			}
 			base.Update(gameTime);
 		}

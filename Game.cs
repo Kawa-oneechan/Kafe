@@ -32,7 +32,6 @@ namespace Kafe
 
 		public static int Ground = 240, LeftStart = 100, RightStart = 100;
 		public static Vector2 Camera;
-		public static bool Paused;
 
 		public Kafe() : base()
 		{
@@ -208,7 +207,7 @@ namespace Kafe
 
 		public static void AskToQuit()
 		{
-			ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Kafe.Paused = false; Input.Flush(); });
+			ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Input.Flush(); });
 		}
 	}
 
@@ -284,7 +283,6 @@ namespace Kafe
 			me.animTime = 0;
 			me.onRight = false;
 
-			Kafe.Paused = true;
 			Kafe.PauseAll(false, me);
 			Kafe.Me.Components.Add(me);
 		}

@@ -36,8 +36,6 @@ namespace Kafe
 
 		public override void Update(GameTime gameTime)
 		{
-			if (Kafe.Paused)
-				return;
 			base.Update(gameTime);
 
 			if (Kafe.Camera.X < LeftExtent) Kafe.Camera.X = LeftExtent;

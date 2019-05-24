@@ -31,9 +31,6 @@ namespace Kafe
 
 		public override void Update(GameTime gameTime)
 		{
-			//TODO: would this not be the same as setting GameComponent.Enabled to false?
-			if (Kafe.Paused)
-				return;
 			timer += (int)gameTime.ElapsedGameTime.Milliseconds;
 			if (timer > Kafe.Speed)
 			{
