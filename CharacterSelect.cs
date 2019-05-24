@@ -78,6 +78,19 @@ namespace Kafe
 				else
 					selection[i] = Kafe.Characters[cursor[i]];
 			}
+			if (Input.WasJustReleased(Keys.Escape))
+			{
+				Kafe.DoTransition(false, () =>
+				{
+					Kafe.Me.Components.Remove(this);
+					LoadingScreen.Start(() =>
+					{
+						var title = new TitleScreen(true) { Enabled = false };
+						Kafe.Me.Components.Add(title);
+						Kafe.DoTransition(true, () => { title.Enabled = true; });
+					});
+				});
+			}
 			if (lockTimer == -1)
 			{
 				if (locked[0] && locked[1])

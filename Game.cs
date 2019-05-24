@@ -136,7 +136,7 @@ namespace Kafe
 						fighterList.Add(new Character(f, 0));
 					Kafe.Characters = fighterList.ToArray();
 					Components.Add(new TitleBackground());
-					Components.Add(new TitleScreen());
+					Components.Add(new TitleScreen(false));
 				});
 			}
 		}
@@ -190,6 +190,25 @@ namespace Kafe
 			TransitionDelta = 0;
 			transitionIn = goIn;
 			OnTransitionFinish = onFinish;
+		}
+
+		public static void PauseAll(bool enabled, GameComponent but)
+		{
+			foreach (var component in Kafe.Me.Components)
+			{
+				if (but != null && component == but)
+					continue;
+				if (component == Kafe.Input)
+					continue;
+				if (component is TitleBackground)
+					continue;
+				((GameComponent)component).Enabled = enabled;
+			}
+		}
+
+		public static void AskToQuit()
+		{
+			ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Kafe.Paused = false; Input.Flush(); });
 		}
 	}
 
@@ -266,6 +285,7 @@ namespace Kafe
 			me.onRight = false;
 
 			Kafe.Paused = true;
+			Kafe.PauseAll(false, me);
 			Kafe.Me.Components.Add(me);
 		}
 
@@ -287,16 +307,19 @@ namespace Kafe
 			var control = Input.Controls[0];
 			if (Input.WasJustReleased(Keys.Y))
 			{
+				Kafe.PauseAll(true, null);
 				Kafe.Me.Components.Remove(this);
 				onYes();
 			}
 			else if (Input.WasJustReleased(Keys.N) || Input.WasJustReleased(Keys.Escape))
 			{
+				Kafe.PauseAll(true, null);
 				Kafe.Me.Components.Remove(this);
 				onNo();
 			}
 			else if (Input.WasJustReleased(Keys.Enter))
 			{
+				Kafe.PauseAll(true, null);
 				Kafe.Me.Components.Remove(this);
 				if (!onRight)
 					onYes();

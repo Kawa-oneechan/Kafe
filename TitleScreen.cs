@@ -58,22 +58,50 @@ namespace Kafe
 	{
 		private Texture2D title, logo;
 		private int anim, selection;
+		private bool skipLogo;
+		private string[] captions = new[] { "SOLO GAME", "VERSUS GAME", "QUIT" };
 
-		public TitleScreen() : base(Kafe.Me)
+		public TitleScreen(bool skipLogo) : base(Kafe.Me)
 		{
 			title = Mix.GetTexture("title_logo.png");
 			logo = Mix.GetTexture("firrhna_logo.png");
 			selection = 0;
+			this.skipLogo = skipLogo;
+			if (skipLogo)
+				anim = 64;
 		}
 
 		public override void Update(GameTime gameTime)
 		{
 			base.Update(gameTime);
-			if (gameTime.TotalGameTime.Seconds > 2)
+			if (gameTime.TotalGameTime.Seconds > 2 || skipLogo)
 				if (anim < 128)
 					anim++;
 
-			if (Input.WasJustReleased(Keys.Enter))
+			if (anim < 64)
+				return;
+
+			if (Input.Controls[0].TrgUp)
+			{
+				if (selection == 0)
+					selection = captions.Length;
+				selection--;
+			}
+			else if (Input.Controls[0].TrgDown)
+			{
+				selection++;
+				if (selection == captions.Length)
+					selection = 0;
+			}
+			else if (Input.WasJustReleased(Keys.Escape))
+			{
+				Input.Flush();
+				if (selection < 2)
+					selection = 2;
+				else
+					Kafe.AskToQuit();
+			}
+			else if (Input.WasJustReleased(Keys.Enter) || Input.Controls[0].TrgA)
 			{
 				Input.Flush();
 				switch (selection)
@@ -84,7 +112,7 @@ namespace Kafe
 							Kafe.Me.Components.Remove(this);
 							LoadingScreen.Start(() =>
 							{
-								var charSelect = new CharacterSelect(true) { Enabled = false }; //don't forget to set that back to false!
+								var charSelect = new CharacterSelect(false) { Enabled = false };
 								Kafe.Me.Components.Add(charSelect);
 								Kafe.DoTransition(true, () => { charSelect.Enabled = true; });
 							});
@@ -103,8 +131,7 @@ namespace Kafe
 						});
 						break;
 					case 2: //Quit
-						//TODO: make this a method we can call from wherever
-						ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Kafe.Paused = false; Input.Flush(); });
+						Kafe.AskToQuit();
 						break;
 				}
 			}
@@ -127,6 +154,17 @@ namespace Kafe
 			var center = new Vector2(title.Width / 2, title.Height / 2);
 
 			batch.Draw(title, dst, null, Color.White, 0.0f, center, (anim < 32) ? anim / 32f : 1f, SpriteEffects.None, 0);
+
+			if (anim >= 64)
+			{
+				var left = 200;
+				var top = 160;
+				for (var i = 0; i < captions.Length; i++)
+				{
+					Text.Draw(batch, 1, captions[i], left, top, (i == selection) ? Color.White : Color.Gray);
+					top += 20;
+				}
+			}
 
 			batch.End();
 		}
