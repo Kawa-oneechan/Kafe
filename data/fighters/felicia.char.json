@@ -6,7 +6,7 @@
 	"inputs": [
 		{
 			"name": "Weak punch",
-			"sequence": "a",
+			"sequence": "A",
 			"stand": "WP-Stand",
 			"standfar": "WP-Stand",
 			"crouch": null,
@@ -14,7 +14,7 @@
 		},
 		{
 			"name": "Medium punch",
-			"sequence": "b",
+			"sequence": "B",
 			"stand": "MP-Stand",
 			"standfar": "MP-Stand",
 			"crouch": null,
@@ -22,7 +22,7 @@
 		},
 		{
 			"name": "Heavy punch",
-			"sequence": "a",
+			"sequence": "C",
 			"stand": "HP-Stand",
 			"standfar": "HP-Stand",
 			"crouch": null,

@@ -69,6 +69,8 @@ namespace Kafe
 		private static Texture2D shadow, editGreebles;
 		private int editBox;
 		private string copiedBoxes;
+		private string inputSequence;
+		private int inputTimer;
 
 		public string Name { get; set; }
 
@@ -79,6 +81,7 @@ namespace Kafe
 		public Vector2 Velocity { get; set; }
 		public bool FacingLeft { get; set; }
 		public int FrameDelay { get; set; }
+		public bool Locked { get; set; }
 		public Character Opponent { get; set; }
 
 		public bool EditMode { get; set; }
@@ -183,6 +186,8 @@ namespace Kafe
 			if (!refresh || currentFrame >= totalFrames)
 				currentFrame = 0;
 			SetupImage();
+
+			inputSequence = string.Empty;
 		}
 
 		public void SetupFrames()
@@ -282,15 +287,11 @@ namespace Kafe
 				return;
 			var advance = (Controls.Right && !FacingLeft) || (Controls.Left && FacingLeft);
 			var retreat = (Controls.Left && !FacingLeft) || (Controls.Right && FacingLeft);
-			var oldFacing = FacingLeft;
-			if (Opponent != null && !EditMode)
-				FacingLeft = (Position.X > Opponent.Position.X);
 
 			switch ((StandardAnims)currentAnim)
 			{
 				case StandardAnims.Idle:
-					if (FacingLeft != oldFacing) SwitchTo(StandardAnims.Turn);
-					else if (Controls.Up)
+					if (Controls.Up)
 					{
 						if (advance) SwitchTo(StandardAnims.JumpAdv);
 						else if (retreat) SwitchTo(StandardAnims.JumpRet);
@@ -329,7 +330,6 @@ namespace Kafe
 					break;
 				case StandardAnims.Crouch:
 					if (!Controls.Down) SwitchTo(StandardAnims.CrouchOut);
-					else if (FacingLeft != oldFacing) SwitchTo(StandardAnims.CrouchTurn);
 					break;
 				case StandardAnims.CrouchOut:
 					SwitchTo(StandardAnims.Idle);
@@ -386,15 +386,28 @@ namespace Kafe
 
 		public void DecideCancelAnim()
 		{
-			if (SelectMode)
+			if (SelectMode || Locked)
 				return;
 			var advance = (Controls.Right && !FacingLeft) || (Controls.Left && FacingLeft);
 			var retreat = (Controls.Left && !FacingLeft) || (Controls.Right && FacingLeft);
+			
+			var oldFacing = FacingLeft;
+			if (Opponent != null && !EditMode)
+			{
+				switch ((StandardAnims)currentAnim)
+				{
+					case StandardAnims.Idle:
+					case StandardAnims.Crouch:
+						FacingLeft = (Position.X > Opponent.Position.X);
+						break;
+				}
+			}
 
 			switch ((StandardAnims)currentAnim)
 			{
 				case StandardAnims.Idle:
-					if (Controls.Up)
+					if (FacingLeft != oldFacing) SwitchTo(StandardAnims.Turn);
+					else if (Controls.Up)
 					{
 						if (advance) SwitchTo(StandardAnims.JumpAdv);
 						else if (retreat) SwitchTo(StandardAnims.JumpRet);
@@ -419,7 +432,8 @@ namespace Kafe
 					SwitchTo(StandardAnims.Crouch);
 					break;
 				case StandardAnims.Crouch:
-					if (!Controls.Down) SwitchTo(StandardAnims.CrouchOut);
+					if (FacingLeft != oldFacing) SwitchTo(StandardAnims.Turn);
+					else if (!Controls.Down) SwitchTo(StandardAnims.CrouchOut);
 					break;
 				case StandardAnims.CrouchOut:
 					SwitchTo(StandardAnims.Idle);
@@ -461,6 +475,8 @@ namespace Kafe
 		{
 			var advance = (Controls.Right && !FacingLeft) || (Controls.Left && FacingLeft);
 			var retreat = (Controls.Left && !FacingLeft) || (Controls.Right && FacingLeft);
+			var trgAdvance = (Controls.TrgRight && !FacingLeft) || (Controls.TrgLeft && FacingLeft);
+			var trgRetreat = (Controls.TrgLeft && !FacingLeft) || (Controls.TrgRight && FacingLeft);
 
 			if (FrameDelay-- <= 0)
 			{
@@ -520,6 +536,39 @@ namespace Kafe
 			else if (Velocity.X < 0)
 				Velocity += new Vector2(0.5f, 0);
 			*/
+
+			if (inputTimer > 0)
+			{
+				inputTimer--;
+				if (inputTimer == 0)
+					inputSequence = string.Empty;
+			}
+			if (!Locked)
+			{
+				if (Controls.TrgA && !inputSequence.EndsWith("A")) { inputSequence += "A"; inputTimer = 20; }
+				if (Controls.TrgB && !inputSequence.EndsWith("B")) { inputSequence += "B"; inputTimer = 20; }
+				if (Controls.TrgC && !inputSequence.EndsWith("C")) { inputSequence += "C"; inputTimer = 20; }
+				if (Controls.TrgD && !inputSequence.EndsWith("D")) { inputSequence += "D"; inputTimer = 20; }
+				if (Controls.TrgE && !inputSequence.EndsWith("E")) { inputSequence += "E"; inputTimer = 20; }
+				if (Controls.TrgF && !inputSequence.EndsWith("F")) { inputSequence += "F"; inputTimer = 20; }
+				if (trgAdvance && !inputSequence.EndsWith("f")) { inputSequence += "f"; inputTimer = 20; }
+				if (trgRetreat && !inputSequence.EndsWith("b")) { inputSequence += "b"; inputTimer = 20; }
+				if (Controls.TrgDown && !inputSequence.EndsWith("d")) { inputSequence += "d"; inputTimer = 20; }
+				//TODO: find any listed moves found in the Inputs array and execute them.
+				/* These should probably be listed (and/or sorted on load) by length of the input string.
+				 * An example:
+					{
+						"name": "Weak punch",
+						"sequence": "A",
+						"stand": "WP-Stand",
+						"standfar": "WP-Stand",
+						"crouch": null,
+						"air": null
+					}
+				 * Should inputSequence end with "A", assuming longer inputs have been exhausted already,
+				 * we should determine our current state and ChangeAnim to whatever is specified.
+				 */
+			}
 		}
 
 		public void PreDraw()
@@ -561,6 +610,12 @@ namespace Kafe
 			StartBatch(batch);
 			batch.Draw(sheet, new Vector2(posX, posY), Image, Color.White, 0.0f, Vector2.Zero, 1.0f, FacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0.0f);
 			batch.End();
+			if (!EditMode)
+			{
+				batch.Begin();
+				Text.DrawEx(batch, 0, inputSequence, FacingLeft ? Kafe.ScreenWidth - 4 : 4, 4, FacingLeft ? Alignment.Right : Alignment.Left);
+				batch.End();
+			}
 		}
 
 		public void DrawEditStuff(SpriteBatch batch, bool stepMode)
