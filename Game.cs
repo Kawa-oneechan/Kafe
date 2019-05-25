@@ -157,6 +157,9 @@ namespace Kafe
 				return;
 			}
 			base.Update(gameTime);
+
+			if (Input.WasJustPressed(Keys.F12))
+				TakeScreenshot();
 		}
 
 		protected override void Draw(GameTime gameTime)
@@ -206,6 +209,18 @@ namespace Kafe
 		public static void AskToQuit()
 		{
 			ConfirmScreen.Ask("Are you sure you want to exit?", () => { Kafe.Me.Exit(); }, () => { Input.Flush(); });
+		}
+
+		public void TakeScreenshot()
+		{
+			var newThread = new System.Threading.Thread(ScreenshotThread);
+			newThread.Start();
+		}
+
+		private void ScreenshotThread()
+		{
+			using (var stream = System.IO.File.OpenWrite(DateTime.Now.Ticks.ToString() + ".png"))
+				rawScreen.SaveAsPng(stream, Kafe.ScreenWidth, Kafe.ScreenHeight);
 		}
 	}
 
