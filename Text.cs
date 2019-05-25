@@ -23,6 +23,8 @@ namespace Kafe
 		}
 	}
 
+	public enum Alignment { Left, Right, Center }
+
 	public static class Text
 	{
 		private static Font[] fonts;
@@ -72,7 +74,6 @@ namespace Kafe
 				}
 				if (c == '|' && i < text.Length - 3 && text[i + 3] == '|')
 				{
-
 					switch (text[i + 1])
 					{
 						case 'c':
@@ -85,6 +86,50 @@ namespace Kafe
 				batch.Draw(f.Sheet, pos, src, color.HasValue ? color.Value : Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
 				pos.X += f.Widths[c - 32] + spacing;
 			}
+		}
+
+		public static int Measure(int font, string text, int spacing = 0)
+		{
+			if (fonts == null)
+				LoadFonts();
+			if (font >= fonts.Length)
+				font = 0;
+			var f = fonts[font];
+			var maxWidth = 0;
+			var thisWidth = 0;
+			text = text.Replace("\r\n", "\n");
+			for (var i = 0; i < text.Length; i++)
+			{
+				var c = text[i];
+				if (c == '\n')
+				{
+					thisWidth = 0;
+					continue;
+				}
+				if (c == '|' && i < text.Length - 3 && text[i + 3] == '|')
+				{
+					i += 3;
+					continue;
+				}
+				thisWidth += f.Widths[c - 32] + spacing;
+				if (thisWidth > maxWidth)
+					maxWidth = thisWidth;
+			}
+			return maxWidth;
+		}
+
+		public static void DrawEx(SpriteBatch batch, int font, string text, int left, int top, Alignment alignment = Alignment.Left, int maxWidth = 0, Color? color = null, int spacing = 0)
+		{
+			if (maxWidth > 0)
+			{
+				//TODO: word-wrap to the best of our abilities
+			}
+			var width = Measure(font, text, spacing);
+			if (alignment == Alignment.Right)
+				left -= width;
+			else if (alignment == Alignment.Center)
+				left -= width / 2;
+			Draw(batch, font, text, left, top, color, spacing);
 		}
 	}
 }

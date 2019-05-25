@@ -157,11 +157,11 @@ namespace Kafe
 
 			if (anim >= 64)
 			{
-				var left = 200;
+				const int left = Kafe.ScreenWidth / 2;
 				var top = 160;
 				for (var i = 0; i < captions.Length; i++)
 				{
-					Text.Draw(batch, 1, captions[i], left, top, (i == selection) ? Color.White : Color.Gray);
+					Text.DrawEx(batch, 1, captions[i], left, top, Alignment.Center, 0, (i == selection) ? Color.White : Color.Gray);
 					top += 20;
 				}
 			}
