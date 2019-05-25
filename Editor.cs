@@ -108,9 +108,9 @@ namespace Kafe
 				else if (Input.WasJustReleased(Keys.OemMinus) && Subject.ColorSwap > 0)
 					Subject.ColorSwap--;
 				
-				if (Input.IsHeld(Keys.LeftAlt))
+				if (stepMode && Input.IsHeld(Keys.LeftAlt))
 					Subject.HandleOffsetEdit();
-				else if (Input.IsHeld(Keys.RightAlt))
+				else if (stepMode && Input.IsHeld(Keys.RightAlt))
 					Subject.HandleBoxEdit();
 
 				if (Input.IsHeld(Keys.OemTilde))
@@ -146,7 +146,7 @@ namespace Kafe
 				batch.End();
 				Subject.Draw(batch);
 				batch.Begin();
-				Subject.DrawEditStuff(batch);
+				Subject.DrawEditStuff(batch, stepMode);
 				batch.End();
 			}
 		}
@@ -157,12 +157,12 @@ namespace Kafe
 			var batch = Kafe.SpriteBatch;
 			batch.Begin();
 
-			if (Input.IsHeld(Keys.LeftAlt))
+			if (stepMode && Input.IsHeld(Keys.LeftAlt))
 			{
 				Text.Draw(batch, 1, "Offset mode", 4, Kafe.ScreenHeight - 4 - 24);
-				Text.Draw(batch, 0, "Arrow keys to shift.", 4 , Kafe.ScreenHeight - 4 - 8);
+				Text.Draw(batch, 0, "Arrow keys to shift.", 4, Kafe.ScreenHeight - 4 - 8);
 			}
-			else if (Input.IsHeld(Keys.RightAlt))
+			else if (stepMode && Input.IsHeld(Keys.RightAlt))
 			{
 				Text.Draw(batch, 1, "Box mode", 4, Kafe.ScreenHeight - 4 - 24 - 8);
 				Text.Draw(batch, 0, "PgUp/Dn to select, Ins/Del to add/remove\nArrows to move, RShift-arrows to size.", 4, Kafe.ScreenHeight - 4 - 8 - 8);
@@ -180,7 +180,7 @@ namespace Kafe
 			else
 			{
 				Text.Draw(batch, 1, "Edit mode", 4, Kafe.ScreenHeight - 4 - 24 - 8);
-				Text.Draw(batch, 0, "Q anim   LAlt offsets   RAlt boxes  ~ scroll\nTab play   W step   E reset   R boxes   +/- colors", 4, Kafe.ScreenHeight - 4 - 8 - 8);
+				Text.Draw(batch, 0, "Q anim   LAlt offsets   RAlt boxes  ` scroll\nTab play   W step   E reset   R boxes   +/- colors", 4, Kafe.ScreenHeight - 4 - 8 - 8);
 			}
 
 			if (!string.IsNullOrWhiteSpace(topMessage))

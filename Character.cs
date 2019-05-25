@@ -563,7 +563,7 @@ namespace Kafe
 			batch.End();
 		}
 
-		public void DrawEditStuff(SpriteBatch batch)
+		public void DrawEditStuff(SpriteBatch batch, bool stepMode)
 		{
 			if (ShowBoxes)
 			{
@@ -611,9 +611,10 @@ namespace Kafe
 				var fallToA = animations[fallToI] as JsonObj;
 				fallTo = string.Format("{0} \"{1}\"", fallToI, fallToA["name"]);
 			}
-			var info = string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\nfall to {5}\noffset {6}",
-				(int)currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, fallTo, CelOffset);
-			if (Input.IsHeld(Keys.RightAlt))
+			var info = string.Format("anim {0} \"{1}\", color {2}\nframe {3} of {4}\n - image {5}, delay {6}\nfall to {7}\noffset {8}\n",
+				(int)currentAnim, animation["name"], ColorSwap, currentFrame, totalFrames, Image.ToShort(), FrameDelay, fallTo, CelOffset);
+
+			if (stepMode && Input.IsHeld(Keys.RightAlt))
 			{
 				if (!frames[currentFrame].ContainsKey("boxes"))
 					info += "\n|c4|* Using previous boxset *|c0|";

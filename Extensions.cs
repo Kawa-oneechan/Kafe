@@ -12,6 +12,14 @@ namespace Kafe
         }
     }
 
+	public static class RectangleExtensions
+	{
+		public static string ToShort(this Rectangle rect)
+		{
+			return string.Format("<{0},{1},{2},{3}>", rect.X, rect.Y, rect.Width, rect.Height);
+		}
+	}
+
     public static class InputExtensions
     {
         private static KeyboardState oldKeyState, newKeyState;
