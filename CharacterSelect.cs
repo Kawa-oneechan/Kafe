@@ -15,6 +15,7 @@ namespace Kafe
 		private Character[] selection;
 		private bool[] locked;
 		private long lockTimer = -1;
+		private bool showTwo;
 
 		private Vector2[] positions = new[] { new Vector2(100, Kafe.Ground), new Vector2(Kafe.ScreenWidth - 100, Kafe.Ground) };
 		private int[] namePositions = new[] { 40, 340 };
@@ -26,6 +27,7 @@ namespace Kafe
 			locked = new[] { false, false };
 			selection = new[] { Kafe.Characters[1], Kafe.Characters[0] };
 			numPlayers = versus ? 2 : 1;
+			showTwo = versus;
 		}
 
 		public override void Update(GameTime gameTime)
@@ -72,8 +74,23 @@ namespace Kafe
 					else if (control.TrgE) selection[i].ColorSwap = 4;
 					else if (control.TrgF) selection[i].ColorSwap = 5;
 					selection[i].SwitchTo(StandardAnims.Select);
+
+					//For single-player games, select another character at random for now.
+					if (numPlayers == 1)
+					{
+						var j = i ^ 1;
+						var rand = new Random();
+						while (cursor[j] == cursor[i])
+							cursor[j] = rand.Next(Kafe.Characters.Length);
+						selection[j] = Kafe.Characters[cursor[j]];
+						selection[j].ColorSwap = 0;
+						selection[j].SwitchTo(StandardAnims.Select);
+						//selection[j].Computer = true;
+						locked[j] = true;
+						showTwo = true;
+					}
 				}
-				if (cursor[i] == cursor[i ^ 1])
+				if (numPlayers > 1 && cursor[i] == cursor[i ^ 1])
 					cursor[i] = oldCursor;
 				else
 					selection[i] = Kafe.Characters[cursor[i]];
@@ -115,7 +132,8 @@ namespace Kafe
 						}
 						LoadingScreen.Start(() =>
 						{
-							var arena = new Arena("locales\\mci_corridor.json", selection[0], selection[1]) { Enabled = false };
+							//TODO: base this on the other character.
+							var arena = new Arena("locales\\mci_corridor.bg.json", selection[0], selection[1]) { Enabled = false };
 							Kafe.Me.Components.Add(arena);
 							Kafe.DoTransition(true, () => { arena.Enabled = true; });							
 						});
@@ -158,7 +176,7 @@ namespace Kafe
 			}
 			batch.End();
 
-			for (var i = 0; i < numPlayers; i++)
+			for (var i = 0; i < (showTwo ? 2 : 1); i++)
 			{
 				selection[i].Position = positions[i];
 				selection[i].FacingLeft = (i == 1);

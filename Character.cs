@@ -464,6 +464,9 @@ namespace Kafe
 
 			if (FrameDelay-- <= 0)
 			{
+				if (frames[currentFrame].ContainsKey("loop"))
+					currentFrame += (int)(double)frames[currentFrame]["loop"];
+
 				currentFrame++;
 				if (currentFrame >= totalFrames)
 					DecideNextAnim();

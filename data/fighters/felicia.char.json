@@ -116,7 +116,7 @@
 				{ "img": [ 132, 0, 0, 3 ] }
 			]
 		},
-		{	"name": "stdJumpUp", //3 PLACEHOLDER
+		{	"name": "stdTurn", //3 PLACEHOLDER
 			"fallTo" : 0, //stdIdle
 			"frames" : [
 				{
@@ -125,7 +125,7 @@
 				}
 			]
 		},
-		{	"name": "stdJumpAdv", //4 PLACEHOLDER
+		{	"name": "stdJumpUp", //4 PLACEHOLDER
 			"fallTo" : 0, //stdIdle
 			"frames" : [
 				{
@@ -134,7 +134,16 @@
 				}
 			]
 		},
-		{	"name": "stdJumpRet", //5 PLACEHOLDER
+		{	"name": "stdJumpAdv", //5 PLACEHOLDER
+			"fallTo" : 0, //stdIdle
+			"frames" : [
+				{
+					"image" : [ 1, 4, 88, 97 ], "offset" : [ 53, 95 ],
+					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
+				}
+			]
+		},
+		{	"name": "stdJumpRet", //6 PLACEHOLDER
 			"lockInput" : false,
 			"fallTo" : 0, //stdIdle
 			"frames" : [
@@ -144,7 +153,43 @@
 				}
 			]
 		},
-		{	"name": "stdIntro", //6
+		{	"name": "stdCrouchIn", //7 PLACEHOLDER
+			"fallTo" : 0, //stdIdle
+			"frames" : [
+				{
+					"image" : [ 1, 4, 88, 97 ], "offset" : [ 53, 95 ],
+					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
+				}
+			]
+		},
+		{	"name": "stdCrouch", //8 PLACEHOLDER
+			"fallTo" : 0, //stdIdle
+			"frames" : [
+				{
+					"image" : [ 1, 4, 88, 97 ], "offset" : [ 53, 95 ],
+					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
+				}
+			]
+		},
+		{	"name": "stdCrouchOut", //9 PLACEHOLDER
+			"fallTo" : 0, //stdIdle
+			"frames" : [
+				{
+					"image" : [ 1, 4, 88, 97 ], "offset" : [ 53, 95 ],
+					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
+				}
+			]
+		},
+		{	"name": "stdCrouchTurn", //10 PLACEHOLDER
+			"fallTo" : 0, //stdIdle
+			"frames" : [
+				{
+					"image" : [ 1, 4, 88, 97 ], "offset" : [ 53, 95 ],
+					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
+				}
+			]
+		},
+		{	"name": "stdIntro", //11
 			"lockInput" : true,
 			"fallTo" : "Intro wait",
 			"frames" : [
@@ -168,7 +213,7 @@
 				{ "image" : [ 391, 998, 84, 102 ], "offset" : [ 43, 100 ] }
 			]
 		},
-		{	"name": "stdKnockedDown",
+		{	"name": "stdDefeat", //12
 			"lockInput": true,
 			"fallTo" : 0, //stdIdle
 			"frames" : [
@@ -196,7 +241,7 @@
 				{ "image" : [ 532, 586, 159, 43 ], "offset" : [ 106, 34 ] }
 			]
 		},
-		{	"name": "stdTime",	//8 PLACEHOLDER
+		{	"name": "stdTime",	//13 PLACEHOLDER
 			"lockInput" : true,
 			"fallTo" : -1, //same
 			"frames" : [
@@ -206,9 +251,9 @@
 				}
 			]
 		},
-		{	"name": "stdVictory", //9
+		{	"name": "stdVictory", //14
 			"lockInput": true,
-			"fallTo" : "Victory looper",
+			"fallTo" : "Victory looper", //TODO: allow "loop" frames
 			"frames" : [
 				{ "image" : [ 688, 964, 88, 94 ], "offset" : [ 52, 92 ] },
 				{ "image" : [ 598, 972, 89, 86 ], "offset" : [ 57, 84 ] },
@@ -223,7 +268,7 @@
 				{ "image" : [ 598, 1210, 86, 50 ], "offset" : [ 45, 40 ] }
 			]
 		},
-		{	"name": "stdHitGroundMid",	//10
+		{	"name": "stdHitGroundMid",	//15
 			"lockInput" : true,
 			"fallTo" : 0, //stdIdle
 			"frames" : [
@@ -231,7 +276,7 @@
 				{ "image" : [ 238, 500, 83, 93 ], "offset" : [ 42, 92 ] }
 			]
 		},
-		{	"name": "stdHitGroundHigh",	//11 PLACEHOLDER
+		{	"name": "stdHitGroundHigh",	//16 PLACEHOLDER
 			"lockInput" : true,
 			"fallTo" : 0, //stdIdle
 			"frames" : [
@@ -239,7 +284,7 @@
 				{ "image" : [ 238, 500, 83, 93 ], "offset" : [ 42, 92 ] }
 			]
 		},
-		{	"name": "stdHitGroundLow",	//12 PLACEHOLDER
+		{	"name": "stdHitGroundLow",	//17 PLACEHOLDER
 			"lockInput" : true,
 			"fallTo" : 0, //stdIdle
 			"frames" : [
@@ -247,7 +292,7 @@
 				{ "image" : [ 238, 500, 83, 93 ], "offset" : [ 42, 92 ] }
 			]
 		},
-		{	"name": "stdHitAir",	//13
+		{	"name": "stdHitAir",	//18
 			"lockInput" : true,
 			"fallTo" : 0, //stdIdle
 			"frames" : [
@@ -255,14 +300,16 @@
 				{ "image" : [ 238, 500, 83, 93 ], "offset" : [ 42, 92 ] }
 			]
 		},
-		{	"name": "stdSelect",	//14 PLACEHOLDER
+		{	"name": "stdSelect",	//19
 			"lockInput" : true,
-			"fallTo" : -1, //same
+			"fallTo": -1, //same
 			"frames" : [
-				{
-					"image" : [ 1, 4, 88, 97 ], "offset" : [ 53, 95 ],
-					"boxes" : [ { "hit" : true, "rect" : [ 23, 9, 59, 85 ] } ]
-				}
+				{ "img": [ 97, 0, 0, 3 ] },
+				{ "img": [ 98, 8, 0, 3 ] },
+				{ "img": [ 99, -2, 6, 3 ] },
+				{ "img": [ 100, -2, 12, 3 ] },
+				{ "img": [ 101, -5, 6, 3 ] },
+				{ "img": [ 102, 0, 0, 10 ], "loop": -1 }
 			]
 		},
 
