@@ -66,9 +66,12 @@ namespace Kafe
 		private List<Rectangle> boxes;
 		private List<bool> boxTypes;
 
-		private static Texture2D shadow, editGreebles;
+		private static Texture2D shadow;
+#if EDITOR
+		private static Texture2D editGreebles;
 		private int editBox;
 		private string copiedBoxes;
+#endif
 		private string inputSequence;
 		private int inputTimer;
 
@@ -84,9 +87,11 @@ namespace Kafe
 		public bool Locked { get; set; }
 		public Character Opponent { get; set; }
 
+#if EDITOR
 		public bool EditMode { get; set; }
-		public bool SelectMode { get; set; }
 		public bool ShowBoxes { get; set; }
+#endif
+		public bool SelectMode { get; set; }
 
 		public ControlSet Controls { get; set; }
 
@@ -94,8 +99,10 @@ namespace Kafe
 		{
 			if (shadow == null)
 				shadow = Mix.GetTexture("shadow");
+#if EDITOR
 			if (editGreebles == null)
 				editGreebles = Mix.GetTexture("editor");
+#endif
 
 			boxes = new List<Rectangle>();
 			boxTypes = new List<bool>();
@@ -341,6 +348,7 @@ namespace Kafe
 							if (animation["fallTo"] is List<object>)
 							{
 								var fallTos = ((List<object>)animation["fallTo"]);
+#if EDITOR
 								if (EditMode)
 								{
 									if (fallTos[0] != null)
@@ -348,6 +356,7 @@ namespace Kafe
 								}
 								else
 								{
+#endif
 									if (Controls.A && fallTos[1] != null)
 										SwitchTo(fallTos[1]);
 									else if (Controls.B && fallTos[2] != null)
@@ -370,7 +379,9 @@ namespace Kafe
 										SwitchTo(fallTos[10]);
 									else if (fallTos[0] != null)
 										SwitchTo(fallTos[0]);
+#if EDITOR
 								}
+#endif
 							}
 							else
 								SwitchTo(animation["fallTo"]);
@@ -392,7 +403,11 @@ namespace Kafe
 			var retreat = (Controls.Left && !FacingLeft) || (Controls.Right && FacingLeft);
 			
 			var oldFacing = FacingLeft;
+#if EDITOR
 			if (Opponent != null && !EditMode)
+#else
+			if (Opponent != null)
+#endif
 			{
 				switch ((StandardAnims)currentAnim)
 				{
@@ -610,14 +625,26 @@ namespace Kafe
 			StartBatch(batch);
 			batch.Draw(sheet, new Vector2(posX, posY), Image, Color.White, 0.0f, Vector2.Zero, 1.0f, FacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0.0f);
 			batch.End();
+#if EDITOR
 			if (!EditMode)
 			{
 				batch.Begin();
 				Text.DrawEx(batch, 0, inputSequence, FacingLeft ? Kafe.ScreenWidth - 4 : 4, 4, FacingLeft ? Alignment.Right : Alignment.Left);
 				batch.End();
 			}
+#endif
 		}
 
+		public void DrawIcon(SpriteBatch batch, Rectangle position, bool recolor = true, bool flip = false)
+		{
+			if (recolor)
+				StartBatch(batch);
+			batch.Draw(icon, position, null, Color.White, 0.0f, Vector2.Zero, flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0.0f);
+			if (recolor)
+				batch.End();
+		}
+
+#if EDITOR
 		public void DrawEditStuff(SpriteBatch batch, bool stepMode)
 		{
 			if (ShowBoxes)
@@ -682,15 +709,6 @@ namespace Kafe
 			}
 
 			Text.Draw(batch, 0, info, 2, 2);
-		}
-
-		public void DrawIcon(SpriteBatch batch, Rectangle position, bool recolor = true, bool flip = false)
-		{
-			if (recolor)
-				StartBatch(batch);
-			batch.Draw(icon, position, null, Color.White, 0.0f, Vector2.Zero, flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0.0f);
-			if (recolor)
-				batch.End();
 		}
 
 		public void HandleOffsetEdit()
@@ -809,5 +827,6 @@ namespace Kafe
 				SetupImage();
 			}
 		}
+#endif
 	}
 }

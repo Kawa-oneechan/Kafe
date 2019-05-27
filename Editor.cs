@@ -4,6 +4,7 @@ using Kawa.Json;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
+#if EDITOR
 namespace Kafe
 {
 	class Editor : Background
@@ -189,3 +190,4 @@ namespace Kafe
 		}
 	}
 }
+#endif

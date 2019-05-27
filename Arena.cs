@@ -17,8 +17,10 @@ namespace Kafe
 			right.Opponent = left;
 			left.SelectMode = false;
 			right.SelectMode = false;
+#if EDITOR
 			left.EditMode = false;
 			right.EditMode = false;
+#endif
 			left.Controls = Input.Controls[0];
 			right.Controls = Input.Controls[1];
 			left.SwitchTo(StandardAnims.Idle); //TODO: switch to Intro when both test characters

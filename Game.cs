@@ -86,6 +86,7 @@ namespace Kafe
 				arenas.Add(a.Substring(a.IndexOf('\\') + 1));
 			}
 
+#if EDITOR
 			if (Args.Length >= 3 && Args[0] == "/edit")
 			{
 				LoadingScreen.Start(() =>
@@ -93,7 +94,8 @@ namespace Kafe
 					Components.Add(new Editor("locales\\" + Args[1] + ".bg.json", Args[2] + ".char.json"));
 				});
 			}
-			else if (Args.Length > 0 && Args[0] == "/quick")
+#endif
+			if (Args.Length > 0 && Args[0] == "/quick")
 			{
 				var names = new string[2];
 				var colors = new int[2];
