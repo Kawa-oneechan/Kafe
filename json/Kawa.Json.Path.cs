@@ -78,6 +78,10 @@ namespace Kawa.Json
 				here = ((List<object>)here).Select(x => (double)x).ToArray();
 			else if (typeof(T).Name == "Object[]" && here is List<object>)
 				here = ((List<object>)here).ToArray();
+			else if (typeof(T).Name == "Vector2" && here is List<object>)
+				here = new Microsoft.Xna.Framework.Vector2((float)(double)((List<object>)here)[0], (float)(double)((List<object>)here)[1]);
+			else if (typeof(T).Name == "Rectangle" && here is List<object>)
+				here = new Microsoft.Xna.Framework.Rectangle((int)(double)((List<object>)here)[0], (int)(double)((List<object>)here)[1], (int)(double)((List<object>)here)[2], (int)(double)((List<object>)here)[3]);
 			else if (typeof(T).Name == "List`1")
 			{
 				var contained = typeof(T).GetGenericArguments()[0];
@@ -105,6 +109,18 @@ namespace Kawa.Json
 			if (!(here is T))
 				throw new JsonException(string.Format("Value at end of path is not of the requested type -- found {0} but expected {1}.", here.GetType(), typeof(T)));
 			return (T)here;
+		}
+
+		public static T Path<T>(this JsonObj obj, string path, T replacement)
+		{
+			try
+			{
+				return Path<T>(obj, path);
+			}
+			catch (KeyNotFoundException)
+			{
+				return replacement;
+			}
 		}
 
 		/// <summary>

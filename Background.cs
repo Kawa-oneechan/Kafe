@@ -90,18 +90,18 @@ namespace Kafe
 			if (!json.ContainsKey("rect"))
 				throw new MissingFieldException("Background layer must have a rect.");
 
-			Rect = RectangleExtensions.FromJson(json["rect"]);
+			Rect = json.Path<Rectangle>("/rect");
 
-			Origin = json.ContainsKey("origin") ? VectorExtensions.FromJson(json["origin"]) : Vector2.Zero;
+			Origin = json.Path<Vector2>("/origin", Vector2.Zero);
 
-			Parallax = json.ContainsKey("parallax") ? VectorExtensions.FromJson(json["parallax"]) : Vector2.One;
+			Parallax = json.Path<Vector2>("/parallax", Vector2.One);
 
-			Movement = json.ContainsKey("movement") ? VectorExtensions.FromJson(json["movement"]) : Vector2.Zero;
+			Movement = json.Path<Vector2>("/movement", Vector2.Zero);
 
 			if (json.ContainsKey("floor"))
 			{
 				Floor = (bool)json["floor"];
-				FloorVals = json.ContainsKey("floorVals") ? json.Path<int[]>("/floorVals") : new[] { 128, 128 };
+				FloorVals = json.Path<int[]>("/floorVals", new[] { 128, 182 });
 			}
 
 			Frames = new int[1] { 0 };
@@ -117,10 +117,10 @@ namespace Kafe
 						Frames[j] = j;
 				}
 			}
-			FrameRate = json.ContainsKey("rate") ? json.Path<int>("/rate") : 100;
+			FrameRate = json.Path<int>("/rate", 100);
 			frameTimeLeft = FrameRate;
 
-			BlendMode = json.ContainsKey("blend") ? json.Path<string>("/blend") : "none";
+			BlendMode = json.Path<string>("/blend", "none");
 		}
 
 		public void Update(GameTime gameTime)

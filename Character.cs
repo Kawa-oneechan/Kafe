@@ -486,9 +486,9 @@ namespace Kafe
 
 				SetupImage();
 				if (frames[currentFrame].ContainsKey("impulse"))
-					Velocity += VectorExtensions.FromJson(frames[currentFrame]["impulse"]);
+					Velocity += frames[currentFrame].Path<Vector2>("/impulse");
 				else if (frames[currentFrame].ContainsKey("velocity"))
-					Velocity = VectorExtensions.FromJson(frames[currentFrame]["velocity"]);
+					Velocity = frames[currentFrame].Path<Vector2>("/velocity");
 			}
 
 			if (animation.ContainsKey("halt") && (bool)animation["halt"])
