@@ -17,18 +17,21 @@ namespace Kafe
 		public Background(string file) : base(Kafe.Me)
 		{
 			json = Mix.GetJson(file) as JsonObj;
-			Sheet = Mix.GetTexture("locales\\" + (json["base"] as string));
+			Sheet = Mix.GetTexture("locales\\" + json.Path<string>("/base"));
 			Layers = new List<BackgroundLayer>();
-			Kafe.Ground = json.ContainsKey("ground") ? (int)(double)json["ground"] : 240;
-			Kafe.LeftStart = json.ContainsKey("start") ? (int)(double)((List<object>)json["start"])[0] : 100;
-			Kafe.RightStart = json.ContainsKey("start") ? (int)(double)((List<object>)json["start"])[1] : 100;
+			Kafe.Ground = json.ContainsKey("ground") ? json.Path<int>("/ground") : 240;
+			Kafe.LeftStart = Kafe.RightStart = 100;
+			if (json.ContainsKey("start"))
+			{
+				Kafe.LeftStart = json.Path<int>("/start/0");
+				Kafe.RightStart = json.Path<int>("/start/1");
+			}
 			LeftExtent = 0;
 			RightExtent = 512;
 			if (json.ContainsKey("extent"))
 			{
-				var data = ((List<object>)json["extent"]);
-				LeftExtent = (int)(double)data[0];
-				RightExtent = (int)(double)data[1];
+				LeftExtent = json.Path<int>("/extent/0");
+				RightExtent = json.Path<int>("/extent/1");
 			}
 			foreach (var layer in ((List<object>)json["layers"]))
 				Layers.Add(new BackgroundLayer((JsonObj)layer, this));
@@ -87,68 +90,37 @@ namespace Kafe
 			if (!json.ContainsKey("rect"))
 				throw new MissingFieldException("Background layer must have a rect.");
 
-			var data = ((List<object>)json["rect"]);
-			Rect = new Rectangle((int)(double)data[0], (int)(double)data[1], (int)(double)data[2], (int)(double)data[3]);
+			Rect = RectangleExtensions.FromJson(json["rect"]);
 
-			Origin = Vector2.Zero;
-			if (json.ContainsKey("origin"))
-			{
-				data = ((List<object>)json["origin"]);
-				Origin = new Vector2((int)(double)data[0], (int)(double)data[1]);
-			}
+			Origin = json.ContainsKey("origin") ? VectorExtensions.FromJson(json["origin"]) : Vector2.Zero;
 
-			Parallax = Vector2.One;
-			if (json.ContainsKey("parallax"))
-			{
-				data = ((List<object>)json["parallax"]);
-				Parallax = new Vector2((float)(double)data[0], (float)(double)data[1]);
-			}
+			Parallax = json.ContainsKey("parallax") ? VectorExtensions.FromJson(json["parallax"]) : Vector2.One;
 
-			Movement = Vector2.Zero;
-			if (json.ContainsKey("movement"))
-			{
-				data = ((List<object>)json["movement"]);
-				Movement = new Vector2((float)(double)data[0], (float)(double)data[1]);
-			}
+			Movement = json.ContainsKey("movement") ? VectorExtensions.FromJson(json["movement"]) : Vector2.Zero;
 
 			if (json.ContainsKey("floor"))
 			{
 				Floor = (bool)json["floor"];
-				if (json.ContainsKey("floorVals"))
-				{
-					data = ((List<object>)json["floorVals"]);
-					FloorVals = new[] { (int)(double)data[0], (int)(double)data[1] };
-				}
-				else
-					FloorVals = new[] { 128, 128 };
+				FloorVals = json.ContainsKey("floorVals") ? json.Path<int[]>("/floorVals") : new[] { 128, 128 };
 			}
 
 			Frames = new int[1] { 0 };
 			if (json.ContainsKey("frames"))
 			{
 				if (json["frames"] is List<object>)
-				{
-					var framesList = (List<object>)json["frames"];
-					Frames = new int[framesList.Count];
-					for (var j = 0; j < framesList.Count; j++)
-						Frames[j] = (int)(double)framesList[j];
-				}
+					Frames = json.Path<int[]>("/frames");
 				else
 				{
-					var i = (int)(double)json["frames"];
+					var i = json.Path<int>("/frames");
 					Frames = new int[i];
 					for (var j = 0; j < i; j++)
 						Frames[j] = j;
 				}
 			}
-			FrameRate = 100;
-			if (json.ContainsKey("rate"))
-				FrameRate = (int)(double)json["rate"];
+			FrameRate = json.ContainsKey("rate") ? json.Path<int>("/rate") : 100;
 			frameTimeLeft = FrameRate;
 
-			BlendMode = "none";
-			if (json.ContainsKey("blend"))
-				BlendMode = json["blend"] as string;
+			BlendMode = json.ContainsKey("blend") ? json.Path<string>("/blend") : "none";
 		}
 
 		public void Update(GameTime gameTime)

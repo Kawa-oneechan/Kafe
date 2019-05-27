@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -10,13 +11,25 @@ namespace Kafe
         {
             return new Vector2((int)vector.X, (int)vector.Y);
         }
-    }
+
+		public static Vector2 FromJson(object json)
+		{
+			var data = json as List<object>;
+			return new Vector2((float)(double)data[0], (float)(double)data[1]);
+		}
+	}
 
 	public static class RectangleExtensions
 	{
 		public static string ToShort(this Rectangle rect)
 		{
 			return string.Format("<{0},{1},{2},{3}>", rect.X, rect.Y, rect.Width, rect.Height);
+		}
+
+		public static Rectangle FromJson(object json)
+		{
+			var data = json as List<object>;
+			return new Rectangle((int)(double)data[0], (int)(double)data[1], (int)(double)data[2], (int)(double)data[3]);
 		}
 	}
 

@@ -43,6 +43,13 @@ namespace Kawa.Json
 						throw new IndexOutOfRangeException();
 					here = list[index];
 				}
+				else if (isIndex && here is List<object>)
+				{
+					var list = (List<object>)here;
+					if (index < 0 || index >= list.Count)
+						throw new IndexOutOfRangeException();
+					here = list[index];
+				}
 				else if (here is JsonObj)
 				{
 					var map = (JsonObj)here;
@@ -60,6 +67,31 @@ namespace Kawa.Json
 				else
 				{
 					throw new JsonException("Current node is not an array or object, but path isn't done yet.");
+				}
+			}
+
+			if (typeof(T).Name == "Int32" && here is double)
+				here = (int)(double)here;
+			else if (typeof(T).Name == "Int32[]" && here is List<object>)
+				here = ((List<object>)here).Select(x => (int)(double)x).ToArray();
+			else if (typeof(T).Name == "List`1")
+			{
+				var contained = typeof(T).GetGenericArguments()[0];
+				var hereList = (List<object>)here;
+				switch (contained.Name)
+				{
+					case "Int32":
+						here = hereList.Select(x => (int)(double)x).ToList();
+						break;
+					case "Double":
+						here = hereList.Select(x => (double)x).ToList();
+						break;
+					case "String":
+						here = hereList.Select(x => (string)x).ToList();
+						break;
+					default:
+						here = hereList.Select(x => (double)x).ToList();
+						break;
 				}
 			}
 
