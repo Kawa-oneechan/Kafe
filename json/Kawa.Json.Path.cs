@@ -74,6 +74,10 @@ namespace Kawa.Json
 				here = (int)(double)here;
 			else if (typeof(T).Name == "Int32[]" && here is List<object>)
 				here = ((List<object>)here).Select(x => (int)(double)x).ToArray();
+			else if (typeof(T).Name == "Double[]" && here is List<object>)
+				here = ((List<object>)here).Select(x => (double)x).ToArray();
+			else if (typeof(T).Name == "Object[]" && here is List<object>)
+				here = ((List<object>)here).ToArray();
 			else if (typeof(T).Name == "List`1")
 			{
 				var contained = typeof(T).GetGenericArguments()[0];
@@ -89,8 +93,11 @@ namespace Kawa.Json
 					case "String":
 						here = hereList.Select(x => (string)x).ToList();
 						break;
+					case "JsonObj":
+						here = hereList.Select(x => (JsonObj)x).ToList();
+						break;
 					default:
-						here = hereList.Select(x => (double)x).ToList();
+						here = hereList;
 						break;
 				}
 			}
