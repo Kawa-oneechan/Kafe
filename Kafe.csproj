@@ -42,6 +42,7 @@
     <Compile Include="Background.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="CharacterSelect.cs" />
+    <Compile Include="Console.cs" />
     <Compile Include="Editor.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="fmod.cs" />

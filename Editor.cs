@@ -113,7 +113,7 @@ namespace Kafe
 				else if (stepMode && Input.IsHeld(Keys.RightAlt))
 					Subject.HandleBoxEdit();
 
-				if (Input.IsHeld(Keys.OemTilde))
+				if (Input.IsHeld(Keys.D1))
 				{
 					var shift = Input.IsHeld(Keys.LeftControl) ? 16 : 8;
 					if (Input.IsHeld(Keys.LeftShift))
@@ -180,7 +180,7 @@ namespace Kafe
 			else
 			{
 				Text.Draw(batch, 1, "Edit mode", 4, Kafe.ScreenHeight - 4 - 24 - 8);
-				Text.Draw(batch, 0, "Q anim   LAlt offsets   RAlt boxes  ` scroll\nTab play   W step   E reset   R boxes   +/- colors", 4, Kafe.ScreenHeight - 4 - 8 - 8);
+				Text.Draw(batch, 0, "Q anim   LAlt offsets   RAlt boxes  1 scroll\nTab play   W step   E reset   R boxes   +/- colors", 4, Kafe.ScreenHeight - 4 - 8 - 8);
 			}
 
 			if (!string.IsNullOrWhiteSpace(topMessage))
