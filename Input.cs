@@ -45,10 +45,6 @@ namespace Kafe
 			keyState = Keyboard.GetState();
 
 			Anything = false;
-
-			if (keyState.IsKeyDown(Keys.Down))
-				gameTime.ToString();
-
 			for (var i = 0; i < 256; i++)
 			{
 				if (keys[i] = (keyState[(Keys)i] == KeyState.Down))
@@ -80,6 +76,28 @@ namespace Kafe
 			{
 				keys[i] = oldKeys[i] = false;
 			}
+		}
+
+		public static Keys LastKeyPress()
+		{
+			if (!Anything)
+				return Keys.None;
+			for (var i = 0; i < 256; i++)
+				if (keys[i])
+					return (Keys)i;
+			return Keys.None;
+		}
+
+		public static Buttons LastGamepadPress(int playerIndex = 0)
+		{
+			var state = GamePad.GetState((PlayerIndex)playerIndex);
+			if (!state.IsConnected)
+				return (Buttons)0;
+			var enumVals = Enum.GetValues(typeof(Buttons));
+			for (var i = 0; i < enumVals.Length; i++)
+				if (state.IsButtonDown((Buttons)enumVals.GetValue(i)))
+					return (Buttons)enumVals.GetValue(i);
+			return (Buttons)0;
 		}
 
 		public static void Save()
@@ -148,7 +166,7 @@ namespace Kafe
 		#endregion
 
 		private int index;
-		private static GamePadState padState;
+		private GamePadState padState;
 
 		public ControlSet(JsonObj mapData)
 		{
@@ -171,6 +189,7 @@ namespace Kafe
 		public void Update()
 		{
 			padState = GamePad.GetState(PlayerIndex);
+			//TODO: this does nothing!
 		}
 	}
 }

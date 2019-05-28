@@ -174,13 +174,51 @@ namespace Kafe
 		}
 	}
 
+	//TODO: move this out when done(ish)
 	class OptionsScreen : DrawableGameComponent
 	{
 		private int line = 0;
 		private int col = 0;
+		private bool waiting = false;
 
 		public OptionsScreen() : base(Kafe.Me)
 		{
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			base.Update(gameTime);
+			
+			if (!waiting)
+			{
+				if (Input.WasJustReleased(Keys.Down))
+				{
+					line++;
+					if (line >= 10)
+						line = 0;
+				}
+				else if (Input.WasJustReleased(Keys.Up))
+				{
+					if (line == 0)
+						line = 10;
+					line--;
+				}
+				//TODO: handle going left and right
+				else if (Input.WasJustReleased(Keys.Enter))
+				{
+					waiting = true;
+					Input.Flush();
+				}
+			}
+			else
+			{
+				if (col % 2 == 0 && Input.Anything)
+				{
+					Input.Controls[col % 2].KeyMap[(MapKey)line] = Input.LastKeyPress();
+					waiting = false;
+					Input.Flush();
+				}
+			}
 		}
 
 		public override void Draw(GameTime gameTime)
@@ -191,13 +229,15 @@ namespace Kafe
 			var batch = Kafe.SpriteBatch;
 			batch.Begin();
 			var y = 64;
+			var activeColor = waiting ? Color.Cyan : Color.Yellow;
 			for (var i = 0; i < 10; i++)
 			{
 				Text.Draw(batch, 0, labels[i], 32, y, (i == line) ? Color.White : Color.Silver);
-				Text.Draw(batch, 0, Input.Controls[0].KeyMap[(MapKey)i].ToString(), 128, y, (i == line) ? ((col == 0) ? Color.Yellow : Color.White) : Color.Silver);
-				Text.Draw(batch, 0, Input.Controls[0].PadMap[(MapKey)i].ToString(), 192, y, (i == line) ? ((col == 1) ? Color.Yellow : Color.White) : Color.Silver);
-				Text.Draw(batch, 0, Input.Controls[1].KeyMap[(MapKey)i].ToString(), 320, y, (i == line) ? ((col == 2) ? Color.Yellow : Color.White) : Color.Silver);
-				Text.Draw(batch, 0, Input.Controls[1].PadMap[(MapKey)i].ToString(), 384, y, (i == line) ? ((col == 3) ? Color.Yellow : Color.White) : Color.Silver);
+				Text.Draw(batch, 0, Input.Controls[0].KeyMap[(MapKey)i].ToString(), 128, y, (i == line) ? ((col == 0) ? activeColor : Color.White) : Color.Silver);
+				//TODO: use icons for gamepad input.
+				//Text.Draw(batch, 0, Input.Controls[0].PadMap[(MapKey)i].ToString(), 192, y, (i == line) ? ((col == 1) ? activeColor : Color.White) : Color.Silver);
+				Text.Draw(batch, 0, Input.Controls[1].KeyMap[(MapKey)i].ToString(), 320, y, (i == line) ? ((col == 2) ? activeColor : Color.White) : Color.Silver);
+				//Text.Draw(batch, 0, Input.Controls[1].PadMap[(MapKey)i].ToString(), 384, y, (i == line) ? ((col == 3) ? activeColor : Color.White) : Color.Silver);
 				y += 16;
 			}
 			batch.End();
