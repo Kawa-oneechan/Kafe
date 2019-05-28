@@ -139,34 +139,34 @@ namespace Kafe
 		}
 
 		#region Continuous
-		public bool Up { get { return Input.IsHeld(KeyMap[MapKey.Up]); } }
-		public bool Down { get { return Input.IsHeld(KeyMap[MapKey.Down]); } }
-		public bool Left { get { return Input.IsHeld(KeyMap[MapKey.Left]); } }
-		public bool Right { get { return Input.IsHeld(KeyMap[MapKey.Right]); } }
-		public bool A { get { return Input.IsHeld(KeyMap[MapKey.A]); } }
-		public bool B { get { return Input.IsHeld(KeyMap[MapKey.B]); } }
-		public bool C { get { return Input.IsHeld(KeyMap[MapKey.C]); } }
-		public bool D { get { return Input.IsHeld(KeyMap[MapKey.D]); } }
-		public bool E { get { return Input.IsHeld(KeyMap[MapKey.E]); } }
-		public bool F { get { return Input.IsHeld(KeyMap[MapKey.F]); } }
+		public bool Up { get { return Input.IsHeld(KeyMap[MapKey.Up]) || padState.IsButtonDown(PadMap[MapKey.Up]); } }
+		public bool Down { get { return Input.IsHeld(KeyMap[MapKey.Down]) || padState.IsButtonDown(PadMap[MapKey.Down]); } }
+		public bool Left { get { return Input.IsHeld(KeyMap[MapKey.Left]) || padState.IsButtonDown(PadMap[MapKey.Left]); } }
+		public bool Right { get { return Input.IsHeld(KeyMap[MapKey.Right]) || padState.IsButtonDown(PadMap[MapKey.Right]); } }
+		public bool A { get { return Input.IsHeld(KeyMap[MapKey.A]) || padState.IsButtonDown(PadMap[MapKey.A]); } }
+		public bool B { get { return Input.IsHeld(KeyMap[MapKey.B]) || padState.IsButtonDown(PadMap[MapKey.B]); } }
+		public bool C { get { return Input.IsHeld(KeyMap[MapKey.C]) || padState.IsButtonDown(PadMap[MapKey.C]); } }
+		public bool D { get { return Input.IsHeld(KeyMap[MapKey.D]) || padState.IsButtonDown(PadMap[MapKey.D]); } }
+		public bool E { get { return Input.IsHeld(KeyMap[MapKey.E]) || padState.IsButtonDown(PadMap[MapKey.E]); } }
+		public bool F { get { return Input.IsHeld(KeyMap[MapKey.F]) || padState.IsButtonDown(PadMap[MapKey.F]); } }
 		public bool Anything { get; private set; }
 		#endregion
 
 		#region Trigger
-		public bool TrgUp { get { return Input.WasJustPressed(KeyMap[MapKey.Up]); } }
-		public bool TrgDown { get { return Input.WasJustPressed(KeyMap[MapKey.Down]); } }
-		public bool TrgLeft { get { return Input.WasJustPressed(KeyMap[MapKey.Left]); } }
-		public bool TrgRight { get { return Input.WasJustPressed(KeyMap[MapKey.Right]); } }
-		public bool TrgA { get { return Input.WasJustPressed(KeyMap[MapKey.A]); } }
-		public bool TrgB { get { return Input.WasJustPressed(KeyMap[MapKey.B]); } }
-		public bool TrgC { get { return Input.WasJustPressed(KeyMap[MapKey.C]); } }
-		public bool TrgD { get { return Input.WasJustPressed(KeyMap[MapKey.D]); } }
-		public bool TrgE { get { return Input.WasJustPressed(KeyMap[MapKey.E]); } }
-		public bool TrgF { get { return Input.WasJustPressed(KeyMap[MapKey.F]); } }
+		public bool TrgUp { get { return Input.WasJustPressed(KeyMap[MapKey.Up]) || PadWasReleased(PadMap[MapKey.Up]); } }
+		public bool TrgDown { get { return Input.WasJustPressed(KeyMap[MapKey.Down]) || PadWasReleased(PadMap[MapKey.Down]); } }
+		public bool TrgLeft { get { return Input.WasJustPressed(KeyMap[MapKey.Left]) || PadWasReleased(PadMap[MapKey.Left]); } }
+		public bool TrgRight { get { return Input.WasJustPressed(KeyMap[MapKey.Right]) || PadWasReleased(PadMap[MapKey.Right]); } }
+		public bool TrgA { get { return Input.WasJustPressed(KeyMap[MapKey.A]) || PadWasReleased(PadMap[MapKey.A]); } }
+		public bool TrgB { get { return Input.WasJustPressed(KeyMap[MapKey.B]) || PadWasReleased(PadMap[MapKey.B]); } }
+		public bool TrgC { get { return Input.WasJustPressed(KeyMap[MapKey.C]) || PadWasReleased(PadMap[MapKey.C]); } }
+		public bool TrgD { get { return Input.WasJustPressed(KeyMap[MapKey.D]) || PadWasReleased(PadMap[MapKey.D]); } }
+		public bool TrgE { get { return Input.WasJustPressed(KeyMap[MapKey.E]) || PadWasReleased(PadMap[MapKey.E]); } }
+		public bool TrgF { get { return Input.WasJustPressed(KeyMap[MapKey.F]) || PadWasReleased(PadMap[MapKey.F]); } }
 		#endregion
 
 		private int index;
-		private GamePadState padState;
+		private GamePadState padState, oldState;
 
 		public ControlSet(JsonObj mapData)
 		{
@@ -188,8 +188,17 @@ namespace Kafe
 
 		public void Update()
 		{
-			padState = GamePad.GetState(PlayerIndex);
-			//TODO: this does nothing!
+			if (GamepadAvailable)
+			{
+				oldState = padState;
+				padState = GamePad.GetState(PlayerIndex);
+			}
+			Anything = Up || Down || Left || Right || A || B || C || D || E || F;
+		}
+
+		private bool PadWasReleased(Buttons button)
+		{
+			return oldState.IsButtonDown(button) && padState.IsButtonUp(button);
 		}
 	}
 }

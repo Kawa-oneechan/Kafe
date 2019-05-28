@@ -181,6 +181,25 @@ namespace Kafe
 		private int col = 0;
 		private bool waiting = false;
 
+		private static Dictionary<Buttons, string> buttonGlyphs = new Dictionary<Buttons, string>()
+		{
+			{ Buttons.DPadUp, "\x80" },
+			{ Buttons.DPadDown, "\x82" },
+			{ Buttons.DPadLeft, "\x84" },
+			{ Buttons.DPadRight, "\x86" },
+			{ Buttons.Start, "\x88" },
+			{ Buttons.Back, "\x8A" },
+			{ Buttons.LeftStick, "\x8C" },
+			{ Buttons.RightStick, "\x8E" },
+			{ Buttons.LeftShoulder, "\x90" },
+			{ Buttons.RightShoulder, "\x92" },
+			{ Buttons.BigButton, "\x94" },
+			{ Buttons.A, "\x96" },
+			{ Buttons.B, "\x98" },
+			{ Buttons.X, "\x9A" },
+			{ Buttons.Y, "\x9C" },
+		};
+
 		public OptionsScreen() : base(Kafe.Me)
 		{
 		}
@@ -235,6 +254,7 @@ namespace Kafe
 				Text.Draw(batch, 0, labels[i], 32, y, (i == line) ? Color.White : Color.Silver);
 				Text.Draw(batch, 0, Input.Controls[0].KeyMap[(MapKey)i].ToString(), 128, y, (i == line) ? ((col == 0) ? activeColor : Color.White) : Color.Silver);
 				//TODO: use icons for gamepad input.
+				Text.Draw(batch, 0, buttonGlyphs[Input.Controls[0].PadMap[(MapKey)i]], 192, y, (i == line) ? ((col == 1) ? activeColor : Color.White) : Color.Silver);
 				//Text.Draw(batch, 0, Input.Controls[0].PadMap[(MapKey)i].ToString(), 192, y, (i == line) ? ((col == 1) ? activeColor : Color.White) : Color.Silver);
 				Text.Draw(batch, 0, Input.Controls[1].KeyMap[(MapKey)i].ToString(), 320, y, (i == line) ? ((col == 2) ? activeColor : Color.White) : Color.Silver);
 				//Text.Draw(batch, 0, Input.Controls[1].PadMap[(MapKey)i].ToString(), 384, y, (i == line) ? ((col == 3) ? activeColor : Color.White) : Color.Silver);
