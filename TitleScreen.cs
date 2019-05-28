@@ -59,7 +59,7 @@ namespace Kafe
 		private Texture2D title, logo;
 		private int anim, selection;
 		private bool skipLogo;
-		private string[] captions = new[] { "SOLO GAME", "VERSUS GAME", "QUIT" };
+		private string[] captions = new[] { "SOLO GAME", "VERSUS GAME", "OPTIONS", "QUIT" };
 
 		public TitleScreen(bool skipLogo) : base(Kafe.Me)
 		{
@@ -96,8 +96,8 @@ namespace Kafe
 			else if (Input.WasJustReleased(Keys.Escape))
 			{
 				Input.Flush();
-				if (selection < 2)
-					selection = 2;
+				if (selection < 3)
+					selection = 3;
 				else
 					Kafe.AskToQuit();
 			}
@@ -130,7 +130,11 @@ namespace Kafe
 							});
 						});
 						break;
-					case 2: //Quit
+					case 2: //Options
+						Kafe.Me.Components.Remove(this);
+						Kafe.Me.Components.Add(new OptionsScreen());
+						break;
+					case 3: //Quit
 						Kafe.AskToQuit();
 						break;
 				}
@@ -166,6 +170,36 @@ namespace Kafe
 				}
 			}
 
+			batch.End();
+		}
+	}
+
+	class OptionsScreen : DrawableGameComponent
+	{
+		private int line = 0;
+		private int col = 0;
+
+		public OptionsScreen() : base(Kafe.Me)
+		{
+		}
+
+		public override void Draw(GameTime gameTime)
+		{
+			base.Draw(gameTime);
+
+			var labels = new[] { "Left", "Right", "Up", "Down", "W.Punch", "M.Punch", "F.Punch", "W.Kick", "M.Kick", "F.Kick" };
+			var batch = Kafe.SpriteBatch;
+			batch.Begin();
+			var y = 64;
+			for (var i = 0; i < 10; i++)
+			{
+				Text.Draw(batch, 0, labels[i], 32, y, (i == line) ? Color.White : Color.Silver);
+				Text.Draw(batch, 0, Input.Controls[0].KeyMap[(MapKey)i].ToString(), 128, y, (i == line) ? ((col == 0) ? Color.Yellow : Color.White) : Color.Silver);
+				Text.Draw(batch, 0, Input.Controls[0].PadMap[(MapKey)i].ToString(), 192, y, (i == line) ? ((col == 1) ? Color.Yellow : Color.White) : Color.Silver);
+				Text.Draw(batch, 0, Input.Controls[1].KeyMap[(MapKey)i].ToString(), 320, y, (i == line) ? ((col == 2) ? Color.Yellow : Color.White) : Color.Silver);
+				Text.Draw(batch, 0, Input.Controls[1].PadMap[(MapKey)i].ToString(), 384, y, (i == line) ? ((col == 3) ? Color.Yellow : Color.White) : Color.Silver);
+				y += 16;
+			}
 			batch.End();
 		}
 	}

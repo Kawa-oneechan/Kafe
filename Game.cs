@@ -133,7 +133,8 @@ namespace Kafe
 						fighterList.Add(new Character(f, 0));
 					Kafe.Characters = fighterList.ToArray();
 					Components.Add(new TitleBackground());
-					Components.Add(new TitleScreen(false));
+					//Components.Add(new TitleScreen(false));
+					Components.Add(new OptionsScreen());
 				});
 			}
 		}
