@@ -220,19 +220,43 @@ namespace Kafe
 			
 			if (!waiting)
 			{
+				if (line == 10 && Input.WasJustReleased(Keys.Enter))
+				{
+					if (col == 0)
+					{
+						Input.Save();
+						Kafe.Me.Components.Remove(this);
+						Kafe.Me.Components.Add(new TitleScreen(true));
+					}
+					else if (col == 1)
+					{
+						Kafe.Me.Components.Remove(this);
+						Kafe.Me.Components.Add(new TitleScreen(true));
+					}
+					else if (col == 2)
+					{
+						System.IO.File.Delete("keys.json");
+						Input.Load();
+					}
+					return;
+				}
+
 				if (Input.WasJustReleased(Keys.Down))
 				{
 					line++;
-					if (line >= 10)
+					if (line >= 11)
 						line = 0;
+					if (line == 10 && col > 2)
+						col = 1;
 				}
 				else if (Input.WasJustReleased(Keys.Up))
 				{
 					if (line == 0)
-						line = 10;
+						line = 11;
 					line--;
+					if (line == 10 && col > 2)
+						col = 1;
 				}
-				//TODO: handle going left and right
 				else if (Input.WasJustReleased(Keys.Right))
 				{
 					col++;
@@ -253,6 +277,7 @@ namespace Kafe
 			}
 			else
 			{
+				//TODO: add a timer to this state so you can cancel by timeout.
 				if (col % 2 == 0 && Input.Anything)
 				{
 					Input.Controls[col / 2].KeyMap[(MapKey)line] = Input.LastKeyPress();
@@ -291,6 +316,10 @@ namespace Kafe
 				Text.Draw(batch, 0, buttonGlyphs[Input.Controls[1].PadMap[(MapKey)i]], 320, y, (i == line) ? ((col == 3) ? activeColor : Color.White) : Color.Silver);
 				y += 16;
 			}
+			y += 16;
+			Text.Draw(batch, 0, "SAVE", 32, y, ((line == 10) && (col == 0)) ? Color.Yellow : Color.Silver);
+			Text.Draw(batch, 0, "CANCEL", 96, y, ((line == 10) && (col == 1)) ? Color.Yellow : Color.Silver);
+			Text.Draw(batch, 0, "RESET", 160, y, ((line == 10) && (col == 2)) ? Color.Yellow : Color.Silver);
 			batch.End();
 		}
 	}

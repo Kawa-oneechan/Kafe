@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using Kawa.Json;
 using Microsoft.Xna.Framework;
@@ -25,11 +26,16 @@ namespace Kafe
 			oldKeys = new bool[256];
 			keyState = Keyboard.GetState();
 
-			Controls = new ControlSet[2]; 
+			Controls = new ControlSet[2];
 
-			if (!System.IO.File.Exists("keys.json"))
-				System.IO.File.WriteAllText("keys.json", Mix.GetString("keys.json", false));
-			var mapData = Json5.Parse(System.IO.File.ReadAllText("keys.json")) as List<object>;
+			Load();
+		}
+
+		public static void Load()
+		{
+			if (!File.Exists("keys.json"))
+				File.WriteAllText("keys.json", Mix.GetString("keys.json", false));
+			var mapData = Json5.Parse(File.ReadAllText("keys.json")) as List<object>;
 			for (var i = 0; i < Controls.Length; i++)
 			{
 				Controls[i] = new ControlSet((JsonObj)mapData[i]);
@@ -103,7 +109,7 @@ namespace Kafe
 
 		public static void Save()
 		{
-			var list = new List<JsonObj>();
+			var list = new List<object>();
 			foreach (var control in Controls)
 			{
 				var data = new JsonObj();
@@ -115,8 +121,9 @@ namespace Kafe
 					gamepad[input.Key.ToString()] = input.Value.ToString();
 				data["keyboard"] = keyboard;
 				data["gamepad"] = gamepad;
+				list.Add(data);
 			}
-			System.IO.File.WriteAllText("keys.json", list.Stringify());
+			File.WriteAllText("keys.json", list.Stringify());
 		}
 	}
 
