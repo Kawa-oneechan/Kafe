@@ -33,6 +33,7 @@ namespace Kafe
 			for (var i = 0; i < Controls.Length; i++)
 			{
 				Controls[i] = new ControlSet((JsonObj)mapData[i]);
+				Controls[i].Index = i;
 			}
 		}
 

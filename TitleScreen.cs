@@ -198,6 +198,16 @@ namespace Kafe
 			{ Buttons.B, "\x98" },
 			{ Buttons.X, "\x9A" },
 			{ Buttons.Y, "\x9C" },
+			{ Buttons.LeftThumbstickUp, "LT\x80" },
+			{ Buttons.LeftThumbstickDown, "LT\x82" },
+			{ Buttons.LeftThumbstickLeft, "LT\x84" },
+			{ Buttons.LeftThumbstickRight, "LT\x86" },
+			{ Buttons.RightThumbstickUp, "RT\x80" },
+			{ Buttons.RightThumbstickDown, "RT\x82" },
+			{ Buttons.RightThumbstickLeft, "R\x84" },
+			{ Buttons.RightThumbstickRight, "RT\x86" },
+			{ Buttons.LeftTrigger, "LTrg" },
+			{ Buttons.RightTrigger, "RTrg" },
 		};
 
 		public OptionsScreen() : base(Kafe.Me)
@@ -223,6 +233,18 @@ namespace Kafe
 					line--;
 				}
 				//TODO: handle going left and right
+				else if (Input.WasJustReleased(Keys.Right))
+				{
+					col++;
+					if (col >= 4)
+						col = 0;
+				}
+				else if (Input.WasJustReleased(Keys.Left))
+				{
+					if (col == 0)
+						col = 4;
+					col--;
+				}
 				else if (Input.WasJustReleased(Keys.Enter))
 				{
 					waiting = true;
@@ -233,9 +255,20 @@ namespace Kafe
 			{
 				if (col % 2 == 0 && Input.Anything)
 				{
-					Input.Controls[col % 2].KeyMap[(MapKey)line] = Input.LastKeyPress();
+					Input.Controls[col / 2].KeyMap[(MapKey)line] = Input.LastKeyPress();
 					waiting = false;
 					Input.Flush();
+				}
+				else if (col % 2 == 1)
+				{
+					foreach (var button in buttonGlyphs.Keys)
+					{
+						if (GamePad.GetState((PlayerIndex)(col / 2)).IsButtonDown(button))
+						{
+							Input.Controls[col / 2].PadMap[(MapKey)line] = button;
+							waiting = false;
+						}
+					}
 				}
 			}
 		}
@@ -253,11 +286,9 @@ namespace Kafe
 			{
 				Text.Draw(batch, 0, labels[i], 32, y, (i == line) ? Color.White : Color.Silver);
 				Text.Draw(batch, 0, Input.Controls[0].KeyMap[(MapKey)i].ToString(), 128, y, (i == line) ? ((col == 0) ? activeColor : Color.White) : Color.Silver);
-				//TODO: use icons for gamepad input.
 				Text.Draw(batch, 0, buttonGlyphs[Input.Controls[0].PadMap[(MapKey)i]], 192, y, (i == line) ? ((col == 1) ? activeColor : Color.White) : Color.Silver);
-				//Text.Draw(batch, 0, Input.Controls[0].PadMap[(MapKey)i].ToString(), 192, y, (i == line) ? ((col == 1) ? activeColor : Color.White) : Color.Silver);
-				Text.Draw(batch, 0, Input.Controls[1].KeyMap[(MapKey)i].ToString(), 320, y, (i == line) ? ((col == 2) ? activeColor : Color.White) : Color.Silver);
-				//Text.Draw(batch, 0, Input.Controls[1].PadMap[(MapKey)i].ToString(), 384, y, (i == line) ? ((col == 3) ? activeColor : Color.White) : Color.Silver);
+				Text.Draw(batch, 0, Input.Controls[1].KeyMap[(MapKey)i].ToString(), 256, y, (i == line) ? ((col == 2) ? activeColor : Color.White) : Color.Silver);
+				Text.Draw(batch, 0, buttonGlyphs[Input.Controls[1].PadMap[(MapKey)i]], 320, y, (i == line) ? ((col == 3) ? activeColor : Color.White) : Color.Silver);
 				y += 16;
 			}
 			batch.End();
