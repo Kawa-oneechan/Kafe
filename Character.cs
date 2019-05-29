@@ -66,7 +66,7 @@ namespace Kafe
 		private List<Rectangle> boxes;
 		private List<bool> boxTypes;
 
-		private static Texture2D shadow, editGreebles;
+		private static Texture2D shadow, editGreebles, editPixel;
 		private int editBox;
 		private string copiedBoxes;
 		private string inputSequence;
@@ -96,6 +96,11 @@ namespace Kafe
 				shadow = Mix.GetTexture("shadow");
 			if (editGreebles == null)
 				editGreebles = Mix.GetTexture("editor");
+			if (editPixel == null)
+			{
+				editPixel = new Texture2D(Kafe.GfxDev, 1, 1, false, SurfaceFormat.Color);
+				editPixel.SetData(new[] { Color.White });
+			}
 
 			boxes = new List<Rectangle>();
 			boxTypes = new List<bool>();
@@ -591,6 +596,14 @@ namespace Kafe
 			}
 		}
 
+		private void DrawBorder(SpriteBatch batch, Rectangle rect, int thickness, Color color)
+		{
+			batch.Draw(editPixel, new Rectangle(rect.X, rect.Y, rect.Width, thickness), color);
+			batch.Draw(editPixel, new Rectangle(rect.X, rect.Y, thickness, rect.Height), color);
+			batch.Draw(editPixel, new Rectangle((rect.X + rect.Width - thickness), rect.Y, thickness, rect.Height), color);
+			batch.Draw(editPixel, new Rectangle(rect.X, rect.Y + rect.Height - thickness, rect.Width, thickness), color);
+		}
+
 		public void DrawEditStuff(SpriteBatch batch, bool stepMode)
 		{
 			if (ShowBoxes)
@@ -599,8 +612,14 @@ namespace Kafe
 				for (var i = 0; i < boxes.Count; i++)
 				{
 					var box = boxes[i];
-					batch.Draw(editGreebles, new Rectangle((int)(Position.X + box.X), (int)(Position.Y + box.Y), box.Width, box.Height),
-						src, i == editBox ? (boxTypes[i] ? Color.CornflowerBlue : Color.Salmon) : boxTypes[i] ? Color.Blue : Color.Red);
+					var boxColor = Color.White;
+					if (boxTypes[i]) //TODO: use enum instead of bool
+						boxColor = (i == editBox) ? Color.CornflowerBlue : Color.Blue;
+					else
+						boxColor = (i == editBox) ? Color.Salmon : Color.Red;
+					var boxRect = new Rectangle((int)(Position.X + box.X), (int)(Position.Y + box.Y), box.Width, box.Height);
+					batch.Draw(editGreebles, boxRect, src, boxColor);
+					DrawBorder(batch, boxRect, 1, boxColor);
 				}
 			}
 
