@@ -18,6 +18,7 @@ namespace Kafe
 		public static Effect TransitionEffect;
 
 		private static Texture2D transitionImage;
+		private static TildeConsole tildeConsole;
 
 		public static GraphicsDevice GfxDev { get; private set; }
 		public static Kafe Me { get; private set; }
@@ -44,6 +45,7 @@ namespace Kafe
 				Window.IsBorderless = true;
 				Window.Position = new Point(0, 0);
 			}
+			Console.Prepare();
 			Mix.Initialize();
 			IsMouseVisible = true;
 		}
@@ -59,6 +61,12 @@ namespace Kafe
 		{
 			Kafe.GfxDev = graphics.GraphicsDevice;
 			SoundEngine.Initialize();
+
+			tildeConsole = new TildeConsole(this);
+			tildeConsole.Visible = false;
+			tildeConsole.OnCommand += new TildeConsole.OnCommandEventHandler(TildeConsole_OnCommand);
+			Components.Add(tildeConsole);
+
 			Input = new global::Kafe.Input(this); 
 			Components.Add(Input); 
 			base.Initialize();
@@ -144,6 +152,13 @@ namespace Kafe
 
 		protected override void Update(GameTime gameTime)
 		{
+			if (tildeConsole.Visible)
+			{
+				tildeConsole.Update(gameTime);
+				Input.Update(gameTime);
+				return;
+			}
+
 			if (TransitionDelta > -1)
 			{
 				TransitionDelta += 0.05f;
@@ -158,6 +173,11 @@ namespace Kafe
 			}
 			base.Update(gameTime);
 
+			if (Input.WasJustReleased(Keys.OemTilde))
+			{
+				tildeConsole.Visible = true;
+				Input.Flush();
+			}
 			if (Input.WasJustPressed(Keys.F12))
 				TakeScreenshot();
 		}
@@ -179,6 +199,9 @@ namespace Kafe
 			SpriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);
 			SpriteBatch.Draw(rawScreen, new Rectangle(0, 0, CrtWidth, CrtHeight), new Rectangle(0, 0, ScreenWidth, ScreenHeight), Color.White);
 			SpriteBatch.End();
+
+			if (tildeConsole.Visible)
+				tildeConsole.Draw(gameTime);
 		}
 
 		public static float TransitionDelta = -1;
@@ -221,6 +244,24 @@ namespace Kafe
 		{
 			using (var stream = System.IO.File.OpenWrite(DateTime.Now.Ticks.ToString() + ".png"))
 				rawScreen.SaveAsPng(stream, Kafe.ScreenWidth, Kafe.ScreenHeight);
+		}
+
+		private void TildeConsole_OnCommand(TildeConsole sender, string command)
+		{
+			command = command.Trim();
+			if (string.IsNullOrWhiteSpace(command))
+				return;
+			var bits = command.ToLowerInvariant().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			switch (bits[0])
+			{
+				case "quit":
+					this.Exit();
+					return;
+				case "screenshot":
+					Console.WriteLine("Screenshot taken.");
+					TakeScreenshot();
+					return;
+			}
 		}
 	}
 
