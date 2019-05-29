@@ -107,8 +107,8 @@ namespace Kafe
 		public void Reload(string jsonFile, int palIndex, bool refresh)
 		{
 			json = Mix.GetJson("fighters\\" + jsonFile, false) as JsonObj;
-			Name = json["name"] as string;
-			var baseName = json["base"] as string;
+			Name = json.Path<string>("/name");
+			var baseName = json.Path<string>("/base");
 
 			var keys = new string[json.Keys.Count];
 			json.Keys.CopyTo(keys, 0);
@@ -172,15 +172,11 @@ namespace Kafe
 
 			ColorSwap = palIndex;
 
-			animations = new List<JsonObj>();
-			foreach (var a in (List<object>)json["animations"])
-			{
-				animations.Add((JsonObj)a);
-			}
+			animations = json.Path<List<JsonObj>>("/animations");
 			if (!refresh)
-				animation = animations[0] as JsonObj;
+				animation = animations[0];
 			else
-				animation = animations[(int)currentAnim] as JsonObj;
+				animation = animations[(int)currentAnim];
 			Position = new Vector2(160, 160);
 			SetupFrames();
 			if (!refresh || currentFrame >= totalFrames)
@@ -192,10 +188,7 @@ namespace Kafe
 
 		public void SetupFrames()
 		{
-			frames = new List<JsonObj>();
-			foreach (var f in (List<object>)animation["frames"])
-				if (f is JsonObj)
-					frames.Add((JsonObj)f);
+			frames = animation.Path<List<JsonObj>>("/frames");
 			totalFrames = frames.Count;
 			boxes.Clear();
 			boxTypes.Clear();
@@ -206,12 +199,12 @@ namespace Kafe
 			var cF = frames[currentFrame];
 			if (cF.ContainsKey("img"))
 			{
-				var img = ((List<object>)cF["img"]);
-				var spriteIndex = (int)(double)img[0];
-				var image = (List<object>)((List<object>)json["sprites"])[spriteIndex];
-				Image = new Rectangle((int)(double)image[0], (int)(double)image[1], (int)(double)image[2], (int)(double)image[3]);
-				CelOffset = new Vector2((int)(double)img[1], (int)(double)img[2]);
-				FrameDelay = (int)(double)img[3];
+				var img = cF.Path<int[]>("/img");
+				var spriteIndex = img[0];
+				var image = json.Path<int[]>("/sprites/" + spriteIndex);
+				Image = new Rectangle(image[0], image[1], image[2], image[3]);
+				CelOffset = new Vector2(img[1], img[2]);
+				FrameDelay = img[3];
 
 				if (cF.ContainsKey("boxes"))
 				{
@@ -227,8 +220,8 @@ namespace Kafe
 			}
 			else
 			{
-				var image = ((List<object>)cF["image"]);
-				var offset = ((List<object>)cF["offset"]);
+				var image = cF.Path<int[]>("/image");
+				var offset = cF.Path<int[]>("/offset");
 				Image = new Rectangle((int)(double)image[0], (int)(double)image[1], (int)(double)image[2], (int)(double)image[3]);
 				CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
 				FrameDelay = 5;
@@ -340,7 +333,7 @@ namespace Kafe
 						{
 							if (animation["fallTo"] is List<object>)
 							{
-								var fallTos = ((List<object>)animation["fallTo"]);
+								var fallTos = animation.Path<object[]>("/fallTo");
 								if (EditMode)
 								{
 									if (fallTos[0] != null)
@@ -442,7 +435,7 @@ namespace Kafe
 					{
 						if (animation.ContainsKey("cancelTo"))
 						{
-							var cancelTos = ((List<object>)animation["cancelTo"]);
+							var cancelTos = animation.Path<object[]>("/cancelTo");
 							if (Controls.A && cancelTos[1] != null)
 								SwitchTo(cancelTos[1]);
 							else if (Controls.B && cancelTos[2] != null)
@@ -481,7 +474,7 @@ namespace Kafe
 			if (FrameDelay-- <= 0)
 			{
 				if (frames[currentFrame].ContainsKey("loop"))
-					currentFrame += (int)(double)frames[currentFrame]["loop"];
+					currentFrame += frames[currentFrame].Path<int>("/loop");
 
 				currentFrame++;
 				if (currentFrame >= totalFrames)
@@ -493,15 +486,9 @@ namespace Kafe
 
 				SetupImage();
 				if (frames[currentFrame].ContainsKey("impulse"))
-				{
-					var impulse = ((List<object>)frames[currentFrame]["impulse"]);
-					Velocity += new Vector2((float)(double)impulse[0], (float)(double)impulse[1]);
-				}
+					Velocity += frames[currentFrame].Path<Vector2>("/impulse");
 				else if (frames[currentFrame].ContainsKey("velocity"))
-				{
-					var velocity = ((List<object>)frames[currentFrame]["velocity"]);
-					Velocity = new Vector2((float)(double)velocity[0], (float)(double)velocity[1]);
-				}
+					Velocity = frames[currentFrame].Path<Vector2>("/velocity");
 			}
 
 			if (animation.ContainsKey("halt") && (bool)animation["halt"])
@@ -522,20 +509,6 @@ namespace Kafe
 			}
 
 			Position = new Vector2(Position.X + (FacingLeft ? -Velocity.X : Velocity.X), Position.Y);
-			/*
-			if (Velocity.X > 5)
-				Velocity -= new Vector2(2.5f, 0);
-			else if (Velocity.X > 1)
-				Velocity -= new Vector2(1, 0);
-			else if (Velocity.X > 0)
-				Velocity -= new Vector2(0.5f, 0);
-			if (Velocity.X < -5)
-				Velocity += new Vector2(2.5f, 0);
-			else if (Velocity.X < -1)
-				Velocity += new Vector2(1, 0);
-			else if (Velocity.X < 0)
-				Velocity += new Vector2(0.5f, 0);
-			*/
 
 			if (inputTimer > 0)
 			{
@@ -699,7 +672,7 @@ namespace Kafe
 			var control = Input.Controls[0];
 			if (cF.ContainsKey("img"))
 			{
-				var offset = ((List<object>)cF["img"]);
+				var offset = cF.Path<double[]>("/img");
 				if (control.TrgUp) offset[2] = (double)offset[2] + 1;
 				else if (control.TrgDown) offset[2] = (double)offset[2] - 1;
 				else if (control.TrgLeft) offset[1] = (double)offset[1] - 1;
@@ -708,7 +681,7 @@ namespace Kafe
 			}
 			else
 			{
-				var offset = ((List<object>)cF["offset"]);
+				var offset = cF.Path<double[]>("/offset");
 				if (control.TrgUp) offset[1] = (double)offset[1] + 1;
 				else if (control.TrgDown) offset[1] = (double)offset[1] - 1;
 				else if (control.TrgLeft) offset[0] = (double)offset[0] - 1;

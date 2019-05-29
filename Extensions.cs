@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -10,7 +11,7 @@ namespace Kafe
         {
             return new Vector2((int)vector.X, (int)vector.Y);
         }
-    }
+	}
 
 	public static class RectangleExtensions
 	{

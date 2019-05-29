@@ -43,6 +43,13 @@ namespace Kawa.Json
 						throw new IndexOutOfRangeException();
 					here = list[index];
 				}
+				else if (isIndex && here is List<object>)
+				{
+					var list = (List<object>)here;
+					if (index < 0 || index >= list.Count)
+						throw new IndexOutOfRangeException();
+					here = list[index];
+				}
 				else if (here is JsonObj)
 				{
 					var map = (JsonObj)here;
@@ -63,9 +70,57 @@ namespace Kawa.Json
 				}
 			}
 
+			if (typeof(T).Name == "Int32" && here is double)
+				here = (int)(double)here;
+			else if (typeof(T).Name == "Int32[]" && here is List<object>)
+				here = ((List<object>)here).Select(x => (int)(double)x).ToArray();
+			else if (typeof(T).Name == "Double[]" && here is List<object>)
+				here = ((List<object>)here).Select(x => (double)x).ToArray();
+			else if (typeof(T).Name == "Object[]" && here is List<object>)
+				here = ((List<object>)here).ToArray();
+			else if (typeof(T).Name == "Vector2" && here is List<object>)
+				here = new Microsoft.Xna.Framework.Vector2((float)(double)((List<object>)here)[0], (float)(double)((List<object>)here)[1]);
+			else if (typeof(T).Name == "Rectangle" && here is List<object>)
+				here = new Microsoft.Xna.Framework.Rectangle((int)(double)((List<object>)here)[0], (int)(double)((List<object>)here)[1], (int)(double)((List<object>)here)[2], (int)(double)((List<object>)here)[3]);
+			else if (typeof(T).Name == "List`1")
+			{
+				var contained = typeof(T).GetGenericArguments()[0];
+				var hereList = (List<object>)here;
+				switch (contained.Name)
+				{
+					case "Int32":
+						here = hereList.Select(x => (int)(double)x).ToList();
+						break;
+					case "Double":
+						here = hereList.Select(x => (double)x).ToList();
+						break;
+					case "String":
+						here = hereList.Select(x => (string)x).ToList();
+						break;
+					case "JsonObj":
+						here = hereList.Select(x => (JsonObj)x).ToList();
+						break;
+					default:
+						here = hereList;
+						break;
+				}
+			}
+
 			if (!(here is T))
 				throw new JsonException(string.Format("Value at end of path is not of the requested type -- found {0} but expected {1}.", here.GetType(), typeof(T)));
 			return (T)here;
+		}
+
+		public static T Path<T>(this JsonObj obj, string path, T replacement)
+		{
+			try
+			{
+				return Path<T>(obj, path);
+			}
+			catch (KeyNotFoundException)
+			{
+				return replacement;
+			}
 		}
 
 		/// <summary>
