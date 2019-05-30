@@ -45,9 +45,25 @@ namespace Kafe
 		Select,
 	};
 
+	public enum BoxTypes
+	{
+		Vulnerable,
+		Attack,
+		Push,
+		ProjectileVulnerable,
+		ProjectileAttack,
+		Throw,
+		Throwable,
+	};
+
 	public class Character
 	{
 		private const int PaletteSize = 4;
+		private static Color[] BoxColors = new[]
+		{
+			Color.Blue, Color.Red, Color.Lime, Color.MediumBlue, Color.MediumVioletRed, Color.Magenta, Color.DarkMagenta,
+			Color.CornflowerBlue, Color.Salmon, Color.GreenYellow, Color.MediumSlateBlue, Color.DarkRed, Color.Violet, Color.DarkViolet
+		};
 
 		private static Dictionary<string, Texture2D> sheets = new Dictionary<string, Texture2D>();
 		private static Dictionary<string, Texture2D> palettes = new Dictionary<string, Texture2D>();
@@ -64,7 +80,7 @@ namespace Kafe
 		private int posX, posY;
 		//keep these in sync yo
 		private List<Rectangle> boxes;
-		private List<bool> boxTypes;
+		private List<BoxTypes> boxTypes;
 
 		private static Texture2D shadow, editGreebles, editPixel;
 		private int editBox;
@@ -103,7 +119,7 @@ namespace Kafe
 			}
 
 			boxes = new List<Rectangle>();
-			boxTypes = new List<bool>();
+			boxTypes = new List<BoxTypes>();
 
 			Reload(jsonFile, palIndex, false);
 			Controls = Input.Controls[0];
@@ -218,19 +234,20 @@ namespace Kafe
 					foreach (var b in (List<object>)cF["boxes"])
 					{
 						var box = (List<object>)b;
-						boxTypes.Add((bool)box[0]);
+						boxTypes.Add((BoxTypes)(int)(double)box[0]);
 						boxes.Add(new Rectangle((int)(double)box[1], (int)(double)box[2], (int)(double)box[3], (int)(double)box[4]));
 					}
 				}
 			}
 			else
 			{
-				var image = cF.Path<int[]>("/image");
-				var offset = cF.Path<int[]>("/offset");
-				Image = new Rectangle((int)(double)image[0], (int)(double)image[1], (int)(double)image[2], (int)(double)image[3]);
-				CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
+				//var image = cF.Path<int[]>("/image");
+				//var offset = cF.Path<int[]>("/offset");
+				//Image = new Rectangle((int)(double)image[0], (int)(double)image[1], (int)(double)image[2], (int)(double)image[3]);
+				//CelOffset = new Vector2((int)(double)offset[0], (int)(double)offset[1]);
+				Image = cF.Path<Rectangle>("/image");
+				CelOffset = cF.Path<Vector2>("/offset");
 				FrameDelay = 5;
-
 			}
 		}
 
@@ -612,11 +629,7 @@ namespace Kafe
 				for (var i = 0; i < boxes.Count; i++)
 				{
 					var box = boxes[i];
-					var boxColor = Color.White;
-					if (boxTypes[i]) //TODO: use enum instead of bool
-						boxColor = (i == editBox) ? Color.CornflowerBlue : Color.Blue;
-					else
-						boxColor = (i == editBox) ? Color.Salmon : Color.Red;
+					var boxColor = BoxColors[(int)boxTypes[i] + (i == editBox ? 7 : 0)];
 					var boxRect = new Rectangle((int)(Position.X + box.X), (int)(Position.Y + box.Y), box.Width, box.Height);
 					batch.Draw(editGreebles, boxRect, src, boxColor);
 					DrawBorder(batch, boxRect, 1, boxColor);
@@ -668,7 +681,7 @@ namespace Kafe
 				else
 					info += "\n";
 				for (var i = 0; i < boxes.Count; i++)
-					info += string.Format("\n|c{0}|{1} {2}", (i == editBox ? 3 : 8), boxes[i], (boxTypes[i] ? 'H' : 'A'));
+					info += string.Format("\n|c{0}|{1} {2}", (i == editBox ? 3 : 8), boxes[i], (new[]{"Vuln", "Atk", "Push", "PrVuln", "PrAtk", "Throw", "Grab"})[(int)boxTypes[i]]);
 				if (!string.IsNullOrWhiteSpace(copiedBoxes))
 					Text.Draw(batch, 2, copiedBoxes, Kafe.ScreenWidth / 2, 2);
 			}
@@ -738,7 +751,7 @@ namespace Kafe
 			var boxes = cF["boxes"] as List<object>;
 			if (Input.WasJustReleased(Keys.Insert)) //add box
 			{
-				((List<object>)cF["boxes"]).Add(new List<object>() { true, 0.0, -8.0, 8.0, 8.0 });
+				((List<object>)cF["boxes"]).Add(new List<object>() { 0.0, 0.0, -8.0, 8.0, 8.0 });
 				SetupImage();
 			}
 			if (Input.WasJustReleased(Keys.Delete))
@@ -768,7 +781,13 @@ namespace Kafe
 
 			var rect = ((List<object>)boxes[editBox]);
 
-			if (Input.WasJustReleased(Keys.Up))
+			if (Input.WasJustReleased(Keys.End))
+			{
+				//boxTypes[editBox] = (BoxTypes)(((int)boxTypes[editBox] + 1) % 7);
+				rect[0] = ((double)rect[0] + 1) % 7;
+				SetupImage();
+			}
+			else if (Input.WasJustReleased(Keys.Up))
 			{
 				if (Input.IsHeld(Keys.RightShift))
 					rect[4] = (double)rect[4] - 1;
