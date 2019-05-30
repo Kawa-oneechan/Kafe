@@ -235,7 +235,14 @@ namespace Kafe
 					{
 						var box = (List<object>)b;
 						boxTypes.Add((BoxTypes)(int)(double)box[0]);
-						boxes.Add(new Rectangle((int)(double)box[1], (int)(double)box[2], (int)(double)box[3], (int)(double)box[4]));
+
+						var bX = (int)(double)box[1];
+						var bY = (int)(double)box[2];
+						var bW = (int)(double)box[3];
+						var bH = (int)(double)box[4];
+						if (FacingLeft)
+							bX = -(bW + bX); //this was harder to figure out than you'd think.
+						boxes.Add(new Rectangle(bX, bY, bW, bH));
 					}
 				}
 			}
@@ -530,6 +537,12 @@ namespace Kafe
 				Position = new Vector2(Position.X, Kafe.Ground);
 			}
 
+			if (Opponent != null)
+			{
+				//TODO Check for pushbox overlap
+				//I don't think I can hack that. Getting them to mirror right was bad enough.
+			}
+
 			Position = new Vector2(Position.X + (FacingLeft ? -Velocity.X : Velocity.X), Position.Y);
 
 			if (inputTimer > 0)
@@ -577,7 +590,7 @@ namespace Kafe
 			else
 			{
 				//TODO: something's fucky here
-				posX -= (int)CelOffset.X;
+				posX += (int)CelOffset.X;
 			}
 		}
 

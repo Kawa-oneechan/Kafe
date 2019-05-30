@@ -53,6 +53,17 @@ namespace Kafe
 			batch.End();
 			foreach (var c in Characters)
 				c.Draw(batch);
+
+			//This part is only here so you can see the boxes in regular fights.
+			//It helped me figure out how to flip 'em, and it should help with implementing
+			//pushback.
+			batch.Begin();
+			foreach (var c in Characters)
+			{
+				c.ShowBoxes = true;
+				c.DrawEditStuff(batch, false);
+			}
+			batch.End();
 		}
 	}
 }
