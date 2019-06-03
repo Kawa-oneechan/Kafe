@@ -67,12 +67,12 @@ namespace Kafe
 				else if (control.TrgA || control.TrgB || control.TrgC || control.TrgD || control.TrgE || control.TrgF)
 				{
 					locked[i] = true;
-					if (control.TrgA) selection[i].ColorSwap = 0;
-					else if (control.TrgB) selection[i].ColorSwap = 1;
-					else if (control.TrgC) selection[i].ColorSwap = 2;
-					else if (control.TrgD) selection[i].ColorSwap = 3;
-					else if (control.TrgE) selection[i].ColorSwap = 4;
-					else if (control.TrgF) selection[i].ColorSwap = 5;
+					if (control.TrgA) selection[i].ColorSwap = 1;
+					else if (control.TrgB) selection[i].ColorSwap = 2;
+					else if (control.TrgC) selection[i].ColorSwap = 3;
+					else if (control.TrgD) selection[i].ColorSwap = 4;
+					else if (control.TrgE) selection[i].ColorSwap = 5;
+					else if (control.TrgF) selection[i].ColorSwap = 6;
 					selection[i].SwitchTo(StandardAnims.Select);
 
 					//For single-player games, select another character at random for now.

@@ -58,7 +58,6 @@ namespace Kafe
 
 	public class Character
 	{
-		private const int PaletteSize = 4;
 		private static Color[] BoxColors = new[]
 		{
 			Color.Blue, Color.Red, Color.Lime, Color.MediumBlue, Color.MediumVioletRed, Color.Magenta, Color.DarkMagenta,
@@ -160,16 +159,16 @@ namespace Kafe
 					//var timer1 = DateTime.Now;
 					//Console.WriteLine("Palette start at {0}", timer1.ToLongTimeString());
 
-					var numPals = palette.Height / PaletteSize;
+					var numPals = palette.Height;
 					var paletteData = new int[palette.Width * palette.Height];
 					palette.GetData(paletteData);
 					var spriteData = new int[sheet.Width * sheet.Height];
 					sheet.GetData(spriteData);
 					for (var j = 0; j < spriteData.Length; j++)
 					{
-						for (var p = 0; p < palette.Width / PaletteSize; p++)
+						for (var p = 0; p < palette.Width; p++)
 						{
-							if (spriteData[j] == paletteData[p * PaletteSize])
+							if (spriteData[j] == paletteData[p])
 								spriteData[j] = 0x10000000 + p;
 						}
 					}
@@ -605,8 +604,8 @@ namespace Kafe
 			{
 				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, Kafe.ClutEffect);
 				Kafe.ClutEffect.Parameters["PALETTE"].SetValue(palette);
-				Kafe.ClutEffect.Parameters["PALETTES"].SetValue((float)palette.Height / PaletteSize);
-				Kafe.ClutEffect.Parameters["COLORS"].SetValue((float)palette.Width / PaletteSize);
+				Kafe.ClutEffect.Parameters["PALETTES"].SetValue((float)palette.Height + 1);
+				Kafe.ClutEffect.Parameters["COLORS"].SetValue((float)palette.Width);
 				Kafe.ClutEffect.Parameters["INDEX"].SetValue((float)ColorSwap);
 			}
 			else
