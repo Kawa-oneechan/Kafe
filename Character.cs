@@ -98,6 +98,8 @@ namespace Kafe
 		public int FrameDelay { get; set; }
 		public bool Locked { get; set; }
 		public Character Opponent { get; set; }
+		public Vector4 MultiplyColor { get; set; }
+		public Vector4 AddColor { get; set; }
 
 		public bool EditMode { get; set; }
 		public bool SelectMode { get; set; }
@@ -202,6 +204,9 @@ namespace Kafe
 			if (!refresh || currentFrame >= totalFrames)
 				currentFrame = 0;
 			SetupImage();
+
+			MultiplyColor = new Vector4(1);
+			AddColor = new Vector4(0);
 
 			inputSequence = string.Empty;
 		}
@@ -603,10 +608,13 @@ namespace Kafe
 			if (palette != null)
 			{
 				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, Kafe.ClutEffect);
-				Kafe.ClutEffect.Parameters["PALETTE"].SetValue(palette);
-				Kafe.ClutEffect.Parameters["PALETTES"].SetValue((float)palette.Height + 1);
-				Kafe.ClutEffect.Parameters["COLORS"].SetValue((float)palette.Width);
-				Kafe.ClutEffect.Parameters["INDEX"].SetValue((float)ColorSwap);
+				var parms = Kafe.ClutEffect.Parameters;
+				parms["PALETTE"].SetValue(palette);
+				parms["PALETTES"].SetValue((float)palette.Height + 1);
+				parms["COLORS"].SetValue((float)palette.Width);
+				parms["INDEX"].SetValue((float)ColorSwap);
+				parms["COLORMULT"].SetValue(MultiplyColor);
+				parms["COLORADD"].SetValue(AddColor);
 			}
 			else
 				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);

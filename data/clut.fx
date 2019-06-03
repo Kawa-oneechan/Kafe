@@ -10,6 +10,8 @@ sampler PALETTE : register(s1) //lookup table
 float PALETTES : register(c0); //num rows
 float COLORS : register(c1); //num of colors per row
 float INDEX : register(c2); //target row
+float4 COLORMULT : register(c3);
+float4 COLORADD : register(c4);
 
 //float4 main(float2 uv : TEXCOORD0) : COLOR
 float4 main(float4 position : SV_Position, float4 col : COLOR0, float2 uv : TEXCOORD0) : COLOR0
@@ -25,7 +27,7 @@ float4 main(float4 position : SV_Position, float4 col : COLOR0, float2 uv : TEXC
 
 	pixel = tex2D(PALETTE, float2(colorIndex, palIndex));
 	
-	return pixel;
+	return pixel * COLORMULT + COLORADD;
 }
 
 technique Plain
