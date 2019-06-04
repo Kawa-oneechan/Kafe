@@ -91,6 +91,7 @@ namespace Kafe
 
 		public Rectangle Image { get; set; }
 		public int ColorSwap { get; set; }
+		public int ColorSwaps { get; private set; }
 		public Vector2 Position { get; set; }
 		public Vector2 CelOffset { get; set; }
 		public Vector2 Velocity { get; set; }
@@ -176,8 +177,11 @@ namespace Kafe
 					}
 					sheet.SetData(spriteData);
 
+					ColorSwaps = numPals;
 					if (palIndex >= numPals)
 						palIndex %= numPals;
+					if (palIndex == 0)
+						palIndex++;
 
 					//var timer2 = DateTime.Now;
 					//Console.WriteLine("Palette end at {0}", timer2.ToLongTimeString());
@@ -609,12 +613,12 @@ namespace Kafe
 			{
 				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, Kafe.ClutEffect);
 				var parms = Kafe.ClutEffect.Parameters;
-				parms["PALETTE"].SetValue(palette);
-				parms["PALETTES"].SetValue((float)palette.Height + 1);
-				parms["COLORS"].SetValue((float)palette.Width);
-				parms["INDEX"].SetValue((float)ColorSwap);
-				parms["COLORMULT"].SetValue(MultiplyColor);
-				parms["COLORADD"].SetValue(AddColor);
+				parms["PaletteMap"].SetValue(palette);
+				parms["NumPalettes"].SetValue((float)palette.Height + 1);
+				parms["NumColors"].SetValue((float)palette.Width);
+				parms["TargetPalette"].SetValue((float)ColorSwap);
+				parms["ColorMult"].SetValue(MultiplyColor);
+				parms["ColorAdd"].SetValue(AddColor);
 			}
 			else
 				batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, null);

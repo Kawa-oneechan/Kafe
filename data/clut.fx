@@ -1,5 +1,5 @@
 sampler s0 : register(s0);
-sampler PALETTE : register(s1) //lookup table
+sampler PaletteMap : register(s1)
 {
 	addressU = Wrap;
 	addressV = Wrap;
@@ -7,13 +7,13 @@ sampler PALETTE : register(s1) //lookup table
 	minfilter = POINT;
 	magfilter = POINT;
 };
-float PALETTES : register(c0); //num rows
-float COLORS : register(c1); //num of colors per row
-float INDEX : register(c2); //target row
-float4 COLORMULT : register(c3);
-float4 COLORADD : register(c4);
 
-//float4 main(float2 uv : TEXCOORD0) : COLOR
+float NumPalettes;
+float NumColors;
+float TargetPalette;
+float4 ColorMult;
+float4 ColorAdd;
+
 float4 main(float4 position : SV_Position, float4 col : COLOR0, float2 uv : TEXCOORD0) : COLOR0
 {
 	float4 pixel = tex2D(s0, uv);
@@ -22,18 +22,12 @@ float4 main(float4 position : SV_Position, float4 col : COLOR0, float2 uv : TEXC
 	if (pixel.a == 0.0) return pixel;
 	if (pixel.a > 0.25) return pixel;
 	
-	colorIndex = (pixel.r * 256) / COLORS;
-	palIndex = (INDEX / PALETTES);
+	colorIndex = (pixel.r * 256) / NumColors;
+	palIndex = (TargetPalette / NumPalettes);
 
-	pixel = tex2D(PALETTE, float2(colorIndex, palIndex));
+	pixel = tex2D(PaletteMap, float2(colorIndex, palIndex));
 	
-	return pixel * COLORMULT + COLORADD;
+	return pixel * ColorMult + ColorAdd;
 }
 
-technique Plain
-{
-    pass Pass1
-    {
-        PixelShader = compile ps_4_0 main();
-    }
-}
+technique Palette { pass Pass1 { PixelShader = compile ps_4_0 main(); } }

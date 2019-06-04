@@ -103,9 +103,9 @@ namespace Kafe
 				if (Input.WasJustReleased(Keys.R))
 					Subject.ShowBoxes = !Subject.ShowBoxes;
 				
-				if (Input.WasJustReleased(Keys.OemPlus))
+				if (Input.WasJustReleased(Keys.OemPlus) && Subject.ColorSwap < Subject.ColorSwaps)
 					Subject.ColorSwap++;				
-				else if (Input.WasJustReleased(Keys.OemMinus) && Subject.ColorSwap > 0)
+				else if (Input.WasJustReleased(Keys.OemMinus) && Subject.ColorSwap > 1)
 					Subject.ColorSwap--;
 				
 				if (stepMode && Input.IsHeld(Keys.LeftAlt))
