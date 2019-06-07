@@ -112,7 +112,7 @@ namespace Kafe
 				for (var i = 0; i < numNames; i++)
 				{
 					names[i] = Args[i + 1].ToLowerInvariant();
-					colors[i] = 0;
+					colors[i] = 1;
 					if (names[i].Contains(","))
 					{
 						colors[i] = int.Parse(names[i].Substring(names[i].IndexOf(',') + 1));

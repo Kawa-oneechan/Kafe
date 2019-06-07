@@ -547,11 +547,45 @@ namespace Kafe
 
 			if (Opponent != null)
 			{
-				//TODO Check for pushbox overlap
-				//I don't think I can hack that. Getting them to mirror right was bad enough.
+				//Kafe.Me.Window.Title = "...";
+				for (var mine = 0; mine < boxes.Count; mine++)
+				{
+					var myBox = boxes[mine];
+					var myType = boxTypes[mine];
+					var doneHere = false;
+					for (var theirs = 0; theirs < Opponent.boxes.Count && !doneHere; theirs++)
+					{
+						var theirBox = Opponent.boxes[theirs];
+						var theirType = Opponent.boxTypes[theirs];
+						if (!myBox.Intersects(theirBox, Position, Opponent.Position))
+							continue;
+						//Kafe.Me.Window.Title = string.Format("Boxes touch! #s {0} and {1}, types {2} and {3}", mine, theirs, myType, theirType);
+						if (myType == BoxTypes.Push && theirType == BoxTypes.Push)
+						{
+							//TODO: Okay. OKAY! Now we just need to determine how deeply we penetrate.
+							/* In Capcom fighters, if you walk into a stationary opponent your speed is halved and your opponent is moved away with the other half.
+							 * If you walk into an opponent who himself walks towards you, it cancels out.
+							 * Therefore, assuming let's say a velocity of 2.0...
+							 * Walk into stationary: velocity is halved to 1.0, opponent's velocity gains -1.0 (- because away from you)
+							 * Walk into walking: velocity is halved to 1.0, opponent starts at 2.0 but gains -1.0, so 2.0 + -1.0 = 1.0
+							 * ...but then *they* walk into *you* as well, so they affect you in turn...
+							 * ...so their 1.0 is halved into 0.5, and your 1.0 gains -0.5 and you end up both having 0.5 velocity.
+							 * If positions are int-clipped this should end up effectively not moving at all then.
+							 */
+							doneHere = true;
+							break;
+						}
+						else if (myType == BoxTypes.Vulnerable && theirType == BoxTypes.Attack)
+						{
+							//TODO: We're the one's being hit, so it's on us to react.
+							doneHere = true;
+							break;
+						}
+					}
+				}
 			}
 
-			Position = new Vector2(Position.X + (FacingLeft ? -Velocity.X : Velocity.X), Position.Y);
+			Position = new Vector2(Position.X + (FacingLeft ? -Velocity.X : Velocity.X), Position.Y).ToInteger();
 
 			if (inputTimer > 0)
 			{

@@ -19,6 +19,15 @@ namespace Kafe
 		{
 			return string.Format("<{0},{1},{2},{3}>", rect.X, rect.Y, rect.Width, rect.Height);
 		}
+
+		public static bool Intersects(this Rectangle a, Rectangle b, Vector2 originA, Vector2 originB)
+		{
+			var aX = a.X + originA.X;
+			var aY = a.Y + originA.Y;
+			var bX = b.X + originB.X;
+			var bY = b.Y + originB.Y;
+			return (bX < aX + a.Width && aX < bX + b.Width && bY < aY + a.Height && aY < bY + b.Height);
+		}
 	}
 
     public static class InputExtensions
