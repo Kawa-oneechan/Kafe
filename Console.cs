@@ -48,6 +48,15 @@ namespace Kafe
 		}
 	}
 
+	public class ConsoleEventArgs : EventArgs
+	{
+		public string Command { get; private set; }
+		public ConsoleEventArgs(string command)
+		{
+			Command = command;
+		}
+	}
+
 	public class TildeConsole : DrawableGameComponent
 	{
 		private SpriteBatch batch;
@@ -58,12 +67,12 @@ namespace Kafe
 		private int width, height;
 		public int ScrollOffset { get; set; }
 
-		public delegate void OnCommandEventHandler(TildeConsole sender, string command);
+		public delegate void OnCommandEventHandler(object sender, ConsoleEventArgs e);
 		public event OnCommandEventHandler OnCommand;
 		public void RaiseOnCommandEvent(string command)
 		{
 			if (this.OnCommand != null)
-				OnCommand(this, command);
+				OnCommand(this, new ConsoleEventArgs(command));
 		}
 
 		#region Keymaps

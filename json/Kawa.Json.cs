@@ -26,17 +26,26 @@ namespace Kawa.Json
 		Both = 3,
 	}
 
+	[Serializable]
 	public sealed class JsonException : Exception
 	{
-		public JsonException(string message) : base(message)
+		public JsonException(string message)
+			: base(message)
 		{
 		}
-		public JsonException(string message, int line) : base(string.Format("{0} at line {1}.", message, line))
+		public JsonException(string message, int line)
+			: base(string.Format("{0} at line {1}.", message, line))
 		{ }
 	}
 
+	[Serializable]
 	public partial class JsonObj : Dictionary<string, object>
 	{
+		public JsonObj() : base()
+		{ }
+
+		protected JsonObj(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
+		{ }
 	}
 
 	public static partial class Json5

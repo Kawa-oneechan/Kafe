@@ -253,9 +253,9 @@ namespace Kafe
 				rawScreen.SaveAsPng(stream, Kafe.ScreenWidth, Kafe.ScreenHeight);
 		}
 
-		private void TildeConsole_OnCommand(TildeConsole sender, string command)
+		private void TildeConsole_OnCommand(object sender, ConsoleEventArgs e)
 		{
-			command = command.Trim();
+			var command = e.Command.Trim();
 			if (string.IsNullOrWhiteSpace(command))
 				return;
 			var bits = command.ToLowerInvariant().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
