@@ -25,7 +25,7 @@ namespace Kafe
 		/// </summary>
 		public static void Initialize(string mainFile = "kafe")
 		{
-			Console.WriteLine("Mix.Initialize()");
+			Console.WriteLine("Initializing Mix system with main file \"{0}\"...", mainFile);
 			fileList = new Dictionary<string, MixFileEntry>();
 			cache = new Dictionary<string, object>();
 			var mixfiles = new List<string>() { mainFile + ".zip" };
@@ -33,10 +33,11 @@ namespace Kafe
 			{
 				if (zipFile.Substring(2).Equals(mainFile + ".zip", StringComparison.OrdinalIgnoreCase))
 					continue;
+				Console.WriteLine(" * {0}", zipFile.Substring(2));
 				mixfiles.Add(zipFile.Substring(2));
 			}
 
-			Console.WriteLine("Mixfiles enumerated. Indexing contents...");
+			Console.WriteLine("Indexing contents...");
 			foreach (var mixfile in mixfiles)
 			{
 				if (!File.Exists(mixfile))
@@ -54,7 +55,7 @@ namespace Kafe
 						{
 							if (header[2] == 1 && header[3] == 2) //reached the Central Directory
 								break;
-							throw new FileLoadException(string.Format("MIX file '{0}' has an incorrect header.", mixfile));
+							throw new FileLoadException(string.Format("Mixfile \"{0}\" has an incorrect header.", mixfile));
 						}
 						mStream.BaseStream.Seek(4, SeekOrigin.Current);
 						var method = mStream.ReadInt16();
@@ -99,7 +100,7 @@ namespace Kafe
 		/// <returns>Returns a <see cref="MemoryStream"/> if found, <see cref="null"/> otherwise.</returns>
 		public static Stream GetStream(string fileName)
 		{
-			Console.WriteLine("Mix.GetStream({0})", fileName);
+			Console.WriteLine("Mix: get stream for \"{0}\"...", fileName);
 			if (File.Exists(Path.Combine("data", fileName)))
 				return new MemoryStream(File.ReadAllBytes(Path.Combine("data", fileName)));
 			if (!fileList.ContainsKey(fileName))
@@ -136,11 +137,11 @@ namespace Kafe
 		{
 			if (useCache && cache.ContainsKey(fileName))
 				return (string)cache[fileName];
-			Console.WriteLine("Mix.GetString({0})", fileName);
+			Console.WriteLine("Mix: get string from \"{0}\"...", fileName);
 			if (File.Exists(Path.Combine("data", fileName)))
 				return File.ReadAllText(Path.Combine("data", fileName));
 			if (!fileList.ContainsKey(fileName))
-				throw new FileNotFoundException("File " + fileName + " was not found in the MIX files.");
+				throw new FileNotFoundException("File " + fileName + " was not found.");
 			var bytes = GetBytes(fileName);
 			var ret = Encoding.UTF8.GetString(bytes);
 			if (useCache)
@@ -153,16 +154,21 @@ namespace Kafe
 		/// </summary>
 		/// <param name="filename">The file to find.</param>
 		/// <returns>Returns a <see cref="Texture2D"/> with the file's contents if found, <see cref="null"/> otherwise.</returns>
-		public static Texture2D GetTexture(string fileName)
+		public static Texture2D GetTexture(string fileName, bool useCache = true)
 		{
-			Console.WriteLine("Mix.GetTexture({0})", fileName);
+			if (useCache && cache.ContainsKey(fileName))
+				return (Texture2D)cache[fileName];
+			Console.WriteLine("Mix: get texture from \"{0}\"...", fileName);
 			if (!fileName.Contains("."))
 				fileName += ".png";
 			using (var str = GetStream(fileName))
 			//Can't use a DeflateStream here.
 			//using (var str = new MemoryStream(GetBytes(fileName)))
 			{
-				return Texture2D.FromStream(Kafe.GfxDev, str);
+				var ret = Texture2D.FromStream(Kafe.GfxDev, str);
+				if (useCache)
+					cache[fileName] = ret;
+				return ret;
 			}
 		}
 
@@ -173,7 +179,7 @@ namespace Kafe
 		/// <returns>Returns a <see cref="byte[]"/> with the file's contents if found, <see cref="null"/> otherwise.</returns>
 		public static byte[] GetBytes(string fileName)
 		{
-			Console.WriteLine("Mix.GetBytes({0})", fileName);
+			Console.WriteLine("Mix: get bytes from \"{0}\"...", fileName);
 			var str = GetStream(fileName);
 			//if (str is MemoryStream)
 			//{
@@ -189,6 +195,7 @@ namespace Kafe
 				fileName += ".json";
 			if (useCache && cache.ContainsKey(fileName + "-asObj"))
 				return cache[fileName + "-asObj"];
+			Console.WriteLine("Mix: get JSON from \"{0}\"...", fileName);
 			var ret = Json5.Parse(GetString(fileName));
 			if (ret is Dictionary<string, object>)
 			{

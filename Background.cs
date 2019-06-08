@@ -17,6 +17,7 @@ namespace Kafe
 
 		public Background(string file) : base(Kafe.Me)
 		{
+			Console.WriteLine("Instantiating a Background using definition \"{0}\"...", file);
 			json = Mix.GetJson(file) as JsonObj;
 			Sheet = Mix.GetTexture("locales\\" + json.Path<string>("/base"));
 			Layers = new List<BackgroundLayer>();

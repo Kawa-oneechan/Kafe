@@ -20,6 +20,7 @@ namespace Kafe
 
 		public Editor(string file, string charFile) : base(file)
 		{
+			Console.WriteLine("Instantiating Editor...");
 			Kafe.Camera.Y = 0;
 			Characters = new Character[1];
 			try
@@ -27,6 +28,7 @@ namespace Kafe
 				var path = Path.Combine("data", "fighters", charFile);
 				if (File.Exists(path))
 				{
+					Console.WriteLine("Subject is loaded from /data. Setting up a watch...");
 					watcher = new FileSystemWatcher(Path.GetDirectoryName(path), charFile);
 					watcher.NotifyFilter = NotifyFilters.LastWrite;
 					watcher.Changed += (sender, e) =>
@@ -47,6 +49,7 @@ namespace Kafe
 						catch (JsonException jEx)
 						{
 							topMessage = jEx.Message;
+							Console.WriteLine("|c4|{0}|c0|: {1}", jEx.ToString(), jEx.Message);
 							Subject = null;
 						}
 					};
@@ -58,6 +61,7 @@ namespace Kafe
 			catch (JsonException jEx)
 			{
 				topMessage = jEx.Message;
+				Console.WriteLine("|c4|{0}|c0|: {1}", jEx.ToString(), jEx.Message);
 				Subject = null;
 			}
 		}

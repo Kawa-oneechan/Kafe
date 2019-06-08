@@ -9,6 +9,7 @@ namespace Kafe
 
 		public Arena(string file, Character left, Character right) : base(file)
 		{
+			Console.WriteLine("Instantiating an Arena (regular two-player battle) with {0} against {1}...", left.Name, right.Name);
 			left.Position = new Vector2(Kafe.LeftStart, Kafe.Ground);
 			right.Position = new Vector2(Kafe.ScreenWidth - Kafe.RightStart, Kafe.Ground);
 			right.FacingLeft = right.IsRight = true;

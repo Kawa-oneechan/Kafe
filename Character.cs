@@ -106,6 +106,7 @@ namespace Kafe
 		public bool EditMode { get; set; }
 		public bool SelectMode { get; set; }
 		public bool ShowBoxes { get; set; }
+		public bool ShowEditStuff { get; set; }
 
 		public ControlSet Controls { get; set; }
 
@@ -130,6 +131,7 @@ namespace Kafe
 
 		public void Reload(string jsonFile, int palIndex, bool refresh)
 		{
+			Console.WriteLine("Loading Character from \"{0}\"...", jsonFile);
 			json = Mix.GetJson("fighters\\" + jsonFile, false) as JsonObj;
 			Name = json.Path<string>("/name");
 			var baseName = json.Path<string>("/base");
@@ -144,6 +146,7 @@ namespace Kafe
 
 			if (sheets.ContainsKey(baseName) && !refresh)
 			{
+				Console.WriteLine("Reusing spritesheet \"{0}\"...", baseName);
 				sheet = sheets[baseName];
 				if (palettes.ContainsKey(baseName))
 					palette = palettes[baseName];
@@ -152,6 +155,7 @@ namespace Kafe
 			}
 			else
 			{
+				Console.WriteLine("Loading spritesheet \"{0}\"...", baseName);
 				sheet = Mix.GetTexture("fighters\\" + baseName);
 				sheets[baseName] = sheet;
 
@@ -160,8 +164,8 @@ namespace Kafe
 					palette = Mix.GetTexture("fighters\\" + baseName + "-pal.png");
 					palettes[baseName] = palette;
 
-					//var timer1 = DateTime.Now;
-					//Console.WriteLine("Palette start at {0}", timer1.ToLongTimeString());
+					var timer1 = DateTime.Now;
+					Console.WriteLine("Palette start at {0}", timer1.ToLongTimeString());
 
 					var numPals = palette.Height;
 					var paletteData = new int[palette.Width * palette.Height];
@@ -184,10 +188,10 @@ namespace Kafe
 					if (palIndex == 0)
 						palIndex++;
 
-					//var timer2 = DateTime.Now;
-					//Console.WriteLine("Palette end at {0}", timer2.ToLongTimeString());
-					//var timer3 = timer2 - timer1;
-					//Console.WriteLine("Delta {0}", timer3);
+					var timer2 = DateTime.Now;
+					Console.WriteLine("Palette end at {0}", timer2.ToLongTimeString());
+					var timer3 = timer2 - timer1;
+					Console.WriteLine("Palette remapping took {0}", timer3);
 				}
 
 				if (Mix.FileExists("fighters\\" + baseName + "-icon.png"))
@@ -214,6 +218,7 @@ namespace Kafe
 			AddColor = new Vector4(0);
 
 			inputSequence = string.Empty;
+			Console.WriteLine("Finished loading {0}.", Name);
 		}
 
 		public void SetupFrames()
@@ -686,6 +691,9 @@ namespace Kafe
 					DrawBorder(batch, boxRect, 1, boxColor);
 				}
 			}
+
+			if (!ShowEditStuff)
+				return;
 
 			batch.Draw(editGreebles, Position - new Vector2(4), new Rectangle(132, 0, 9, 9), Color.Yellow);
 

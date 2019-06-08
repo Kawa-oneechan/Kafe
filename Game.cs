@@ -54,6 +54,7 @@ namespace Kafe
 		{
 			if (!assetName.Contains("."))
 				assetName += ".fxb";
+			Console.WriteLine("GetEffect: fetching \"{0}\"...", assetName);
 			return new Effect(GfxDev, Mix.GetBytes(assetName));
 		}
 
@@ -70,10 +71,12 @@ namespace Kafe
 			Input = new global::Kafe.Input(this); 
 			Components.Add(Input); 
 			base.Initialize();
+			Console.WriteLine("Game initialized.");
 		}
 
 		protected override void LoadContent()
 		{
+			Console.WriteLine("Loading game content...");
 			SpriteBatch = new SpriteBatch(GraphicsDevice);
 			rawScreen = new RenderTarget2D(GraphicsDevice, ScreenWidth, ScreenHeight);
 
@@ -81,6 +84,7 @@ namespace Kafe
 			TransitionEffect = GetEffect("transition");
 			transitionImage = Mix.GetTexture("transition");
 
+			Console.WriteLine("Enumerating characters and locations...");
 			var fighterFiles = Mix.GetFilesWithPattern("fighters\\*.char.json");
 			var fighters = new List<string>();
 			foreach (var f in fighterFiles)
@@ -96,6 +100,7 @@ namespace Kafe
 
 			if (Args.Length >= 3 && Args[0] == "/edit")
 			{
+				Console.WriteLine("|c3|Edit mode requested.");
 				LoadingScreen.Start(() =>
 				{
 					Components.Add(new Editor("locales\\" + Args[1] + ".bg.json", Args[2] + ".char.json"));
@@ -103,6 +108,7 @@ namespace Kafe
 			}
 			else if (Args.Length > 0 && Args[0] == "/quick")
 			{
+				Console.WriteLine("|c3|Quick battle requested.");
 				var names = new string[2];
 				var colors = new int[2];
 				var rand = new Random();
@@ -134,6 +140,7 @@ namespace Kafe
 			}
 			else
 			{
+				Console.WriteLine("|c3|Regular gameplay requested.");
 				LoadingScreen.Start(() =>
 				{
 					var fighterList = new List<Character>();
@@ -311,7 +318,7 @@ namespace Kafe
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("|c4|{0}|c0|{1}", ex.ToString(), ex.Message);
+				Console.WriteLine("|c4|{0}|c0|: {1}", ex.ToString(), ex.Message);
 			}
 		}
 	}

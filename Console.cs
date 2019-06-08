@@ -119,6 +119,7 @@ namespace Kafe
 		{
 			base.Initialize();
 			Console.TildeConsole = this;
+			Console.WriteLine("Console initialized.");
 		}
 
 		protected override void LoadContent()
@@ -129,6 +130,7 @@ namespace Kafe
 			width = GraphicsDevice.PresentationParameters.BackBufferWidth;
 			height = GraphicsDevice.PresentationParameters.BackBufferHeight / 2;
 			base.LoadContent();
+			Console.WriteLine("Console content loaded.");
 		}
 
 		public override void Update(GameTime gameTime)
@@ -154,7 +156,7 @@ namespace Kafe
 			}
 			else if (Input.WasJustPressed(Keys.Enter))
 			{
-				WriteLine("-> " + command);
+				WriteLine("|c2|" + command);
 				RaiseOnCommandEvent(command);
 				command = "";
 			}
