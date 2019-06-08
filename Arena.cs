@@ -12,7 +12,7 @@ namespace Kafe
 		{
 			left.Position = new Vector2(Kafe.LeftStart, Kafe.Ground);
 			right.Position = new Vector2(Kafe.ScreenWidth - Kafe.RightStart, Kafe.Ground);
-			right.FacingLeft = true;
+			right.FacingLeft = right.IsRight = true;
 			left.Opponent = right;
 			right.Opponent = left;
 			left.SelectMode = false;

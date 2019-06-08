@@ -124,12 +124,17 @@ namespace Kafe
 			{
 				//TODO: word-wrap to the best of our abilities
 			}
-			var width = Measure(font, text, spacing);
-			if (alignment == Alignment.Right)
-				left -= width;
-			else if (alignment == Alignment.Center)
-				left -= width / 2;
-			Draw(batch, font, text, left, top, color, spacing);
+			foreach (var line in text.Split('\n'))
+			{
+				var width = Measure(font, line, spacing);
+				var newLeft = left;
+				if (alignment == Alignment.Right)
+					newLeft -= width;
+				else if (alignment == Alignment.Center)
+					newLeft -= width / 2;
+				Draw(batch, font, line, newLeft, top, color, spacing);
+				top += fonts[font].LineHeight;
+			}
 		}
 	}
 }

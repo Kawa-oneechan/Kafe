@@ -101,6 +101,7 @@ namespace Kafe
 		public Character Opponent { get; set; }
 		public Vector4 MultiplyColor { get; set; }
 		public Vector4 AddColor { get; set; }
+		public bool IsRight { get; set; }
 
 		public bool EditMode { get; set; }
 		public bool SelectMode { get; set; }
@@ -232,7 +233,7 @@ namespace Kafe
 				var spriteIndex = img[0];
 				var image = json.Path<int[]>("/sprites/" + spriteIndex);
 				Image = new Rectangle(image[0], image[1], image[2], image[3]);
-				CelOffset = new Vector2(img[1], img[2]);
+				CelOffset = new Vector2(FacingLeft ? -img[1] : img[1], img[2]);
 				FrameDelay = img[3];
 
 				if (cF.ContainsKey("boxes"))
@@ -624,17 +625,8 @@ namespace Kafe
 
 		public void PreDraw()
 		{
-			posX = (int)Position.X - (Image.Width / 2);
+			posX = (int)(Position.X - (Image.Width / 2) + CelOffset.X);
 			posY = (int)(Position.Y - Image.Height - CelOffset.Y);
-			if (!FacingLeft)
-			{
-				posX += (int)CelOffset.X;
-			}
-			else
-			{
-				//TODO: something's fucky here
-				posX += (int)CelOffset.X;
-			}
 		}
 
 		public void DrawShadow(SpriteBatch batch)
@@ -745,7 +737,7 @@ namespace Kafe
 					Text.Draw(batch, 2, copiedBoxes, Kafe.ScreenWidth / 2, 2);
 			}
 
-			Text.Draw(batch, 0, info, 2, 2);
+			Text.DrawEx(batch, 2, info, (IsRight ? Kafe.ScreenWidth - 2 : 2), 2, (IsRight ? Alignment.Right : Alignment.Left));
 		}
 
 		public void DrawIcon(SpriteBatch batch, Rectangle position, bool recolor = true, bool flip = false)
