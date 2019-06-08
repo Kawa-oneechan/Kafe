@@ -13,6 +13,7 @@ namespace Kafe
 		public Texture2D Sheet { get; private set; }
 		public List<BackgroundLayer> Layers { get; private set; }
 		public int LeftExtent, RightExtent;
+		public Character[] Characters { get; set; }
 
 		public Background(string file) : base(Kafe.Me)
 		{

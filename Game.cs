@@ -252,15 +252,66 @@ namespace Kafe
 			if (string.IsNullOrWhiteSpace(command))
 				return;
 			var bits = command.ToLowerInvariant().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-			switch (bits[0])
+			var toBool = new Func<int, bool>(i =>
 			{
-				case "quit":
-					this.Exit();
-					return;
-				case "screenshot":
-					Console.WriteLine("Screenshot taken.");
-					TakeScreenshot();
-					return;
+				return (bits[i] == "on" || bits[i] == "true" || bits[i] == "1" || bits[i] == "y");
+			});
+			var toInt = new Func<int, int>(i =>
+			{
+				return int.Parse(bits[i]);
+			});
+			var findCharacters = new Func<int, Character[]>(i =>
+			{
+				foreach (var component in Components)
+				{
+					if (component is Background)
+					{
+						return ((Background)component).Characters;
+					}
+				}
+				return null;
+			});
+			try
+			{
+				switch (bits[0])
+				{
+					case "quit":
+						this.Exit();
+						return;
+					case "screenshot":
+						Console.WriteLine("Screenshot taken.");
+						TakeScreenshot();
+						return;
+					case "showboxes":
+						var characters = findCharacters(0);
+						if (characters == null)
+							Console.WriteLine("No characters here right now.");
+						else if (bits.Length == 1)
+						{
+							var shown = new List<bool>();
+							foreach(var c in characters)
+								shown.Add(c.ShowBoxes);
+							Console.WriteLine(string.Join(", ", shown));
+						}
+						else if (bits.Length > 1)
+						{
+							var charIndex = toInt(1);
+							if (charIndex >= characters.Length)
+								Console.WriteLine("Character index out of range.");
+							else
+							{
+								if (bits.Length == 2)
+									Console.WriteLine(characters[charIndex].ShowBoxes.ToString());
+								else
+									characters[charIndex].ShowBoxes = toBool(2);
+							}
+						}
+						return;
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("|c4|{0}|c0|{1}", ex.ToString(), ex.Message);
 			}
 		}
 	}

@@ -8,7 +8,11 @@ namespace Kafe
 {
 	class Editor : Background
 	{
-		public Character Subject { get; set; }
+		public Character Subject
+		{
+			get { return Characters[0]; }
+			set { Characters[0] = value; }
+		}
 		private FileSystemWatcher watcher;
 		private string topMessage = string.Empty;
 		private bool stepMode = true;
@@ -17,6 +21,7 @@ namespace Kafe
 		public Editor(string file, string charFile) : base(file)
 		{
 			Kafe.Camera.Y = 0;
+			Characters = new Character[1];
 			try
 			{
 				var path = Path.Combine("data", "fighters", charFile);

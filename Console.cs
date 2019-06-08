@@ -9,6 +9,7 @@ namespace Kafe
 {
 	public static class Console
 	{
+		private static List<string> backLog = new List<string>();
 		private static StreamWriter fileLog;
 
 		public static TildeConsole TildeConsole;
@@ -27,13 +28,23 @@ namespace Kafe
 		public static void WriteLine(string text)
 		{
 			if (TildeConsole != null)
+			{
+				if (backLog != null)
+				{
+					foreach (var line in backLog)
+						TildeConsole.WriteLine(line);
+					backLog = null;
+				}
 				TildeConsole.WriteLine(text);
+			}
+			else if (backLog != null)
+				backLog.Add(text);
 			fileLog.WriteLine(text);
 		}
 
 		public static void WriteLine(string format, params object[] arg)
 		{
-			fileLog.WriteLine(format, arg);
+			WriteLine(string.Format(format, arg));
 		}
 	}
 
@@ -131,6 +142,10 @@ namespace Kafe
 				ScrollOffset--;
 			else if (Input.WasJustPressed(Keys.Back) && command.Length > 0)
 				command = command.Remove(command.Length - 1);
+			else if (Input.WasJustPressed(Keys.Home))
+				ScrollOffset = buffer.Count - 1;
+			else if (Input.WasJustPressed(Keys.End))
+				ScrollOffset = 0;
 			else if (Input.WasJustReleased(Keys.OemTilde))
 			{
 				command = string.Empty;
@@ -162,17 +177,17 @@ namespace Kafe
 			batch.Draw(background, new Rectangle(0, 0, width, height - 16), Color.White);
 			//batch.Draw(edge, new Rectangle(0, height - 16, width, 32), Color.Black);
 
-			var x = 2;
-			var y = height - 24;
-			Text.Draw(batch, 0, ">" + command + (gameTime.TotalGameTime.Milliseconds % 500 < 300 ? "_" : ""), x, y, Color.Yellow);
+			var y = height - 26;
+			Text.Draw(batch, 0, ">" + command + (gameTime.TotalGameTime.Milliseconds % 500 < 300 ? "_" : ""), 2, y, Color.Yellow);
 			int start = buffer.Count - ScrollOffset;
-			for (int i = 0; i < 15; i++)
+			y -= 4;
+			for (int i = 0; i < 26; i++)
 			{
-				y -= 8;
+				y -= 9;
 				start--;
 				if (start < 0)
 					break;
-				Text.Draw(batch, 0, buffer[start], x, y, Color.White);
+				Text.Draw(batch, 0, buffer[start], 6, y, Color.White);
 			}
 
 			batch.End();
