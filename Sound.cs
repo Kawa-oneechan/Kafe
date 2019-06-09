@@ -15,7 +15,7 @@ namespace Kafe
         public static void Initialize()
         {
             player = Factory.CreateSystem();
-            player.init(16, InitalisationFlags.Normal, IntPtr.Zero);
+            player.Initialize(16, InitalisationFlags.Normal, IntPtr.Zero);
 
             randomizer = new Random();
         }
@@ -35,10 +35,10 @@ namespace Kafe
 				};
 				if (System.IO.File.Exists("kafe.dls"))
 					exInfo.dlsname = "kafe.dls";
-				var ret = player.createSound(data, Mode.Loop | Mode.OpenMemory, ref exInfo, ref sound);
+				var ret = player.CreateSound(data, Mode.Loop | Mode.OpenMemory, ref exInfo, ref sound);
 				if (ret != Result.OK)
 					return;
-				ret = player.playSound(CHANNELINDEX.REUSE, sound, true, ref musicChannel);
+				ret = player.PlaySound(CHANNELINDEX.REUSE, sound, true, ref musicChannel);
 				if (ret != Result.OK)
 					return;
 
@@ -47,20 +47,20 @@ namespace Kafe
 					var tag = new TAG();
 					uint loopStart = 0;
 					uint loopEnd = 0;
-					ret = sound.getTag("LOOP_START", 0, ref tag);
+					ret = sound.GetTag("LOOP_START", 0, ref tag);
 					if (ret != Result.ERR_TOOMANYCHANNELS)
 					{
 						if (ret != Result.ERR_TAGNOTFOUND)
-							loopStart = uint.Parse(System.Runtime.InteropServices.Marshal.PtrToStringAnsi(tag.data));
-						ret = sound.getTag("LOOP_END", 0, ref tag);
+							loopStart = uint.Parse(tag.StringData);
+						ret = sound.GetTag("LOOP_END", 0, ref tag);
 						if (ret != Result.ERR_TAGNOTFOUND)
-							loopEnd = uint.Parse(System.Runtime.InteropServices.Marshal.PtrToStringAnsi(tag.data));
+							loopEnd = uint.Parse(tag.StringData);
 						if (loopEnd > 0)
-							sound.setLoopPoints(loopStart, TIMEUNIT.PCM, loopEnd, TIMEUNIT.PCM);
+							sound.SetLoopPoints(loopStart, TIMEUNIT.PCM, loopEnd, TIMEUNIT.PCM);
 					}
 				}
 
-				musicChannel.setPaused(false);
+				musicChannel.SetPaused(false);
 			}
         }
     }
