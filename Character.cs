@@ -90,6 +90,8 @@ namespace Kafe
 		public string Name { get; set; }
 
 		public Rectangle Image { get; set; }
+		public float Health { get; set; }
+		public float Power { get; set; }
 		public int ColorSwap { get; set; }
 		public int ColorSwaps { get; private set; }
 		public Vector2 Position { get; set; }
