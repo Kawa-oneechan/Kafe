@@ -39,6 +39,7 @@
   <PropertyGroup />
   <ItemGroup>
     <Compile Include="Arena.cs" />
+    <Compile Include="Atlas.cs" />
     <Compile Include="Background.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="CharacterSelect.cs" />

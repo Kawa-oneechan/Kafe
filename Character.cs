@@ -80,6 +80,7 @@ namespace Kafe
 		//keep these in sync yo
 		private List<Rectangle> boxes;
 		private List<BoxTypes> boxTypes;
+		private Rectangle[] atlas;
 
 		private static Texture2D shadow, editGreebles, editPixel;
 		private int editBox;
@@ -145,6 +146,9 @@ namespace Kafe
 				if (json[key] is string && ((string)json[key]).StartsWith("import://"))
 					json[key] = Mix.GetJson("fighters\\" + ((string)json[key]).Substring(9));
 			}
+
+			atlas = Atlas.FromJson(json["sprites"]);
+			json.Remove("sprites");
 
 			if (sheets.ContainsKey(baseName) && !refresh)
 			{
@@ -238,8 +242,9 @@ namespace Kafe
 			{
 				var img = cF.Path<int[]>("/img");
 				var spriteIndex = img[0];
-				var image = json.Path<int[]>("/sprites/" + spriteIndex);
-				Image = new Rectangle(image[0], image[1], image[2], image[3]);
+				//var image = json.Path<int[]>("/sprites/" + spriteIndex);
+				//Image = new Rectangle(image[0], image[1], image[2], image[3]);
+				Image = atlas[spriteIndex];
 				CelOffset = new Vector2(FacingLeft ? -img[1] : img[1], img[2]);
 				FrameDelay = img[3];
 
