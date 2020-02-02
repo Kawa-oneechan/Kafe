@@ -16,6 +16,7 @@ namespace Kafe
 		public static SpriteBatch SpriteBatch;
 		public static Effect ClutEffect;
 		public static Effect TransitionEffect;
+		public static Effect RetrowaveEffect;
 
 		private static Texture2D transitionImage;
 		private static TildeConsole tildeConsole;
@@ -83,6 +84,7 @@ namespace Kafe
 			ClutEffect = GetEffect("clut");
 			TransitionEffect = GetEffect("transition");
 			transitionImage = Mix.GetTexture("transition");
+			RetrowaveEffect = GetEffect("shaderwave");
 
 			Console.WriteLine("Enumerating characters and locations...");
 			var fighterFiles = Mix.GetFilesWithPattern("fighters\\*.char.json");

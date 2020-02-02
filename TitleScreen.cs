@@ -9,34 +9,37 @@ namespace Kafe
 {
 	class TitleBackground : DrawableGameComponent
 	{
-		private Texture2D sheet, backdrop;
-		private int lineAnim, backdropAnim;
+		private Texture2D sheet; //, backdrop;
+		//private int lineAnim, backdropAnim;
 
-		private static int gridStart = 49;
+		//private static int gridStart = 49;
 
 		public TitleBackground() : base(Kafe.Me)
 		{
 			sheet = Mix.GetTexture("menu.png");
-			backdrop = Mix.GetTexture("menu_back.png");
+			//backdrop = Mix.GetTexture("menu_back.png");
+			Kafe.RetrowaveEffect.Parameters["iResolution"].SetValue(new Vector2(Kafe.ScreenWidth, Kafe.ScreenHeight));
 		}
 
 		public override void Update(GameTime gameTime)
 		{
 			base.Update(gameTime);
-			backdropAnim++;
+			Kafe.RetrowaveEffect.Parameters["iTime"].SetValue(gameTime.TotalGameTime.Ticks / 2000000f);
+			/* backdropAnim++;
 			if (backdropAnim >= backdrop.Width * 16)
 				backdropAnim = 0;
 			lineAnim++;
 			if (lineAnim == 64)
-				lineAnim = 0;
+				lineAnim = 0; */
 		}
 
 		public override void Draw(GameTime gameTime)
 		{
 			base.Draw(gameTime);
 			var batch = Kafe.SpriteBatch;
-			batch.Begin();
-			var dst = new Rectangle(-(backdropAnim / 16), 0, backdrop.Width, Kafe.ScreenHeight);
+			batch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp, null, null, Kafe.RetrowaveEffect);
+			batch.Draw(sheet, new Rectangle(0, 0, Kafe.ScreenWidth, Kafe.ScreenHeight), null, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
+			/* var dst = new Rectangle(-(backdropAnim / 16), 0, backdrop.Width, Kafe.ScreenHeight);
 			batch.Draw(backdrop, dst, Color.White);
 			dst.Offset(backdrop.Width, 0);
 			batch.Draw(backdrop, dst, Color.White);
@@ -50,6 +53,7 @@ namespace Kafe
 				batch.Draw(sheet, dst, src, Color.White);
 				dst.Offset(0, 16);
 			}
+			*/
 			batch.End();
 		}
 	}
