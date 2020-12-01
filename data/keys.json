@@ -10,7 +10,7 @@
 			"c" : "C",
 			"d" : "A",
 			"e" : "S",
-			"f" : "D",
+			"f" : "D"
 		},
 		"gamepad" : {
 			"up" : "DPadUp",
@@ -22,7 +22,7 @@
 			"c" : "LeftShoulder",
 			"d" : "X",
 			"e" : "Y",
-			"f" : "RightShoulder",
+			"f" : "RightShoulder"
 		}
 	},
 	{	//Player 2
@@ -36,7 +36,7 @@
 			"c" : "H",
 			"d" : "R",
 			"e" : "T",
-			"f" : "Y",
+			"f" : "Y"
 		},
 		"gamepad" : {
 			"up" : "DPadUp",
@@ -48,7 +48,7 @@
 			"c" : "LeftShoulder",
 			"d" : "X",
 			"e" : "Y",
-			"f" : "RightShoulder",
+			"f" : "RightShoulder"
 		}
 	}
 ]

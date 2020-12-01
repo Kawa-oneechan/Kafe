@@ -534,8 +534,8 @@ namespace Kawa.Json
 			};
 			#endregion
 
-			if (text.StartsWith("\uFEFF"))
-				text = text.Substring(1);
+			//if (text.StartsWith("\uFEFF"))
+			//	text = text.Substring(1);
 
 			//wow.
 			//much cheat.
